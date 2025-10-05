@@ -1,38 +1,19 @@
-import Starfield from "./components/Starfield";
-import Hero from "./components/Hero";
-import Experience from "./components/Experience";
-import Skills from "./components/Skills";
-import SpaceshipCursor from "./components/SpaceshipCursor";
-import { profile } from "./data/profile";
-import "./index.css";
-
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
 
 export default function App() {
   return (
-    <>
-      <SpaceshipCursor />
-      <Starfield />
-      <main className="container">
-        <div className="grid">
-          <div>
-            <Hero profile={profile} />
-            <div style={{ height: 16 }} />
-            <Experience profile={profile} />
-          </div>
-          <div>
-            <Skills skills={profile.skills} />
-            <div className="card" style={{ marginTop: 12 }}>
-              <h2 className="h h2">Nerd Stats</h2>
-              <ul className="clean">
-                <li>🔭 Favorite field: distributed systems & perf tuning</li>
-                <li>🛠️ Tooling: Dynatrace, Splunk, Jenkins, ADO</li>
-                <li>🚀 Motto: "Measure, automate, iterate."</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="footer">© {new Date().getFullYear()} {profile.name} — built with React & Vite</div>
-      </main>
-    </>
+    <BrowserRouter basename="/space-nerd-portfolio">{/* change to your repo name */}
+      <nav style={{ padding: "12px", textAlign: "center", position: "sticky", top: 0, zIndex: 1000 }}>
+        <Link to="/" style={{ margin: "0 12px" }}>Home</Link>
+        <Link to="/about" style={{ margin: "0 12px" }}>About</Link>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

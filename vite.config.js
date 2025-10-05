@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Introduction/',   // <-- important for project pages
-})
+  base: "/space-nerd-portfolio/", // <-- your repo name
+});
