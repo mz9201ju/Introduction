@@ -4,7 +4,7 @@ import About from "./pages/About";
 
 export default function App() {
   return (
-    <BrowserRouter basename="/space-nerd-portfolio">{/* change to your repo name */}
+    <BrowserRouter basename="/Introduction/">{/* https://mz9201ju.github.io/Introduction/# */}
       <nav style={{ padding: "12px", textAlign: "center", position: "sticky", top: 0, zIndex: 1000 }}>
         <Link to="/" style={{ margin: "0 12px" }}>Home</Link>
         <Link to="/about" style={{ margin: "0 12px" }}>About</Link>
