@@ -2,6 +2,7 @@ import Starfield from "./components/Starfield";
 import Hero from "./components/Hero";
 import Experience from "./components/Experience";
 import Skills from "./components/Skills";
+import SpaceshipCursor from "./components/SpaceshipCursor";
 import { profile } from "./data/profile";
 import "./index.css";
 
@@ -9,6 +10,7 @@ import "./index.css";
 export default function App() {
   return (
     <>
+      <SpaceshipCursor />
       <Starfield />
       <main className="container">
         <div className="grid">

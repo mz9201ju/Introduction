@@ -1,3 +1,5 @@
 # React + Vite
 
-Omer Zahid - 30 minutes first day
+### 🎨 Assets & Credits
+- **Spaceship Cursor Icon:** [Freepik - Flaticon](https://www.flaticon.com/free-icons/ufo)
+- Used under [Flaticon Free License](https://www.flaticon.com/license)
