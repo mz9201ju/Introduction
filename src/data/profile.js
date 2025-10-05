@@ -6,6 +6,7 @@ export const profile = {
         "Full‑stack engineer shipping enterprise‑scale, AI‑powered solutions. Obsessed with latency, resilience, and clean CI/CD.",
     links: {
         linkedin: "https://linkedin.com/in/omer-zahid-developer",
+        github: "https://github.com/mz9201ju/Introduction",
         email: "omer.zahid@mnsu.edu"
     },
     skills: [

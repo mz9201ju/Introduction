@@ -77,6 +77,7 @@ export default function Hero({ profile }) {
             <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
                 <a href={`mailto:${profile.links.email}`} style={{ color: "var(--accent)" }}>Email</a>
                 <a href={profile.links.linkedin} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>LinkedIn</a>
+                <a href={profile.links.github} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>GitHub</a>
             </div>
         </header>
     );
