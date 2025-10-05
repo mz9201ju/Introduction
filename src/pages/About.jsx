@@ -1,5 +1,6 @@
-import Home from "./Home";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate hook
 export default function About() {
+    const navigate = useNavigate(); // ✅ initialize navigate function
     return (
         <div style={{ textAlign: "center", padding: "4rem" }}>
             <h1>About Me 🚀</h1>
