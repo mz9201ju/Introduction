@@ -14,6 +14,7 @@ export default function App() {
       <nav style={{ padding: "12px", textAlign: "center", position: "sticky", top: 0, zIndex: 1000 }}>
         <Link to="/" style={{ margin: "0 12px" }}>Home</Link>
         <Link to="/about" style={{ margin: "0 12px" }}>About</Link>
+        <Link to="/darthVader" style={{ margin: "0 12px" }}>PlayGame!</Link>
       </nav>
 
       <Routes>
