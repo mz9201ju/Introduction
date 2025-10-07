@@ -4,19 +4,24 @@ import spaceship from "../assets/spaceship.png";
 
 export default function SpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
+  const posRef = useRef({ x: 0, y: 0 });        // NEW: live position ref
   const [lasers, setLasers] = useState([]);
   const lastClickRef = useRef(0);
 
   const FAST_CLICK_MS = 220;
 
-  // Track mouse
+  // Track mouse (keeps both state for visuals and ref for event handler)
   useEffect(() => {
-    const onMove = (e) => setPos({ x: e.clientX, y: e.clientY });
+    const onMove = (e) => {
+      const p = { x: e.clientX, y: e.clientY };
+      setPos(p);
+      posRef.current = p;                          // NEW: keep latest pos in ref
+    };
     window.addEventListener("mousemove", onMove);
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // Fire on RIGHT-CLICK with cadence color
+  // Fire on RIGHT-CLICK with cadence color (stable listener)
   useEffect(() => {
     const onCtx = (e) => {
       e.preventDefault();
@@ -30,20 +35,25 @@ export default function SpaceshipCursor() {
       const width = 3 + Math.floor(Math.random() * 2);
       const driftX = (Math.random() - 0.5) * 6;
 
-      setLasers((p) => [...p, { id, x: pos.x, y: pos.y, color, length, width, driftX }]);
+      const { x, y } = posRef.current;            // NEW: use ref (not state) to avoid stale coords
+
+      // Notify Starfield to spawn a player bullet at these coordinates
+      window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y } }));
+
+      // Local visual laser streak (cursor overlay only)
+      setLasers((p) => [...p, { id, x, y, color, length, width, driftX }]);
       setTimeout(() => setLasers((p) => p.filter((l) => l.id !== id)), 850);
     };
 
     window.addEventListener("contextmenu", onCtx);
     return () => window.removeEventListener("contextmenu", onCtx);
-  }, [pos]);
+  }, []); // IMPORTANT: [] so we don't rebind per-mousemove
 
   const colorMap = {
     red:  { fill: "#ff2b2b", glow: "0 0 8px rgba(255,43,43,0.9), 0 0 16px rgba(255,43,43,0.6)" },
     blue: { fill: "#1aa3ff", glow: "0 0 8px rgba(26,163,255,0.9), 0 0 16px rgba(26,163,255,0.6)" },
   };
 
-  // Everything rendered via portal to <body> so it sits above your app
   return createPortal(
     <>
       <img
@@ -57,8 +67,7 @@ export default function SpaceshipCursor() {
           height: 40,
           transform: "translate(-50%, -50%)",
           pointerEvents: "none",
-          // go absurdly high; your nav was zIndex:1000
-          zIndex: 2147483647, 
+          zIndex: 2147483647,
           willChange: "transform",
         }}
       />
