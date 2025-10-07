@@ -69,11 +69,7 @@ export default function Hero({ profile }) {
             </div>
 
             <p style={{ marginTop: 14, color: "var(--ink)" }}>{profile.blurb}</p>
-            <div className="badges" style={{ marginTop: 12 }}>
-                {profile.skills.slice(0, 8).map((s) => (
-                    <span className="badge" key={s}>{s}</span>
-                ))}
-            </div>
+        
             <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
                 <a href={`mailto:${profile.links.email}`} style={{ color: "var(--accent)" }}>Email</a>
                 <a href={profile.links.linkedin} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>LinkedIn</a>
