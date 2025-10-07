@@ -265,7 +265,7 @@ export default function Starfield() {
       raf = requestAnimationFrame(frame);
     }
 
-    // inputs
+    // inputs (desktop only)
     const onExternalFire = (e) => {
       const { x, y, color } = e.detail || {};
       if (typeof x === "number" && typeof y === "number") { cursorX = x; cursorY = y; }
@@ -273,11 +273,6 @@ export default function Starfield() {
     };
     const onLeftDown = (e) => { if (e.button === 0) playerFire(); };
     const onMove = (e) => { cursorX = e.clientX; cursorY = e.clientY; };
-    const onTouchStart = (e) => {
-      const t = e.touches && e.touches[0]; if (!t) return;
-      cursorX = t.clientX; cursorY = t.clientY;
-      playerFire();
-    };
 
     // init
     resize();
@@ -285,7 +280,6 @@ export default function Starfield() {
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mousedown", onLeftDown);
     window.addEventListener("player-fire", onExternalFire);
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
     raf = requestAnimationFrame(frame);
 
     // cleanup
@@ -295,7 +289,6 @@ export default function Starfield() {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mousedown", onLeftDown);
       window.removeEventListener("player-fire", onExternalFire);
-      window.removeEventListener("touchstart", onTouchStart);
     };
   }, []);
 

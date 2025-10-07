@@ -10,26 +10,17 @@ export default function SpaceshipCursor() {
 
   const FAST_CLICK_MS = 220;
 
-  // track mouse/touch position
+  // mouse position
   useEffect(() => {
     const onMove = (e) => {
       const p = { x: e.clientX, y: e.clientY };
       setPos(p); posRef.current = p;
     };
-    const onTouchMove = (e) => {
-      const t = e.touches?.[0]; if (!t) return;
-      const p = { x: t.clientX, y: t.clientY };
-      setPos(p); posRef.current = p;
-    };
     window.addEventListener("mousemove", onMove);
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchmove", onTouchMove);
-    };
+    return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // right-click + tap to fire (and prevent browser menu)
+  // right-click only (blocks browser menu)
   useEffect(() => {
     const blockCtx = (e) => e.preventDefault();
     document.addEventListener("contextmenu", blockCtx, { capture: true });
@@ -53,25 +44,10 @@ export default function SpaceshipCursor() {
       setTimeout(() => setLasers((p) => p.filter((l) => l.id !== id)), 850);
     };
 
-    const onTap = (e) => {
-      const t = e.touches?.[0];
-      const x = t ? t.clientX : posRef.current.x;
-      const y = t ? t.clientY : posRef.current.y;
-      e.preventDefault();
-      const color = "blue";
-      const id = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
-      const length = 24, width = 3, driftX = 0;
-      window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y, color } }));
-      setLasers((p) => [...p, { id, x, y, color, length, width, driftX }]);
-      setTimeout(() => setLasers((p) => p.filter((l) => l.id !== id)), 600);
-    };
-
     window.addEventListener("contextmenu", onCtx);
-    window.addEventListener("touchstart", onTap, { passive: false });
 
     return () => {
       window.removeEventListener("contextmenu", onCtx);
-      window.removeEventListener("touchstart", onTap);
       document.removeEventListener("contextmenu", blockCtx, { capture: true });
     };
   }, []);
