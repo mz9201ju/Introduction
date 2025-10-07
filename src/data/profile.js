@@ -3,7 +3,8 @@ export const profile = {
     name: "Omer Zahid",
     title: "Senior Software Engineer — AI‑enabled Systems",
     blurb:
-        "Full‑stack engineer shipping enterprise‑scale, AI‑powered solutions. Obsessed with latency, resilience, and clean CI/CD.",
+        "Results-oriented Senior Software Engineer with extensive experience designing and delivering enterprise-scale, AI-enabled software solutions across full-stack environments. Skilled in the full software development lifecycle (SDLC) — from requirements analysis, object-oriented design, and coding to testing, integration, and deployment — while aligning with Agile principles. Developed and optimized AI-driven tasking and scheduling systems, leveraging machine-learning algorithms to boost operational efficiency. Proficient in Java, Python, React, Spring Boot, and infrastructure automation using Maven, GitLab, and Azure DevOps (ADO). Strong command of Docker, Kubernetes, OpenShift, and Azure Kubernetes Service (AKS) for container orchestration and scalable microservice deployments.\
+        Adept at embedding AI/ML workflows into CI/CD pipelines for continuous training, validation, and deployment. Experienced in Agile frameworks including Scrum and Kanban, managing multi-program sprints and delivering iterative solutions with measurable performance gains. Advanced scripting in YAML, PowerShell, Bash, and JSON across both Windows and Linux environments. Known for leading modernization efforts, reducing latency, and improving system reliability. A proactive collaborator and mentor, fostering innovation through technical leadership, automation, and AI-driven process improvements across complex enterprise systems.",
     links: {
         linkedin: "https://linkedin.com/in/omer-zahid-developer",
         github: "https://github.com/mz9201ju/Introduction",
