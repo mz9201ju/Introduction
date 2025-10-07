@@ -4,25 +4,36 @@ import spaceship from "../assets/spaceship.png";
 
 export default function SpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
-  const posRef = useRef({ x: 0, y: 0 });        // NEW: live position ref
+  const posRef = useRef({ x: 0, y: 0 });
   const [lasers, setLasers] = useState([]);
   const lastClickRef = useRef(0);
 
   const FAST_CLICK_MS = 220;
 
-  // Track mouse (keeps both state for visuals and ref for event handler)
+  // track mouse/touch position
   useEffect(() => {
     const onMove = (e) => {
       const p = { x: e.clientX, y: e.clientY };
-      setPos(p);
-      posRef.current = p;                          // NEW: keep latest pos in ref
+      setPos(p); posRef.current = p;
+    };
+    const onTouchMove = (e) => {
+      const t = e.touches?.[0]; if (!t) return;
+      const p = { x: t.clientX, y: t.clientY };
+      setPos(p); posRef.current = p;
     };
     window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onTouchMove);
+    };
   }, []);
 
-  // Fire on RIGHT-CLICK with cadence color (stable listener)
+  // right-click + tap to fire (and prevent browser menu)
   useEffect(() => {
+    const blockCtx = (e) => e.preventDefault();
+    document.addEventListener("contextmenu", blockCtx, { capture: true });
+
     const onCtx = (e) => {
       e.preventDefault();
       const now = performance.now();
@@ -35,19 +46,35 @@ export default function SpaceshipCursor() {
       const width = 3 + Math.floor(Math.random() * 2);
       const driftX = (Math.random() - 0.5) * 6;
 
-      const { x, y } = posRef.current;            // NEW: use ref (not state) to avoid stale coords
+      const { x, y } = posRef.current;
+      window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y, color } }));
 
-      // Notify Starfield to spawn a player bullet at these coordinates
-      window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y } }));
-
-      // Local visual laser streak (cursor overlay only)
       setLasers((p) => [...p, { id, x, y, color, length, width, driftX }]);
       setTimeout(() => setLasers((p) => p.filter((l) => l.id !== id)), 850);
     };
 
+    const onTap = (e) => {
+      const t = e.touches?.[0];
+      const x = t ? t.clientX : posRef.current.x;
+      const y = t ? t.clientY : posRef.current.y;
+      e.preventDefault();
+      const color = "blue";
+      const id = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+      const length = 24, width = 3, driftX = 0;
+      window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y, color } }));
+      setLasers((p) => [...p, { id, x, y, color, length, width, driftX }]);
+      setTimeout(() => setLasers((p) => p.filter((l) => l.id !== id)), 600);
+    };
+
     window.addEventListener("contextmenu", onCtx);
-    return () => window.removeEventListener("contextmenu", onCtx);
-  }, []); // IMPORTANT: [] so we don't rebind per-mousemove
+    window.addEventListener("touchstart", onTap, { passive: false });
+
+    return () => {
+      window.removeEventListener("contextmenu", onCtx);
+      window.removeEventListener("touchstart", onTap);
+      document.removeEventListener("contextmenu", blockCtx, { capture: true });
+    };
+  }, []);
 
   const colorMap = {
     red:  { fill: "#ff2b2b", glow: "0 0 8px rgba(255,43,43,0.9), 0 0 16px rgba(255,43,43,0.6)" },
@@ -69,6 +96,9 @@ export default function SpaceshipCursor() {
           pointerEvents: "none",
           zIndex: 2147483647,
           willChange: "transform",
+          WebkitUserSelect: "none",
+          userSelect: "none",
+          WebkitTouchCallout: "none",
         }}
       />
 
