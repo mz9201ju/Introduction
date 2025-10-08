@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import SpaceshipCursor from "./components/SpaceshipCursor";
 import Starfield from "./components/Starfield";
+import PlayGame from "./pages/PlayGame";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/darthVader" element={<PlayGame />} />
       </Routes>
     </BrowserRouter>
   );

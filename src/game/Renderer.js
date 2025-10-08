@@ -58,8 +58,8 @@ export default class Renderer {
         if (pb.life <= 0) pb.life = 0;
     }
 
+    // Pure draw: does NOT mutate ex.t
     drawExplosion(ctx, ex, dt) {
-        ex.t += dt;
         const p = Math.min(1, ex.t / GAME.EXPLOSION_TIME);
         const r = 10 + 42 * p, alpha = 1 - p;
         ctx.save();

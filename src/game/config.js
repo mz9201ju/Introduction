@@ -6,8 +6,8 @@ export const STARFIELD = {
 };
 
 export const GAME = {
-    ENEMY_MIN_SPAWN_MS: 2500,
-    ENEMY_MAX_SPAWN_MS: 4800,
+    ENEMY_MIN_SPAWN_MS: 1500,
+    ENEMY_MAX_SPAWN_MS: 2800,
     ENEMY_SPEED: 70,
 
     BULLET_SPEED: 520,
