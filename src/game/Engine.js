@@ -6,9 +6,10 @@ import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion } from "./e
 
 // Orchestrates state, physics, spawning, inputs, and the main loop.
 export default class Engine {
-    constructor(canvas) {
+    constructor(canvas, { onKill } = {}) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
+        this.onKill = onKill;
 
         // Scene pieces
         this.bg = new StarfieldBackground();
@@ -30,7 +31,8 @@ export default class Engine {
         // Bind handlers
         this.frame = this.frame.bind(this);
         this.onMove = this.onMove.bind(this);
-        this.onLeftDown = this.onLeftDown.bind(this);
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.blockContextMenu = this.blockContextMenu.bind(this);
         this.onExternalFire = this.onExternalFire.bind(this);
         this.onResize = this.onResize.bind(this);
 
@@ -38,7 +40,8 @@ export default class Engine {
         this.onResize();
         window.addEventListener("resize", this.onResize);
         window.addEventListener("mousemove", this.onMove);
-        window.addEventListener("mousedown", this.onLeftDown);
+        window.addEventListener("mousedown", this.onMouseDown);
+        window.addEventListener("contextmenu", this.blockContextMenu);
         window.addEventListener("player-fire", this.onExternalFire);
 
         this.raf = requestAnimationFrame(this.frame);
@@ -48,7 +51,8 @@ export default class Engine {
         cancelAnimationFrame(this.raf);
         window.removeEventListener("resize", this.onResize);
         window.removeEventListener("mousemove", this.onMove);
-        window.removeEventListener("mousedown", this.onLeftDown);
+        window.removeEventListener("mousedown", this.onMouseDown);
+        window.removeEventListener("contextmenu", this.blockContextMenu);
         window.removeEventListener("player-fire", this.onExternalFire);
     }
 
@@ -56,12 +60,21 @@ export default class Engine {
         this.canvas.width = this.bg.W = window.innerWidth;
         this.canvas.height = this.bg.H = window.innerHeight;
         this.bg.resize(this.canvas.width, this.canvas.height);
-        // center cursor on start
         this.cursorX = this.bg.CX; this.cursorY = this.bg.CY;
     }
 
     onMove(e) { this.cursorX = e.clientX; this.cursorY = e.clientY; }
-    onLeftDown(e) { if (e.button === 0) this.playerFire(); }
+
+    onMouseDown(e) {
+        if (e.button === 0) {
+            this.playerFire(); // left = green
+        } else if (e.button === 2) {
+            this.playerFire(Math.random() < 0.5 ? "red" : "blue"); // right = red/blue
+        }
+    }
+
+    blockContextMenu(e) { e.preventDefault(); }
+
     onExternalFire(e) {
         const { x, y, color } = e.detail || {};
         if (typeof x === "number" && typeof y === "number") { this.cursorX = x; this.cursorY = y; }
@@ -118,7 +131,9 @@ export default class Engine {
     }
 
     triggerExplosion(x, y) {
-        this.explosions.push(makeExplosion({ x, y }));
+        const ex = makeExplosion({ x, y });
+        ex.counted = false;
+        this.explosions.push(ex);
     }
 
     doSpawning(dt) {
@@ -136,7 +151,6 @@ export default class Engine {
         for (const e of this.enemies) {
             if (!e.alive) continue;
 
-            // wobble perpendicular to velocity
             e.wobblePhase += dt * 2.2;
             const wobble = Math.sin(e.wobblePhase) * 18;
             const ux = e.vx / (e.spd || 1), uy = e.vy / (e.spd || 1);
@@ -159,7 +173,6 @@ export default class Engine {
     }
 
     handleCollisions() {
-        // player bullets vs enemies
         for (const pb of this.myBullets) {
             if (pb.life <= 0) continue;
             for (const e of this.enemies) {
@@ -169,6 +182,7 @@ export default class Engine {
                     e.alive = false;
                     pb.life = 0;
                     this.triggerExplosion(e.x, e.y);
+                    break; // one bullet -> at most one kill
                 }
             }
         }
@@ -176,20 +190,23 @@ export default class Engine {
 
     cull() {
         const { W, H } = this.bg;
-        // enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) if (!this.enemies[i].alive) this.enemies.splice(i, 1);
-        // enemy bullets
         for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
             const b = this.enemyBullets[i];
             if (b.life <= 0 || b.x < -50 || b.x > W + 50 || b.y < -50 || b.y > H + 50) this.enemyBullets.splice(i, 1);
         }
-        // my bullets
         for (let i = this.myBullets.length - 1; i >= 0; i--) {
             const pb = this.myBullets[i];
             if (pb.life <= 0 || pb.x < -50 || pb.x > W + 50 || pb.y < -50 || pb.y > H + 50) this.myBullets.splice(i, 1);
         }
-        // explosions
-        for (let i = this.explosions.length - 1; i >= 0; i--) if (this.explosions[i].t >= GAME.EXPLOSION_TIME) this.explosions.splice(i, 1);
+        for (let i = this.explosions.length - 1; i >= 0; i--) {
+            const ex = this.explosions[i];
+            if (ex.t >= GAME.EXPLOSION_TIME) {
+                if (!ex.counted && this.onKill) this.onKill();
+                ex.counted = true;
+                this.explosions.splice(i, 1);
+            }
+        }
     }
 
     frame(tNow) {
@@ -199,30 +216,24 @@ export default class Engine {
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.bg.W, this.bg.H);
 
-        // background stars
         this.bg.updateAndDraw(ctx);
 
-        // spawns
         this.doSpawning(dt);
         const now = performance.now();
 
-        // enemies update + draw
         this.updateEnemies(dt, now);
         for (const e of this.enemies) if (e.alive) this.renderer.drawEnemy(ctx, e);
 
-        // enemy bullets
         for (const b of this.enemyBullets) this.renderer.drawEnemyBullet(ctx, b, dt);
-
-        // player bullets
         for (const pb of this.myBullets) this.renderer.drawPlayerBullet(ctx, pb, dt);
 
-        // collisions
         this.handleCollisions();
 
-        // explosions
-        for (const ex of this.explosions) this.renderer.drawExplosion(ctx, ex, dt);
+        for (const ex of this.explosions) {
+            ex.t += dt;                // advance time only here
+            this.renderer.drawExplosion(ctx, ex, dt);
+        }
 
-        // culls
         this.cull();
 
         this.raf = requestAnimationFrame(this.frame);
