@@ -10,6 +10,8 @@ export default class Engine {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
+        this.killCount = 0;
+        this.gameOver = false;
 
         // Scene pieces
         this.bg = new StarfieldBackground();
@@ -202,14 +204,22 @@ export default class Engine {
         for (let i = this.explosions.length - 1; i >= 0; i--) {
             const ex = this.explosions[i];
             if (ex.t >= GAME.EXPLOSION_TIME) {
-                if (!ex.counted && this.onKill) this.onKill();
-                ex.counted = true;
+                if (!ex.counted) {
+                    ex.counted = true;
+                    this.killCount++;
+                    if (this.killCount >= 10) this.gameOver = true;
+                    if (this.onKill) this.onKill();
+                }
                 this.explosions.splice(i, 1);
             }
         }
     }
 
     frame(tNow) {
+        if (this.gameOver) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            return;
+        }
         const dt = Math.min(0.033, (tNow - this.lastT) / 1000);
         this.lastT = tNow;
 
