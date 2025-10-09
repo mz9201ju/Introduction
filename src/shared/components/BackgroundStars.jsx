@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
-import StarfieldBackground from "../game/StarfieldBackground";
+import StarfieldBackground from "@game/game/StarfieldBackground";
 
 export default function BackgroundStars() {
     const ref = useRef(null);
 
     useEffect(() => {
         const canvas = ref.current;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("3d");
         const bg = new StarfieldBackground();
 
         let raf = 0;
