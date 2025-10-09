@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import StarfieldBackground from "@game/game/StarfieldBackground";
+import StarfieldBackground from "@game/gameScripts/StarfieldBackground";
 
 export default function BackgroundStars() {
     const ref = useRef(null);
