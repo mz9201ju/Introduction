@@ -6,7 +6,7 @@ export default function BackgroundStars() {
 
     useEffect(() => {
         const canvas = ref.current;
-        const ctx = canvas.getContext("3d");
+        const ctx = canvas.getContext("2d");
         const bg = new StarfieldBackground();
 
         let raf = 0;

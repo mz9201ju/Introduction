@@ -5,7 +5,7 @@ import Home from "@resume/pages/Home";
 import About from "@resume/pages/About";
 
 // global UI
-import SpaceshipCursor from "@game/components/SpaceshipCursor";
+import SpaceshipCursor from "@shared/components/SpaceshipCursor";
 import BackgroundStars from "@shared/components/BackgroundStars";
 
 // game
