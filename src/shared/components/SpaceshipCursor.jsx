@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import spaceship from "../assets/spaceship.png";
+import spaceship from "/spaceship.png";
 
 export default function SpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });

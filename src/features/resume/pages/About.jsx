@@ -1,13 +1,9 @@
 import { useNavigate } from "react-router-dom"; // ✅ import navigate hook
-import BackgroundStars from "@shared/components/BackgroundStars";
-import SpaceshipCursor from "@game/components/SpaceshipCursor";
 
 export default function About() {
     const navigate = useNavigate(); // ✅ initialize navigate function
     return (
         <div style={{ textAlign: "center", padding: "4rem" }}>
-            <SpaceshipCursor />
-            <BackgroundStars />
             <h1>About Me 🚀</h1>
             <p>
                 I love my Allah — the One who created this entire universe. 🌌
