@@ -6,7 +6,7 @@ import About from "@resume/pages/About";
 
 // global UI
 import SpaceshipCursor from "@shared/components/SpaceshipCursor";
-import BackgroundStars from "@shared/components/BackgroundStars";
+//import BackgroundStars from "@shared/components/BackgroundStars"; // enable this when you want stars coming on resume as well
 
 // game
 import PlayGame from "@game/pages/PlayGame";
@@ -16,7 +16,6 @@ export default function App() {
     <BrowserRouter basename="/Introduction/">
       {/* global effects: render on ALL pages */}
       <SpaceshipCursor />
-      <BackgroundStars />
 
       <nav style={{ padding: "12px", textAlign: "center", position: "sticky", top: 0, zIndex: 1000 }}>
         <Link to="/" style={{ margin: "0 12px" }}>Home</Link>
