@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Engine from "@game/game/Engine";
+import Engine from "@game/gameScripts/Engine";
 
 // Thin React wrapper that mounts the canvas + engine and cleans up.
 export default function Starfield({ onKill }) {

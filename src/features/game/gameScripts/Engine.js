@@ -232,7 +232,9 @@ export default class Engine {
         const now = performance.now();
 
         this.updateEnemies(dt, now);
-        for (const e of this.enemies) if (e.alive) this.renderer.drawEnemy(ctx, e);
+        for (const e of this.enemies)
+            if (e.alive)
+                this.renderer.drawEnemy(ctx, e, this.killCount);
 
         for (const b of this.enemyBullets) this.renderer.drawEnemyBullet(ctx, b, dt);
         for (const pb of this.myBullets) this.renderer.drawPlayerBullet(ctx, pb, dt);
