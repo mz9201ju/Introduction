@@ -1,13 +1,25 @@
-import enemyShip from "../assets/enemySpaceShip.png";
+import enemyShip1 from "../assets/enemySpaceShip.png";
+import enemyShip2 from "../assets/alien.png";
+import enemyShip3 from "../assets/alien-ship.png";
+import enemyShip4 from "../assets/enemyShip.png";
+import enemyShip5 from "../assets/evilShip.png";
+import enemyShip6 from "../assets/enemyFigterShip.png";
+import enemyShip7 from "../assets/ufo.png";
+
 import { GAME } from "./config";
 
 // Handles drawing of enemies, bullets, explosions, and ship sprite.
 export default class Renderer {
     constructor() {
+        const enemyImages = [enemyShip1, enemyShip2, enemyShip3, enemyShip4, enemyShip5, enemyShip6, enemyShip7];
+        const randomIndex = Math.floor(Math.random() * enemyImages.length);
+        const chosenImage = enemyImages[randomIndex];
+
+
         this.enemyImg = new Image();
         this.enemyImgReady = false;
         this.enemyImg.onload = () => (this.enemyImgReady = true);
-        this.enemyImg.src = enemyShip;
+        this.enemyImg.src = chosenImage;
     }
 
     drawEnemy(ctx, e) {
