@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
-import Starfield from "../components/Starfield";
-import Scoreboard from "../components/Scoreboard";
+import { useState, useEffect, useCallback } from "react";
+import Starfield from "@game/components/Starfield";
+import Scoreboard from "@game/components/Scoreboard";
 
 export default function PlayGame() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [kills, setKills] = useState(0);
+
+  // memoize so Engine doesn't get recreated from a new function ref
+  const handleKill = useCallback(() => setKills(k => k + 1), []);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowInstructions(false), 5000);
@@ -13,10 +16,9 @@ export default function PlayGame() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
-      <Starfield onKill={() => setKills(k => k + 1)} />
+      <Starfield onKill={handleKill} />
       <Scoreboard kills={kills} />
 
-      {/* How to Play (bottom-left, auto hides after 5s) */}
       {showInstructions && (
         <div
           style={{
@@ -38,30 +40,29 @@ export default function PlayGame() {
           <div style={{ fontWeight: 700, marginBottom: 6 }}>How to Play</div>
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             <li>Move your mouse to aim the ship.</li>
-            <li>Left click to fire (green laser). Right click to fire (red/blue)</li>
-            <li>
-              Enemies fire red/blue lasers at an interval (<code>fireEvery</code>).
-            </li>
+            <li>Left click = green laser. Right click = red/blue.</li>
+            <li>Enemies fire at their <code>fireEvery</code> interval.</li>
           </ul>
         </div>
       )}
 
-      {/* Tip (bottom-right) */}
-      {showInstructions && (<div
-        style={{
-          position: "fixed",
-          right: 12,
-          bottom: 12,
-          zIndex: 10,
-          padding: "8px 10px",
-          background: "rgba(0,0,0,0.35)",
-          color: "#cfe3ff",
-          borderRadius: 8,
-          fontSize: 12,
-        }}
-      >
-        Tip: Keep moving — wobbling enemies miss more often.
-      </div>)}
+      {showInstructions && (
+        <div
+          style={{
+            position: "fixed",
+            right: 12,
+            bottom: 12,
+            zIndex: 10,
+            padding: "8px 10px",
+            background: "rgba(0,0,0,0.35)",
+            color: "#cfe3ff",
+            borderRadius: 8,
+            fontSize: 12,
+          }}
+        >
+          Tip: Keep moving — wobbling enemies miss more often.
+        </div>
+      )}
     </div>
   );
 }

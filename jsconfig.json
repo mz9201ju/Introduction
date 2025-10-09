@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@game/*": [
+                "src/features/game/*"
+            ],
+            "@resume/*": [
+                "src/features/resume/*"
+            ],
+            "@shared/*": [
+                "src/shared/*"
+            ],
+            "@app/*": [
+                "src/app/*"
+            ]
+        }
+    }
+}

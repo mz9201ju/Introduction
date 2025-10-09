@@ -1,17 +1,17 @@
-import Starfield from "../components/Starfield";
-import Hero from "../components/Hero";
-import Experience from "../components/Experience";
-import Skills from "../components/Skills";
-import SpaceshipCursor from "../components/SpaceshipCursor";
-import { profile } from "../data/profile";
-import "../index.css";
+import BackgroundStars from "@shared/components/BackgroundStars";
+import Hero from "@resume/components/Hero";
+import Experience from "@resume/components/Experience";
+import Skills from "@resume/components/Skills";
+import SpaceshipCursor from "@game/components/SpaceshipCursor";
+import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
+// remove page-level CSS import; load index.css once in main.jsx
 
 
 export default function Home() {
   return (
     <>
       <SpaceshipCursor />
-      <Starfield />
+      <BackgroundStars />
       <main className="container">
         <div className="grid">
           <div>
