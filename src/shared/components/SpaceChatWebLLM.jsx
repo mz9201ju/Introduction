@@ -42,6 +42,7 @@ export default function SpaceChatWebLLM() {
     useEffect(() => {
         if (open && !welcomed && ready) {
             setMsgs(m => [...m, { role: "assistant", content: "👋 Hi Darth Vader, good to see you back in orbit." }]);
+            setWelcomed(true);
         }
     }, [open, ready]);
 
@@ -56,7 +57,6 @@ export default function SpaceChatWebLLM() {
         const q = input.trim();
         if (!q || busy || !engineRef.current) return;
         if (!welcomed) setMsgs(m => m.filter(x => x.role !== "assistant")); // remove the intro
-        setWelcomed(true);
 
         setInput("");
         setMsgs(m => [...m, { role: "user", content: q }, { role: "assistant", content: "" }]);
