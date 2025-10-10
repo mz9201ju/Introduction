@@ -11,27 +11,43 @@ import { GAME } from "./config";
 // Handles drawing of enemies, bullets, explosions, and ship sprite.
 export default class Renderer {
     constructor() {
-        const enemyImages = [enemyShip1, enemyShip2, enemyShip3, enemyShip4, enemyShip5, enemyShip6, enemyShip7];
-        const randomIndex = Math.floor(Math.random() * enemyImages.length);
-        const chosenImage = enemyImages[randomIndex];
+        const enemyImages = [
+            enemyShip1, enemyShip2, enemyShip3,
+            enemyShip4, enemyShip5, enemyShip6, enemyShip7
+        ];
 
+        // Preload all enemy sprites
+        this.enemyImgs = enemyImages.map((src) => {
+            const img = new Image();
+            const slot = { img, ready: false };
+            img.onload = () => (slot.ready = true);
+            img.src = src;
+            return slot;
+        });
 
-        this.enemyImg = new Image();
-        this.enemyImgReady = false;
-        this.enemyImg.onload = () => (this.enemyImgReady = true);
-        this.enemyImg.src = chosenImage;
+        // Cache: enemy object -> sprite index
+        this.enemySprite = new WeakMap();
     }
 
     drawEnemy(ctx, e) {
+        // get or assign a stable sprite index for this enemy
+        const n = this.enemyImgs.length;
+        let idx = this.enemySprite.get(e);
+        if (idx == null) {
+            idx = Math.floor(Math.random() * n);
+            this.enemySprite.set(e, idx);
+        }
+        const slot = this.enemyImgs[idx];
+
         ctx.save();
         ctx.translate(e.x, e.y);
         ctx.rotate(e.angle);
         const SIZE = 28;
-        if (this.enemyImgReady) {
+        if (slot?.ready) {
             ctx.imageSmoothingEnabled = true;
             ctx.shadowColor = "rgba(255,255,255,0.6)";
             ctx.shadowBlur = 8;
-            ctx.drawImage(this.enemyImg, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
+            ctx.drawImage(slot.img, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
         }
         ctx.restore();
     }
