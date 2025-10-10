@@ -200,6 +200,7 @@ export default class Engine {
 
     updateEnemies(dt, now) {
         const { W, H } = this.bg;
+        const PAD = 24; // small inset so sprites don’t clip the edge
 
         for (const e of this.enemies) {
             if (!e.alive) continue;
@@ -212,6 +213,30 @@ export default class Engine {
             e.x += e.vx * dt + nx * wobble * dt;
             e.y += e.vy * dt + ny * wobble * dt;
 
+            // --- bounce off walls ---
+            // clamp + reflect velocity, preserve speed magnitude
+            if (e.x < PAD) {
+                e.x = PAD;
+                e.vx = Math.abs(e.vx);
+            } else if (e.x > W - PAD) {
+                e.x = W - PAD;
+                e.vx = -Math.abs(e.vx);
+            }
+            if (e.y < PAD) {
+                e.y = PAD;
+                e.vy = Math.abs(e.vy);
+            } else if (e.y > H - PAD) {
+                e.y = H - PAD;
+                e.vy = -Math.abs(e.vy);
+            }
+
+            // keep velocity at target speed after reflections
+            {
+                const s = Math.hypot(e.vx, e.vy) || 1;
+                e.vx = (e.vx / s) * e.spd;
+                e.vy = (e.vy / s) * e.spd;
+            }
+
             const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
             e.angle = Math.atan2(dy, dx);
 
@@ -220,8 +245,6 @@ export default class Engine {
                 e.nextFire = now + e.fireEvery;
                 if (Math.random() < 0.25) e.nextFire = now + e.fireEvery * 0.45; // burst
             }
-
-            if (e.x < -200 || e.x > W + 200 || e.y < -200 || e.y > H + 200) e.alive = false;
         }
     }
 
