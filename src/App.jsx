@@ -1,6 +1,10 @@
 // App.jsx
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useMemo, useRef, createRef } from "react"; // ← useRef, createRef added
+
+// 🔹 NEW: transition + location imports
+import { useLocation } from "react-router-dom";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 // resume
 import Home from "@resume/pages/Home";
@@ -50,6 +54,16 @@ export default function App() {
   return (
     <>
       <BrowserRouter basename="/Introduction/">
+        {/* 🔹 slide CSS here to keep files minimal */}
+        <style>{`
+          .route-viewport { position: relative; overflow: hidden; width: 100vw; min-height: 100vh; }
+          .slide-enter { transform: translateX(100%); opacity: 0.85; }
+          .slide-enter-active { transform: translateX(0%); opacity: 1; transition: transform 600ms ease-in-out, opacity 400ms ease; }
+          .slide-exit { transform: translateX(0%); opacity: 1; }
+          .slide-exit-active { transform: translateX(-100%); opacity: 0.85; transition: transform 600ms ease-in-out, opacity 400ms ease; }
+          .route-slot { position: absolute; inset: 0; width: 100%; height: 100%; }
+        `}</style>
+
         {/* global effects: render on ALL pages */}
         <SpaceshipCursor />
 
@@ -102,14 +116,8 @@ export default function App() {
           ))}
         </nav>
 
-        {/* ROUTES — keep your pages as-is */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/darthVader" element={<PlayGame />} />
-          {/* Optional: catch-all → home (nice on GH Pages) */}
-          <Route path="*" element={<Home />} />
-        </Routes>
+        {/* 🔹 keep transitions inside Router via child */}
+        <AnimatedRoutes />
 
         {/* Chat must be inside Suspense to avoid blank app during lazy load */}
         <Suspense fallback={null}>
@@ -117,5 +125,45 @@ export default function App() {
         </Suspense>
       </BrowserRouter>
     </>
+  );
+}
+
+/* 🔹 Handles slide transitions with stable nodeRefs per route */
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  // ✅ Each pathname gets its own ref so CSSTransition never loses the DOM node
+  const nodeRefs = useRef(new Map());
+  const getNodeRef = (key) => {
+    if (!nodeRefs.current.has(key)) nodeRefs.current.set(key, createRef());
+    return nodeRefs.current.get(key);
+  };
+
+  const key = location.pathname;
+  const nodeRef = getNodeRef(key);
+
+  return (
+    <div className="route-viewport">
+      <TransitionGroup component={null}>
+        <CSSTransition
+          key={key}
+          nodeRef={nodeRef}     // ✅ critical fix
+          classNames="slide"
+          timeout={600}
+          unmountOnExit
+        >
+          <div ref={nodeRef} className="route-slot">
+            {/* ROUTES — keep your pages as-is */}
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/darthVader" element={<PlayGame />} />
+              {/* Optional: catch-all → home (nice on GH Pages) */}
+              <Route path="*" element={<Home />} />
+            </Routes>
+          </div>
+        </CSSTransition>
+      </TransitionGroup>
+    </div>
   );
 }
