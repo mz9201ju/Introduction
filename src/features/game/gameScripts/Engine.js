@@ -6,6 +6,7 @@ import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion } from "./e
 import bossImage1 from "../assets/alien-head.png";
 import bossImage2 from "../assets/angry.png";
 import bossImage3 from "../assets/star.png"
+import galaxy from "../assets/galaxy.jpeg";
 
 // Orchestrates state, physics, spawning, inputs, and the main loop.
 export default class Engine {
@@ -37,6 +38,12 @@ export default class Engine {
         // Scene pieces
         this.bg = new StarfieldBackground();
         this.renderer = new Renderer();
+
+        // createGalaxyBackGroundImage
+        this.bgImg = new Image();
+        this.bgImgReady = false;
+        this.bgImg.onload = () => (this.bgImgReady = true);
+        this.bgImg.src = galaxy;
 
         // Runtime state
         this.enemies = [];
@@ -346,7 +353,6 @@ export default class Engine {
                     this.victory = true;     // <-- flag win
                     this.victoryT = 0;
                     this.clearWorld();       // optional: wipe bullets/fx
-                    // (optional) this.onKill?.({ kills: this.killCount + 1 });
                     // DO NOT call enterBossPhase() here
                 }
             }
@@ -450,7 +456,12 @@ export default class Engine {
 
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.bg.W, this.bg.H);
-        this.bg.updateAndDraw(ctx);
+        // Only show galaxy background after victory
+        if (this.victory && this.bgImgReady) {
+            ctx.drawImage(this.bgImg, 0, 0, this.canvas.width, this.canvas.height);
+        } else {
+            this.bg.updateAndDraw(ctx); // normal starfield until victory
+        }
 
         if (this.inBossPhase) {
             // === BOSS PHASE ===

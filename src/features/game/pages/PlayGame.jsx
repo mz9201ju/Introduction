@@ -72,7 +72,7 @@ export default function PlayGame() {
             fontSize: 12,
           }}
         >
-          Tip: Keep moving — wobbling enemies miss more often.
+          Tip: Keep moving — wobbling enemies miss more often. (10 kills bring in BOSS!)
         </div>
       )}
     </div>
