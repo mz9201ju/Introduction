@@ -1,17 +1,20 @@
 // src/components/SpaceChatWebLLM.jsx
 import { useEffect, useRef, useState } from "react";
 import { initLLM, webllmChat } from "../../lib/ai-webllm";
+import darth from "../../features/game/assets/helmet.png";
 
 export default function SpaceChatWebLLM() {
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const [ready, setReady] = useState(false);
+    const [welcomed, setWelcomed] = useState(false);
     const [progress, setProgress] = useState("Initializing…");
     const [input, setInput] = useState("");
     const [msgs, setMsgs] = useState([
         { role: "system", content: "You are SpaceNerd Copilot. Be concise, helpful, and fun." },
-        { role: "assistant", content: "🛰️ Online. Ask me anything—fully offline model, no server." },
+        { role: "assistant", content: "🚀 Welcome, Darth Vader! Ready to explore the galaxy together?" },
     ]);
+
 
     const listRef = useRef(null);
     const engineRef = useRef(null);
@@ -35,6 +38,13 @@ export default function SpaceChatWebLLM() {
         return () => { mounted = false; };
     }, [open]);
 
+    // 👋 New welcome effect (put this right after the one above)
+    useEffect(() => {
+        if (open && !welcomed && ready) {
+            setMsgs(m => [...m, { role: "assistant", content: "👋 Hi Darth Vader, good to see you back in orbit." }]);
+        }
+    }, [open, ready]);
+
     // autoscroll
     useEffect(() => {
         if (!open) return;
@@ -45,6 +55,8 @@ export default function SpaceChatWebLLM() {
     const send = async () => {
         const q = input.trim();
         if (!q || busy || !engineRef.current) return;
+        if (!welcomed) setMsgs(m => m.filter(x => x.role !== "assistant")); // remove the intro
+        setWelcomed(true);
 
         setInput("");
         setMsgs(m => [...m, { role: "user", content: q }, { role: "assistant", content: "" }]);
@@ -89,7 +101,12 @@ export default function SpaceChatWebLLM() {
         <>
             {/* Toggle FAB */}
             <button onClick={() => setOpen(o => !o)} style={styles.fab} aria-label="Open AI chat">
-                {open ? "✖" : "🛰️"}
+                {open ? "✖" : <img src={darth} alt="🛰️" width="60" height="50" style={{
+                    backgroundColor: "white",
+                    borderRadius: "50%",   // optional: makes it round like the emoji
+                    padding: "0px",         // optional: adds some breathing room
+                    marginLeft: "-9px"   // 👈 moves image ~6px left
+                }} />}
             </button>
 
             {/* Panel */}
