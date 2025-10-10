@@ -7,7 +7,19 @@ export default function PlayGame() {
   const [kills, setKills] = useState(0);
 
   // memoize so Engine doesn't get recreated from a new function ref
-  const handleKill = useCallback(() => setKills(k => k + 1), []);
+  const handleKill = useCallback((payload = {}) => {
+    const { reset, kills: k, absolute } = payload;
+    if (reset) {                // Engine pressed "R" → hard reset UI
+      setKills(0);
+      return;
+    }
+    if (absolute && typeof k === "number") {
+      setKills(k);              // Engine is source of truth (e.g., +1 after explosion)
+      return;
+    }
+    // Fallback if Engine ever emits legacy "increment" signals
+    setKills(prev => prev + 1);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowInstructions(false), 5000);
