@@ -6,7 +6,6 @@ import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion } from "./e
 import bossImage1 from "../assets/alien-head.png";
 import bossImage2 from "../assets/angry.png";
 import bossImage3 from "../assets/star.png"
-import galaxy from "../assets/galaxy.jpeg";
 
 // Orchestrates state, physics, spawning, inputs, and the main loop.
 export default class Engine {
@@ -43,7 +42,7 @@ export default class Engine {
         this.bgImg = new Image();
         this.bgImgReady = false;
         this.bgImg.onload = () => (this.bgImgReady = true);
-        this.bgImg.src = galaxy;
+        this.bgImg.src = new URL("../assets/galaxy.jpeg", import.meta.url).href;;
 
         // Runtime state
         this.enemies = [];
