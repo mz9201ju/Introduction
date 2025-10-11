@@ -45,10 +45,14 @@ export default function About() {
                         rel="noopener noreferrer"
                         style={{
                             display: "inline-block",
-                            borderRadius: "12px",
-                            overflow: "hidden",
-                            boxShadow: "0 0 20px #00bfff88",
-                            transition: "transform 0.3s ease",
+                            padding: "10px 20px",
+                            borderRadius: "8px",
+                            background: "linear-gradient(90deg, #00bfff, #0077ff)",
+                            color: "#fff",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                            boxShadow: "0 0 15px #00bfff88",
+                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
