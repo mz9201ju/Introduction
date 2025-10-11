@@ -45,14 +45,10 @@ export default function About() {
                         rel="noopener noreferrer"
                         style={{
                             display: "inline-block",
-                            padding: "10px 20px",
-                            borderRadius: "8px",
-                            background: "linear-gradient(90deg, #00bfff, #0077ff)",
-                            color: "#fff",
-                            fontWeight: 600,
-                            textDecoration: "none",
-                            boxShadow: "0 0 15px #00bfff88",
-                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                            borderRadius: "20px 20px 20px 20px",
+                            overflow: "auto",
+                            boxShadow: "0 0 100px #00bfff88",
+                            transition: "transform 0.3s ease",
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
@@ -61,9 +57,8 @@ export default function About() {
                             src="https://iad.microlink.io/8O5GGQwFxbs-x8-2WihIiQNPmb2Ew_tIdWOBxUaVt9ANITv-Mi1vZ-4-raPcOTkjQLeU68J2CV8boU05uJauUA.png"
                             alt="ELIA Barber Shop Preview"
                             style={{
-                                width: "320px",
-                                height: "180px",
-                                display: "block",
+                                width: "200px",
+                                height: "100px",
                             }}
                         />
                         <div
