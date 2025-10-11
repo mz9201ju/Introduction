@@ -37,30 +37,42 @@ export default function About() {
                         online visibility. Designed with React + Vite + Tailwind and deployed on
                         GitHub Pages. Features online booking and a modern responsive design.
                     </p>
+
+                    {/* Static website preview */}
                     <a
                         href="https://mz9201ju.github.io/ELIA_BarberShop_WebSite"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
                             display: "inline-block",
-                            marginTop: "0.5rem",
-                            padding: "10px 20px",
-                            borderRadius: "8px",
-                            backgroundColor: "#00bfff",
-                            color: "#fff",
-                            textDecoration: "none",
-                            fontWeight: 600,
-                            boxShadow: "0 0 15px #00bfff88",
-                            transition: "all 0.3s ease",
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            boxShadow: "0 0 20px #00bfff88",
+                            transition: "transform 0.3s ease",
                         }}
-                        onMouseEnter={(e) =>
-                            (e.currentTarget.style.boxShadow = "0 0 25px #00bfffcc")
-                        }
-                        onMouseLeave={(e) =>
-                            (e.currentTarget.style.boxShadow = "0 0 15px #00bfff88")
-                        }
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
                     >
-                        🔗 Visit Site
+                        <img
+                            src="https://iad.microlink.io/8O5GGQwFxbs-x8-2WihIiQNPmb2Ew_tIdWOBxUaVt9ANITv-Mi1vZ-4-raPcOTkjQLeU68J2CV8boU05uJauUA.png"
+                            alt="ELIA Barber Shop Preview"
+                            style={{
+                                width: "320px",
+                                height: "180px",
+                                display: "block",
+                            }}
+                        />
+                        <div
+                            style={{
+                                backgroundColor: "#00bfff",
+                                color: "#fff",
+                                padding: "10px 20px",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                            }}
+                        >
+                            🔗 Visit Site
+                        </div>
                     </a>
                     <h3>🧠 Tech Stack</h3>
                     <p>React • Vite • Tailwind</p>
