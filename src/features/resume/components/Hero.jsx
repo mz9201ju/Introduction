@@ -1,4 +1,43 @@
 import MeetingInvite from "./MeetingInvite";
+
+
+// 🔹 Shared style (applies to all buttons/links)
+const linkStyle = {
+    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
+    fontWeight: 700,
+    color: "#fff",
+    padding: "10px 2px",
+    borderRadius: "10px",
+    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
+    transition: "all 0.3s ease",
+    cursor: "pointer",
+    textDecoration: "none",
+};
+
+// 🔹 Hover logic (used by all links)
+const handleHover = (e, isEnter) => {
+    e.currentTarget.style.boxShadow = isEnter
+        ? "0 0 20px #00bfffcc, 0 0 40px #0077ffaa"
+        : "0 0 10px #00bfff88, 0 0 30px #0077ff44";
+};
+
+// 🔹 Reusable styled link
+const StyledLink = ({ href, label, isEmail = false }) => (
+    <a
+        href={isEmail ? `mailto:${href}` : href}
+        target={isEmail ? "_self" : "_blank"}
+        rel="noreferrer"
+        style={linkStyle}
+        onMouseEnter={(e) => handleHover(e, true)}
+        onMouseLeave={(e) => handleHover(e, false)}
+    >
+        {label}
+    </a>
+);
+
+
+
+
 export default function Hero({ profile }) {
     return (
         <header className="card">
@@ -72,45 +111,9 @@ export default function Hero({ profile }) {
             <p style={{ marginTop: 14, color: "var(--ink)" }}>{profile.blurb}</p>
 
             <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
-                <a href={`mailto:${profile.links.email}`} style={{
-                    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
-                    fontWeight: 700,
-                    color: "#fff",
-                    padding: "10px 2px",
-                    borderRadius: "10px",
-                    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
-                    transition: "all 0.3s ease",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                }}
-                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 0 20px #00bfffcc, 0 0 40px #0077ffaa")}
-                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 0 10px #00bfff88, 0 0 30px #0077ff44")}>Email</a>
-                <a href={profile.links.linkedin} target="_blank" rel="noreferrer" style={{
-                    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
-                    fontWeight: 700,
-                    color: "#fff",
-                    padding: "10px 2px",
-                    borderRadius: "10px",
-                    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
-                    transition: "all 0.3s ease",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                }}
-                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 0 20px #00bfffcc, 0 0 40px #0077ffaa")}
-                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 0 10px #00bfff88, 0 0 30px #0077ff44")}>LinkedIn</a>
-                <a href={profile.links.github} target="_blank" rel="noreferrer" style={{
-                    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
-                    fontWeight: 700,
-                    color: "#fff",
-                    padding: "10px 2px",
-                    borderRadius: "10px",
-                    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
-                    transition: "all 0.3s ease",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                }}
-                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 0 20px #00bfffcc, 0 0 40px #0077ffaa")}
-                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 0 10px #00bfff88, 0 0 30px #0077ff44")}>GitHub</a>
+                <StyledLink href={profile.links.email} label="Email" isEmail />
+                <StyledLink href={profile.links.linkedin} label="LinkedIn" />
+                <StyledLink href={profile.links.github} label="GitHub" />
                 <MeetingInvite />
             </div>
         </header>
