@@ -19,6 +19,7 @@ export default class Engine {
         this.victory = false;
         this.victoryT = 0;
         this.justReset = false;
+        this.playerHitCount = 100;
 
         this.inBossPhase = false;
         this.boss = null;
@@ -79,10 +80,18 @@ export default class Engine {
     }
 
     onKeyDown(e) {
+        const key = (e.key || "").toLowerCase();
+        // Always allow 'R' to reset, regardless of state
+        if (key === "r") {
+            e.preventDefault();
+            this.resetGame();
+        }
+
         if (e.key.toLowerCase() === "r" && this.victory) {
             this.victory = false;
             this.victoryT = 0;
-            this.gameOver = false;
+            this.gameOver = false;     // ← allow restart after death
+            this.playerHitCount = 100;
 
             this.inBossPhase = false;
             this.boss = null;
@@ -96,12 +105,33 @@ export default class Engine {
             this.lastT = performance.now();
             this.justReset = true; // <-- tells cull() to ignore any stale explosions this frame
 
-            if (this.onKill) this.onKill({ reset: true, kills: 0, absolute: true });
-            if (this.onReset) this.onReset();  // <- tell UI to set score = 0
+            this.onKill({ reset: true, kills: 0, absolute: true });
+            this.onReset();  // <- tell UI to set score = 0
         }
     }
 
+    // single source of truth for resetting the game
+    resetGame() {
+        this.victory = false;
+        this.victoryT = 0;
+        this.gameOver = false;
+        this.playerHitCount = 100;
 
+        this.inBossPhase = false;
+        this.boss = null;
+
+        this.killCount = 0;
+        this.clearWorld();
+
+        this.spawnTimer = 0;
+        this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
+
+        this.lastT = performance.now();
+        this.justReset = true;
+
+        this.onKill({ reset: true, kills: 0, absolute: true });
+        this.onReset();
+    }
 
     destroy() {
         cancelAnimationFrame(this.raf);
@@ -300,7 +330,7 @@ export default class Engine {
             hp: 10,
             alive: true,
             radius: 40,
-            fireEvery: 800,
+            fireEvery: 150,
             fireT: 0,
         };
     }
@@ -401,7 +431,7 @@ export default class Engine {
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.shadowColor = "rgba(255,255,150,0.9)";
         ctx.shadowBlur = 30;
-        ctx.fillText("VICTORY!", 0, 0);
+        ctx.fillText("VICTORY! 100 shots!", 0, 0);
 
         ctx.font = "20px system-ui";
         ctx.shadowBlur = 0;
@@ -410,11 +440,63 @@ export default class Engine {
         ctx.restore();
     }
 
+    // detect player (cursor) getting hit by enemy/boss lasers
+    checkPlayerHit() {
+        if (this.victory || this.gameOver) return;
 
+        const px = this.cursorX;
+        const py = this.cursorY;
+
+        // Use a small radius for the player's hit circle.
+        // Will honor GAME.PLAYER_HIT_RADIUS if you add it; otherwise falls back to GAME.HIT_RADIUS or 20.
+        const R =
+            (GAME && (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS)) ? (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS) : 20;
+        const R2 = R * R;
+        for (const b of this.enemyBullets) {
+            if (b.life <= 0) continue;
+            const dx = px - b.x, dy = py - b.y;
+            if (dx * dx + dy * dy <= R2) {
+                // bullet hits the player
+                b.life = 0;
+                this.triggerExplosion(px, py);
+                if (this.playerHitCount == 50) {
+                    this.gameOver = true;       // hard stop (your frame() already handles this)
+                    break;
+                }
+                this.playerHitCount--;
+            }
+        }
+    }
+
+    // paint a non-intrusive "Game Over" overlay
+    drawGameOver(ctx) {
+        ctx.save();
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(0, 0, this.bg.W, this.bg.H);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.font = "bold 56px system-ui";
+        ctx.fillStyle = "#fff";
+        ctx.fillText("GAME OVER", this.bg.CX, this.bg.CY - 10);
+
+        ctx.font = "20px system-ui";
+        ctx.fillText("Press R to restart", this.bg.CX, this.bg.CY + 28);
+        ctx.restore();
+    }
 
     cull() {
         const { W, H } = this.bg;
-        for (let i = this.enemies.length - 1; i >= 0; i--) if (!this.enemies[i].alive) this.enemies.splice(i, 1);
+        for (let i = this.enemies.length - 1; i >= 0; i--) if (!this.enemies[i].alive) {
+            this.enemies.splice(i, 1);
+            // Only count during normal phase AND not on the reset frame
+            if (!this.inBossPhase && !this.justReset) {
+                this.killCount++;
+                if (this.onKill) this.onKill({ kills: this.killCount, absolute: true });
+                if (this.killCount >= 100) this.enterBossPhase();
+            }
+        }
         for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
             const b = this.enemyBullets[i];
             if (b.life <= 0 || b.x < -50 || b.x > W + 50 || b.y < -50 || b.y > H + 50) this.enemyBullets.splice(i, 1);
@@ -428,28 +510,14 @@ export default class Engine {
             if (ex.t >= GAME.EXPLOSION_TIME) {
                 if (!ex.counted) {
                     ex.counted = true;
-
-                    // Only count during normal phase AND not on the reset frame
-                    if (!this.inBossPhase && !this.justReset) {
-                        this.killCount++;
-                        if (this.onKill) this.onKill({ kills: this.killCount, absolute: true });
-                        if (this.killCount >= 10) this.enterBossPhase();
-                    }
                 }
                 this.explosions.splice(i, 1);
             }
         }
-
     }
 
 
     frame(tNow) {
-        // Optional freeze after win/lose (keeps engine allocated, just stops loop)
-        if (this.gameOver) {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            return; // no RAF -> hard pause
-        }
-
         const dt = Math.min(0.033, (tNow - this.lastT) / 1000);
         this.lastT = tNow;
 
@@ -487,9 +555,17 @@ export default class Engine {
 
         this.handleCollisions();
 
+        // check if enemy/boss lasers hit the player (cursor)
+        this.checkPlayerHit();
+
         for (const ex of this.explosions) {
             ex.t += dt;
             this.renderer.drawExplosion(ctx, ex, dt);
+        }
+
+        if (this.gameOver) {
+            // keep whatever you already drew (bg, bullets, etc.) and overlay on top
+            this.drawGameOver(this.ctx);
         }
 
         this.cull();
