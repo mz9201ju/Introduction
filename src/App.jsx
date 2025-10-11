@@ -1,9 +1,11 @@
 // App.jsx (shell)
 import { BrowserRouter } from "react-router-dom";
 import SpaceshipCursor from "@shared/components/SpaceshipCursor";
-import NavBar from "../src/app/nav/NavBar";
-import AppRoutes from "../src/app/routes/AppRoutes";
-import SpaceChatHost from "../src/app/chat/SpaceChatHost";
+import NavBar from "@app/nav/NavBar";
+import AppRoutes from "@app/routes/AppRoutes";
+import SpaceChatHost from "@app/chat/SpaceChatHost";
+import WarpDriveFX from "@app/routes/WarpDriveFX";
+
 
 export default function App() {
   return (
@@ -13,6 +15,9 @@ export default function App() {
 
       {/* Chrome */}
       <NavBar />
+
+      {/* FX overlay that reacts to route changes */}
+      <WarpDriveFX />
 
       {/* Page outlet */}
       <AppRoutes />
