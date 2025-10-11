@@ -1,3 +1,4 @@
+import MeetingInvite from "./MeetingInvite";
 export default function Hero({ profile }) {
     return (
         <header className="card">
@@ -69,11 +70,48 @@ export default function Hero({ profile }) {
             </div>
 
             <p style={{ marginTop: 14, color: "var(--ink)" }}>{profile.blurb}</p>
-        
+
             <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
-                <a href={`mailto:${profile.links.email}`} style={{ color: "var(--accent)" }}>Email</a>
-                <a href={profile.links.linkedin} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>LinkedIn</a>
-                <a href={profile.links.github} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>GitHub</a>
+                <a href={`mailto:${profile.links.email}`} style={{
+                    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
+                    fontWeight: 700,
+                    color: "#fff",
+                    padding: "10px 2px",
+                    borderRadius: "10px",
+                    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
+                    transition: "all 0.3s ease",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                }}
+                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 0 20px #00bfffcc, 0 0 40px #0077ffaa")}
+                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 0 10px #00bfff88, 0 0 30px #0077ff44")}>Email</a>
+                <a href={profile.links.linkedin} target="_blank" rel="noreferrer" style={{
+                    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
+                    fontWeight: 700,
+                    color: "#fff",
+                    padding: "10px 2px",
+                    borderRadius: "10px",
+                    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
+                    transition: "all 0.3s ease",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                }}
+                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 0 20px #00bfffcc, 0 0 40px #0077ffaa")}
+                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 0 10px #00bfff88, 0 0 30px #0077ff44")}>LinkedIn</a>
+                <a href={profile.links.github} target="_blank" rel="noreferrer" style={{
+                    background: "#4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%)",
+                    fontWeight: 700,
+                    color: "#fff",
+                    padding: "10px 2px",
+                    borderRadius: "10px",
+                    boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
+                    transition: "all 0.3s ease",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                }}
+                    onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 0 20px #00bfffcc, 0 0 40px #0077ffaa")}
+                    onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 0 10px #00bfff88, 0 0 30px #0077ff44")}>GitHub</a>
+                <MeetingInvite />
             </div>
         </header>
     );
