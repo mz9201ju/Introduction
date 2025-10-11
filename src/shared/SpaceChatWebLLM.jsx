@@ -1,7 +1,7 @@
 // src/components/SpaceChatWebLLM.jsx
 import { useEffect, useRef, useState } from "react";
-import { initLLM, webllmChat } from "./lib/ai-webllm";
-import darth from "../../features/game/assets/helmet.png";
+import { initLLM, webllmChat } from "./ai-webllm";
+import darth from "../features/game/assets/helmet.png";
 
 export default function SpaceChatWebLLM() {
     const [open, setOpen] = useState(false);

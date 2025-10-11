@@ -494,7 +494,7 @@ export default class Engine {
             if (!this.inBossPhase && !this.justReset) {
                 this.killCount++;
                 if (this.onKill) this.onKill({ kills: this.killCount, absolute: true });
-                if (this.killCount >= 100) this.enterBossPhase();
+                if (this.killCount >= 20) this.enterBossPhase();
             }
         }
         for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
