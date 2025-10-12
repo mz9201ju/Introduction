@@ -1,50 +1,31 @@
-// src/components/SpaceChatWebLLM.jsx
+// src/components/SpaceChatWebLLM.jsx  (now backed by OpenAI via your Cloudflare Worker)
 import { useEffect, useRef, useState } from "react";
-import { initLLM, webllmChat } from "./ai-webllm";
 import darth from "../features/game/assets/helmet.png";
+
+// ✅ POINT THIS TO YOUR WORKER
+const PROXY_URL = "https://gh-ai-proxy.omer-mnsu.workers.dev/api";
 
 export default function SpaceChatWebLLM() {
     const [open, setOpen] = useState(false);
     const [busy, setBusy] = useState(false);
-    const [ready, setReady] = useState(false);
-    const [welcomed, setWelcomed] = useState(false);
-    const [progress, setProgress] = useState("Initializing…");
     const [input, setInput] = useState("");
+    const [welcomed, setWelcomed] = useState(false);
+
+    // No on-device model needed anymore — remove "ready/progress" concept
     const [msgs, setMsgs] = useState([
         { role: "system", content: "You are SpaceNerd Copilot. Be concise, helpful, and fun." },
         { role: "assistant", content: "🚀 Welcome, Darth Vader! Ready to explore the galaxy together?" },
     ]);
 
-
     const listRef = useRef(null);
-    const engineRef = useRef(null);
 
-    // init once when panel opens (so cold visitors don’t pay model cost)
+    // simple welcome ping once opened
     useEffect(() => {
-        if (!open || engineRef.current) return;
-        let mounted = true;
-        (async () => {
-            try {
-                const engine = await initLLM((t) => mounted && setProgress(t));
-                if (!mounted) return;
-                engineRef.current = engine;
-                setReady(true);
-                setProgress("Ready");
-            } catch (e) {
-                console.error(e);
-                setProgress("Failed to initialize model.");
-            }
-        })();
-        return () => { mounted = false; };
-    }, [open]);
-
-    // 👋 New welcome effect (put this right after the one above)
-    useEffect(() => {
-        if (open && !welcomed && ready) {
-            setMsgs(m => [...m, { role: "assistant", content: "👋 Hi Darth Vader, good to see you back in orbit." }]);
+        if (open && !welcomed) {
+            setMsgs((m) => [...m, { role: "assistant", content: "👋 Hi Darth Vader, now powered by OpenAI." }]);
             setWelcomed(true);
         }
-    }, [open, ready]);
+    }, [open, welcomed]);
 
     // autoscroll
     useEffect(() => {
@@ -55,37 +36,56 @@ export default function SpaceChatWebLLM() {
 
     const send = async () => {
         const q = input.trim();
-        if (!q || busy || !engineRef.current) return;
-        if (!welcomed) setMsgs(m => m.filter(x => x.role !== "assistant")); // remove the intro
+        if (!q || busy) return;
 
         setInput("");
-        setMsgs(m => [...m, { role: "user", content: q }, { role: "assistant", content: "" }]);
+        setMsgs((m) => [...m, { role: "user", content: q }, { role: "assistant", content: "…" }]);
         setBusy(true);
 
-        // Build the conversation for WebLLM
-        const convo = [
-            msgs[0], // system
-            ...msgs.filter(m => m.role !== "system"),
-            { role: "user", content: q }
-        ];
-
-        let acc = "";
         try {
-            for await (const delta of webllmChat(engineRef.current, convo)) {
-                acc += delta;
-                setMsgs(m => {
+            const res = await fetch(PROXY_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    messages: [{ role: "user", content: q }],
+                }),
+            });
+
+            if (!res.ok) {
+                const raw = await res.text();
+                let msg = "API error.";
+                try {
+                    msg = JSON.parse(raw)?.error?.message || msg;
+                } catch { }
+                setMsgs((m) => {
                     const copy = [...m];
-                    copy[copy.length - 1] = { role: "assistant", content: acc };
+                    copy[copy.length - 1] = { role: "assistant", content: `⚠️ ${msg}` };
                     return copy;
                 });
+                setBusy(false);
+                return;
             }
+
+            const data = await res.json();
+            console.log("✅ AI Response:", data);
+
+            const text =
+                data?.choices?.[0]?.message?.content?.trim() ||
+                "(no output)";
+
+            setMsgs((m) => {
+                const copy = [...m];
+                copy[copy.length - 1] = { role: "assistant", content: text };
+                return copy;
+            });
         } catch (err) {
-            console.error(err);
-            setMsgs(m => [...m, { role: "assistant", content: "⚠️ Inference error." }]);
+            console.error("⚠️ Chat API failed:", err);
+            setMsgs((m) => [...m, { role: "assistant", content: "⚠️ API error. Check Worker logs." }]);
         } finally {
             setBusy(false);
         }
     };
+
 
     const handleKey = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -94,38 +94,28 @@ export default function SpaceChatWebLLM() {
         }
     };
 
-    const unsupported = !("gpu" in navigator) && !("gpu" in (navigator || {}));
-    // Note: WebLLM can still run with WASM fallback; just slower.
-
     return (
         <>
             {/* Toggle FAB */}
-            <button onClick={() => setOpen(o => !o)} style={styles.fab} aria-label="Open AI chat">
-                {open ? "✖" : <img src={darth} alt="🛰️" width="60" height="50" style={{
-                    backgroundColor: "white",
-                    borderRadius: "50%",   // optional: makes it round like the emoji
-                    padding: "0px",         // optional: adds some breathing room
-                    marginLeft: "-9px"   // 👈 moves image ~6px left
-                }} />}
+            <button onClick={() => setOpen(o => o ? false : true)} style={styles.fab} aria-label="Open AI chat">
+                {open ? "✖" : (
+                    <img
+                        src={darth}
+                        alt="🛰️"
+                        width="60"
+                        height="50"
+                        style={{ backgroundColor: "white", borderRadius: "50%", padding: "0px", marginLeft: "-9px" }}
+                    />
+                )}
             </button>
 
             {/* Panel */}
             {open && (
                 <div style={styles.panel}>
                     <div style={styles.header}>
-                        <span>Space Copilot (On-device)</span>
+                        <span>Space Copilot (OpenAI)</span>
                         <span style={styles.pulse} aria-hidden>●</span>
                     </div>
-
-                    {!ready && (
-                        <div style={styles.loader}>
-                            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>{progress}</div>
-                            <div style={styles.barWrap}><div style={styles.bar} /></div>
-                            <div style={{ fontSize: 11, opacity: 0.7 }}>
-                                {unsupported ? "WebGPU not detected — falling back to WASM (slower)." : "Using WebGPU if available."}
-                            </div>
-                        </div>
-                    )}
 
                     <div ref={listRef} style={styles.list}>
                         {msgs.filter(m => m.role !== "system").map((m, i) => (
@@ -140,12 +130,12 @@ export default function SpaceChatWebLLM() {
                             value={input}
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={handleKey}
-                            placeholder={!ready ? "Loading model…" : (busy ? "Thinking…" : "Ask me anything…")}
-                            disabled={busy || !ready}
+                            placeholder={busy ? "Thinking…" : "Ask me anything…"}
+                            disabled={busy}
                             rows={2}
                             style={styles.textarea}
                         />
-                        <button onClick={send} disabled={busy || !input.trim() || !ready} style={styles.sendBtn}>
+                        <button onClick={send} disabled={busy || !input.trim()} style={styles.sendBtn}>
                             {busy ? "…" : "Send"}
                         </button>
                     </div>
@@ -179,9 +169,6 @@ const styles = {
         display: "flex", alignItems: "center", justifyContent: "space-between"
     },
     pulse: { color: "#7bdcff", textShadow: "0 0 8px #7bdcff" },
-    loader: { padding: 12, display: "flex", flexDirection: "column", gap: 6 },
-    barWrap: { height: 6, background: "rgba(120,200,255,0.15)", borderRadius: 8, overflow: "hidden" },
-    bar: { height: "100%", width: "40%", background: "rgba(120,200,255,0.6)", animation: "load 1.2s infinite alternate" },
     list: { padding: 12, overflowY: "auto", gap: 8, display: "flex", flexDirection: "column", flex: 1, minHeight: 160 },
     userMsg: { display: "flex", justifyContent: "flex-end" },
     botMsg: { display: "flex", justifyContent: "flex-start" },
@@ -201,7 +188,7 @@ const styles = {
     }
 };
 
-// tiny keyframe, inline to avoid CSS file
+// keep your inline keyframes (purely cosmetic)
 const styleEl = document.createElement("style");
 styleEl.innerHTML = `@keyframes load { from { width: 18%; } to { width: 78%; } }`;
 document.head.appendChild(styleEl);
