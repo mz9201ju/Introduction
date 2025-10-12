@@ -1,24 +1,18 @@
 # React + Vite
 
-### 🎨 Assets & Credits
-- **Spaceship Cursor Icon:** [Freepik - Flaticon](https://www.flaticon.com/free-icons/ufo)
-- Used under [Flaticon Free License](https://www.flaticon.com/license)
-
-### 🌐 Live Portfolio Links
-
-- **Resume:** [https://mz9201ju.github.io/Introduction/](https://mz9201ju.github.io/Introduction/)
-- **Omer Zahid:** [https://mz9201ju.github.io/Introduction/about](https://mz9201ju.github.io/Introduction/about)
-- **PlayGame!** [https://mz9201ju.github.io/Introduction/darthVader](https://mz9201ju.github.io/Introduction/darthVader)
-
 # 🚀 Introduction — Omer Zahid
 
 Welcome to the **Introduction Project**, a personal portfolio site and interactive AI experience built by **Omer Zahid**.
 
-    **Live Site:** [https://mz9201ju.github.io/Introduction/](https://mz9201ju.github.io/Introduction/)
-    **Omer Zahid:** [https://mz9201ju.github.io/Introduction/about](https://mz9201ju.github.io/Introduction/about)
-    **PlayGame!** [https://mz9201ju.github.io/Introduction/darthVader](https://mz9201ju.github.io/Introduction/darthVader)
+    - **Live Site:** [https://mz9201ju.github.io/Introduction/](https://mz9201ju.github.io/Introduction/)
+    - **Omer Zahid:** [https://mz9201ju.github.io/Introduction/about](https://mz9201ju.github.io/Introduction/about)
+    - **PlayGame!** [https://mz9201ju.github.io/Introduction/darthVader](https://mz9201ju.github.io/Introduction/darthVader)
 
 ---
+
+### 🎨 Assets & Credits
+- **Spaceship Cursor Icon:** [Freepik - Flaticon](https://www.flaticon.com/free-icons/ufo)
+- Used under [Flaticon Free License](https://www.flaticon.com/license)
 
 ## 🌌 Overview
 
@@ -65,3 +59,6 @@ curl -X POST "https://gh-ai-proxy.omer-mnsu.workers.dev/api" \
 Omer Zahid
 📧 omer.zahid@mnsu.edu
 “Through the Force — and some React hooks — all things are possible.” ✨
+
+## 🛡️ License
+This project is open source and available under the MIT License.
