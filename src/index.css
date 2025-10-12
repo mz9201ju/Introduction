@@ -120,3 +120,36 @@ ul.clean li {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== root-level spaceship cursor fix ===== */
+
+/* Completely hide system cursor across the site */
+html, body, :root, #root, * {
+  cursor: none !important;
+}
+
+/* Keep normal cursor for typing areas */
+input, textarea, [contenteditable="true"] {
+  cursor: text !important;
+}
+
+/* Ensure links and buttons don’t override with pointer */
+a, a:hover, a:focus,
+button, button:hover, button:focus,
+[role="button"] {
+  cursor: none !important;
+}
+
+/* Optional: fix for canvases or special game areas */
+canvas {
+  cursor: none !important;
+}
+
+/* Safety: prevent custom cursor container from blocking clicks */
+.spaceship-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+}

@@ -180,7 +180,7 @@ export default function SpaceChatWebLLM() {
             {open && (
                 <div style={styles.panel}>
                     <div style={styles.header}>
-                        <span>Space Copilot • Darth Vader</span>
+                        <span>Space Copilot • Welcome Darth Vader</span>
                         <span style={styles.pulse}>●</span>
                     </div>
 
