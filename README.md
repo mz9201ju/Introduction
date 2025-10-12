@@ -1,9 +1,5 @@
 # React + Vite
 
-### 🎨 Assets & Credits
-- **Spaceship Cursor Icon:** [Freepik - Flaticon](https://www.flaticon.com/free-icons/ufo)
-- Used under [Flaticon Free License](https://www.flaticon.com/license)
-
 # 🚀 Introduction — Omer Zahid
 Welcome to the **Introduction Project**, a personal portfolio site and interactive AI experience built by **Omer Zahid**.
 
@@ -37,14 +33,14 @@ The AI chatbot is powered through a **[proxy endpoint](https://gh-ai-proxy.omer-
 
 ## ⚙️ Local Development
 
-# 1️⃣ Clone the Repository
+### 1️⃣ Clone the Repository
 git clone https://github.com/mz9201ju/Introduction.git
 cd Introduction
-# 2️⃣ Install Dependencies
+### 2️⃣ Install Dependencies
 npm install
-# 3️⃣ Run Locally
+### 3️⃣ Run Locally
 npm run dev
-# 4️⃣ Test the Proxy Endpoint
+### 4️⃣ Test the Proxy Endpoint
 curl -X POST "https://gh-ai-proxy.omer-mnsu.workers.dev/api" \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"Hello from local dev!"}]}'
@@ -56,6 +52,10 @@ curl -X POST "https://gh-ai-proxy.omer-mnsu.workers.dev/api" \
 Omer Zahid
 📧 omer.zahid@mnsu.edu
 “Through the Force — and some React hooks — all things are possible.” ✨
+
+## 🎨 Assets & Credits
+- **Spaceship Cursor Icon:** [Freepik - Flaticon](https://www.flaticon.com/free-icons/ufo)
+- Used under [Flaticon Free License](https://www.flaticon.com/license)
 
 ## 🛡️ License
 This project is open source and available under the MIT License.
