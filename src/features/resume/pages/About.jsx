@@ -76,6 +76,63 @@ export default function About() {
                     <h3>🧠 Tech Stack</h3>
                     <p>React • Vite • Tailwind</p>
                 </div>
+                <div
+                    style={{
+                        marginTop: "1rem",
+                        padding: "1rem",
+                        background: "rgba(0,0,0,0.6)",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 20px #00bfff55",
+                    }}
+                >
+                    <h3>✈️ Bell Aviation / ROMISOFT LLC</h3>
+                    <p>
+                        Bell Aviation Services has a rich history in Aircraft Maintenance, Repair, Operations, Worldwide Recovery, Avionics, 
+                        Fleet Maintenance & Logistics. Building on foundational services, the software arm of this business 
+                        is ROMISOFT supporting both commercial and military aircraft mixed fleet operations.
+                         We also offer individualized FAA part 61 training for High Performance, 
+                         Complex, and Tail Wheel endorsements using our own classic airplanes. 
+                         We are a small business and veteran owned.
+                    </p>
+
+                    {/* Static website preview */}
+                    <a
+                        href="https://mz9201ju.github.io/bell-aviation-romisoft/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: "inline-block",
+                            borderRadius: "20px 20px 20px 20px",
+                            overflow: "auto",
+                            boxShadow: "0 0 100px #00bfff88",
+                            transition: "transform 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
+                    >
+                        <img
+                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/bell-aviation-romisoft/&screenshot=true&type=png&meta=false&embed=screenshot.url"
+                            alt="Bell Aviation / ROMISOFT LLC"
+                            style={{
+                                width: "200px",
+                                height: "100px",
+                            }}
+                        />
+                        <div
+                            style={{
+                                backgroundColor: "#00bfff",
+                                color: "#fff",
+                                padding: "10px 20px",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                            }}
+                        >
+                            🔗 Visit Site
+                        </div>
+                    </a>
+                    <h3>🧠 Tech Stack</h3>
+                    <p>React • Vite • Tailwind</p>
+                </div>
             </section>
         </div>
     );
