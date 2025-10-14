@@ -24,6 +24,7 @@ html,
 body,
 #root {
   height: 100%;
+  margin: 0;
 }
 
 body {
@@ -144,6 +145,9 @@ button, button:hover, button:focus,
 canvas {
   cursor: none !important;
   touch-action: none;
+  display:block;
+  position: relative;
+  z-index: 9999;
 }
 
 /* Safety: prevent custom cursor container from blocking clicks */
