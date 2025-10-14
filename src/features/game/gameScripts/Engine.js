@@ -21,6 +21,12 @@ export default class Engine {
         this.justReset = false;
         this.playerHitCount = 100;
 
+        // iOS Safari needs this to recognize continuous drag
+        this.canvas.style.touchAction = "none";
+        this.canvas.style.userSelect = "none";
+        this.canvas.style.webkitUserSelect = "none";
+        this.canvas.style.webkitTouchCallout = "none";
+
         this.inBossPhase = false;
         this.boss = null;
         this.nextEnemyAt = 0; // you likely already have this; we’ll freeze it in boss phase.
