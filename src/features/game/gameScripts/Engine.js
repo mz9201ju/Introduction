@@ -66,6 +66,8 @@ export default class Engine {
         this.onExternalFire = this.onExternalFire.bind(this);
         this.onResize = this.onResize.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
+        this.onTouchMove = this.onTouchMove.bind(this);
+        this.onTouchEnd = this.onTouchEnd.bind(this);
 
         // Init
         this.onResize();
@@ -76,7 +78,44 @@ export default class Engine {
         window.addEventListener("player-fire", this.onExternalFire);
         window.addEventListener("keydown", this.onKeyDown);
 
+        // Add this alongside your existing mouse event listeners
+        this.canvas.addEventListener("touchstart", this.onTouchMove, { passive: false });
+        this.canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
+        this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
+
+
         this.raf = requestAnimationFrame(this.frame);
+    }
+
+    destroy() {
+        cancelAnimationFrame(this.raf);
+        window.removeEventListener("resize", this.onResize);
+        window.removeEventListener("mousemove", this.onMove);
+        window.removeEventListener("mousedown", this.onMouseDown);
+        window.removeEventListener("contextmenu", this.blockContextMenu);
+        window.removeEventListener("player-fire", this.onExternalFire);
+        window.removeEventListener("keydown", this.onKeyDown);
+        this.canvas.removeEventListener("touchstart", this.onTouchMove);
+        this.canvas.removeEventListener("touchmove", this.onTouchMove);
+        this.canvas.removeEventListener("touchend", this.onTouchEnd);
+    }
+
+    onTouchMove(e) {
+        e.preventDefault(); // stop page scroll/zoom
+        const t = e.touches[0] || e.changedTouches[0];
+        if (!t) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = t.clientX - rect.left;
+        const y = t.clientY - rect.top;
+
+        // Your game uses cursor as the "player" position:
+        this.cursorX = x;
+        this.cursorY = y;
+    }
+
+    onTouchEnd(e) {
+        e.preventDefault();
+        // optional: you could fire here, stop thrust, etc.
     }
 
     onKeyDown(e) {
@@ -131,16 +170,6 @@ export default class Engine {
 
         this.onKill({ reset: true, kills: 0, absolute: true });
         this.onReset();
-    }
-
-    destroy() {
-        cancelAnimationFrame(this.raf);
-        window.removeEventListener("resize", this.onResize);
-        window.removeEventListener("mousemove", this.onMove);
-        window.removeEventListener("mousedown", this.onMouseDown);
-        window.removeEventListener("contextmenu", this.blockContextMenu);
-        window.removeEventListener("player-fire", this.onExternalFire);
-        window.removeEventListener("keydown", this.onKeyDown);
     }
 
     onResize() {
