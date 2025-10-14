@@ -274,7 +274,7 @@ export default class Engine {
     }
 
     enemyFire(e) {
-        const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
+        const dx = this.playerX - e.x, dy = this.playerY - e.y;
         const d = Math.hypot(dx, dy) || 1;
         const bullet = makeEnemyBullet({
             x: e.x, y: e.y,
@@ -288,7 +288,7 @@ export default class Engine {
 
     playerFire(colorOverride) {
         const bullet = makePlayerBullet({
-            x: this.cursorX, y: this.cursorY,
+            x: this.playerX, y: this.playerY,
             vx: 0, vy: -GAME.MY_BULLET_SPEED,
             life: GAME.MY_BULLET_LIFE,
             color: colorOverride || "green",
@@ -335,7 +335,7 @@ export default class Engine {
             const [vx, vy] = this._renorm(e.vx, e.vy, e.spd);
             e.vx = vx; e.vy = vy;
 
-            const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
+            const dx = this.playerX - e.x, dy = this.playerY - e.y;
             e.angle = Math.atan2(dy, dx);
 
             if (now >= e.nextFire) {
@@ -392,8 +392,8 @@ export default class Engine {
         b.fireT += dt * 1000;
         if (b.fireT >= b.fireEvery) {
             b.fireT = 0;
-            const dx = this.cursorX - b.x;
-            const dy = this.cursorY - b.y;
+            const dx = this.playerX - b.x;
+            const dy = this.playerY - b.y;
             const d = Math.hypot(dx, dy) || 1;
             const bullet = {
                 x: b.x,
@@ -444,8 +444,8 @@ export default class Engine {
     checkPlayerHit() {
         if (this.victory || this.gameOver) return;
 
-        const px = this.cursorX;
-        const py = this.cursorY;
+        const px = this.playerX;
+        const py = this.playerY;
 
         const R =
             (GAME && (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS))
