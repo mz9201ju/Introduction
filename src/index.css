@@ -12,8 +12,11 @@
 }
 
 @media (max-width: 600px) {
+
   /* smaller avatar on mobile */
-  .card img { max-width: 100%; }
+  .card img {
+    max-width: 100%;
+  }
 }
 
 * {
@@ -125,18 +128,28 @@ ul.clean li {
 /* ===== root-level spaceship cursor fix ===== */
 
 /* Completely hide system cursor across the site */
-html, body, :root, #root, * {
+html,
+body,
+:root,
+#root,
+* {
   cursor: none !important;
 }
 
 /* Keep normal cursor for typing areas */
-input, textarea, [contenteditable="true"] {
+input,
+textarea,
+[contenteditable="true"] {
   cursor: text !important;
 }
 
 /* Ensure links and buttons don’t override with pointer */
-a, a:hover, a:focus,
-button, button:hover, button:focus,
+a,
+a:hover,
+a:focus,
+button,
+button:hover,
+button:focus,
 [role="button"] {
   cursor: none !important;
 }
@@ -145,10 +158,12 @@ button, button:hover, button:focus,
 canvas {
   cursor: none !important;
   touch-action: none;
-  display:block;
+  display: block;
   position: relative;
-  z-index: 9999;
+  z-index: 9999 !important;
+  pointer-events: auto;
 }
+
 
 /* Safety: prevent custom cursor container from blocking clicks */
 .spaceship-cursor {
@@ -158,3 +173,9 @@ canvas {
   pointer-events: none;
   z-index: 9999;
 }
+
+* {
+  overscroll-behavior: none;
+}
+
+/* prevents rubber-band while dragging */

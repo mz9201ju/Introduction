@@ -32,7 +32,7 @@ export default class Engine {
         this.justReset = false;
         this.playerHitCount = 100;
 
-        // iOS Safari needs this to recognize continuous drag
+        // iOS/Android: do this on the CANVAS
         Object.assign(this.canvas.style, {
             touchAction: "none",
             userSelect: "none",
@@ -135,8 +135,8 @@ export default class Engine {
         window.removeEventListener("player-fire", this.onExternalFire);
         window.removeEventListener("keydown", this.onKeyDown);
         window.removeEventListener("touchstart", this.onTouchMove);
-        window.removeEventListener("touchmove", this.onTouchMove);
-        window.removeEventListener("touchend", this.onTouchEnd);
+        this.canvas.removeEventListener("touchmove", this.onTouchMove);
+        this.canvas.removeEventListener("touchend", this.onTouchEnd);
         this.canvas.removeEventListener("pointerdown", this.onPointerDown);
         this.canvas.removeEventListener("pointermove", this.onPointerMove);
         this.canvas.removeEventListener("pointerup", this.onPointerUp);
@@ -197,8 +197,11 @@ export default class Engine {
         if (e.cancelable) e.preventDefault();
         if (!this._pointerActive) return;
         const rect = this.canvas.getBoundingClientRect();
-        this._setCursor(e.clientX - rect.left, e.clientY - rect.top);
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        // console.log('pointermove', x, y);  // TEMP
+        this._setCursor(x, y);
     }
+
 
     onPointerUp(e) {
         if (e.cancelable) e.preventDefault();
