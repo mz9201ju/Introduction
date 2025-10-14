@@ -23,6 +23,8 @@ export default class Engine {
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
         this.onReset = onReset;
+        this.playerX = 0;
+        this.playerY = 0;
 
         /** Score & state flags */
         this.killCount = 0;
@@ -109,7 +111,7 @@ export default class Engine {
         window.addEventListener("keydown", this.onKeyDown);
 
         // Touch support (passive:false so preventDefault() works)
-        this.canvas.addEventListener("touchstart", this.onTouchMove, { passive: false });
+        this.canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
         this.canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
         this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
         this.canvas.addEventListener("gesturestart", (ev) => ev.preventDefault(), { passive: false });
@@ -134,7 +136,7 @@ export default class Engine {
         window.removeEventListener("contextmenu", this.blockContextMenu);
         window.removeEventListener("player-fire", this.onExternalFire);
         window.removeEventListener("keydown", this.onKeyDown);
-        window.removeEventListener("touchstart", this.onTouchMove);
+        this.canvas.removeEventListener("touchstart", this.onTouchStart);
         this.canvas.removeEventListener("touchmove", this.onTouchMove);
         this.canvas.removeEventListener("touchend", this.onTouchEnd);
         this.canvas.removeEventListener("pointerdown", this.onPointerDown);
@@ -185,13 +187,17 @@ export default class Engine {
     // Input
     // ----------------------------
 
+    onTouchStart(e) {
+        if (e.cancelable) e.preventDefault();
+        this._pointerActive = true; // start tracking, but don't set cursor yet
+    }
+
     onPointerDown(e) {
         if (e.cancelable) e.preventDefault();
         this.canvas.setPointerCapture?.(e.pointerId);
-        const rect = this.canvas.getBoundingClientRect();
-        this._setCursor(e.clientX - rect.left, e.clientY - rect.top);
-        this._pointerActive = true;
+        this._pointerActive = true; // no cursor set here -> avoids the initial jump
     }
+
 
     onPointerMove(e) {
         if (e.cancelable) e.preventDefault();
@@ -323,6 +329,7 @@ export default class Engine {
     onResize() {
         this._applyDPR();
         this._setCursor(this.bg.CX, this.bg.CY);
+        this.playerX = this.cursorX; this.playerY = this.cursorY;
     }
 
 
@@ -706,6 +713,14 @@ export default class Engine {
     frame(tNow) {
         const dt = Math.min(0.033, (tNow - this.lastT) / 1000);
         this.lastT = tNow;
+
+        // init once
+        if (this.playerX == null) { this.playerX = this.cursorX; this.playerY = this.cursorY; }
+
+        // exponential smoothing (lambda≈8 feels snappy)
+        const alpha = 1 - Math.exp(-8 * dt);
+        this.playerX += (this.cursorX - this.playerX) * alpha;
+        this.playerY += (this.cursorY - this.playerY) * alpha;
 
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.bg.W, this.bg.H);
