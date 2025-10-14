@@ -143,6 +143,7 @@ button, button:hover, button:focus,
 /* Optional: fix for canvases or special game areas */
 canvas {
   cursor: none !important;
+  touch-action: none;
 }
 
 /* Safety: prevent custom cursor container from blocking clicks */
