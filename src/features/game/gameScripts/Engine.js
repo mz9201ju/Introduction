@@ -1,3 +1,4 @@
+// Engine.js — unified, minimal, smooth tap-to-move (mobile) + mouse (desktop).
 import StarfieldBackground from "./StarfieldBackground";
 import Renderer from "./Renderer";
 import { GAME } from "./config";
@@ -7,11 +8,9 @@ import bossImage1 from "../assets/alien-head.png";
 import bossImage2 from "../assets/angry.png";
 import bossImage3 from "../assets/star.png";
 
-/**
- * Engine
- * Orchestrates state, physics, spawning, inputs, and the main loop.
- * Cleaned to support mobile "tap to move" with smooth easing (no jump).
- */
+// Toggle mobile arrows here if you want them:
+const SHOW_MOBILE_ARROWS = true;
+
 export default class Engine {
     /**
      * @param {HTMLCanvasElement} canvas
@@ -23,13 +22,13 @@ export default class Engine {
         this.onKill = onKill;
         this.onReset = onReset;
 
-        // Player logical + render positions
+        // Smoothed render position (ship) and target position (cursor)
         this.playerX = 0;
         this.playerY = 0;
-        this.cursorX = 0; // target we ease toward
+        this.cursorX = 0;
         this.cursorY = 0;
 
-        /** Score & state flags */
+        // Game state
         this.killCount = 0;
         this.gameOver = false;
         this.victory = false;
@@ -37,7 +36,7 @@ export default class Engine {
         this.justReset = false;
         this.playerHitCount = 100;
 
-        // Mobile friendliness
+        // Mobile UX
         Object.assign(this.canvas.style, {
             touchAction: "none",
             userSelect: "none",
@@ -45,11 +44,11 @@ export default class Engine {
             webkitTouchCallout: "none",
         });
 
-        /** Boss-phase control */
+        // Boss
         this.inBossPhase = false;
         this.boss = null;
 
-        /** Random boss sprite */
+        // Boss sprite
         const bossImages = [bossImage1, bossImage2, bossImage3];
         const chosen = bossImages[Math.floor(Math.random() * bossImages.length)];
         this.bossImg = new Image();
@@ -57,93 +56,89 @@ export default class Engine {
         this.bossImg.onload = () => (this.bossImgReady = true);
         this.bossImg.src = chosen;
 
-        /** Scene pieces */
+        // Scene
         this.bg = new StarfieldBackground();
         this.renderer = new Renderer();
 
-        /** Galaxy background shown only after victory */
+        // Victory bg
         this.bgImg = new Image();
         this.bgImgReady = false;
         this.bgImg.onload = () => (this.bgImgReady = true);
         this.bgImg.src = new URL("../assets/galaxy.jpeg", import.meta.url).href;
 
-        /** Runtime state containers */
+        // Entities
         this.enemies = [];
         this.enemyBullets = [];
         this.myBullets = [];
         this.explosions = [];
 
-        /** Spawn cadence */
+        // Spawns
         this.spawnTimer = 0;
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
 
-        /** Frame timing */
+        // Timestamps
         this.lastT = performance.now();
         this.raf = 0;
 
-        // Bind handlers once
+        // For mobile arrows (hold to nudge target)
+        this._moveDirX = 0;       // -1 left, +1 right
+        this._moveSpeed = 520;    // px/s adjusting the target cursor
+
+        // Bind
         this.frame = this.frame.bind(this);
         this.onResize = this.onResize.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onMouseDown = this.onMouseDown.bind(this);
-        this.blockContextMenu = this.blockContextMenu.bind(this);
-        this.onExternalFire = this.onExternalFire.bind(this);
-        this.onMove = this.onMove.bind(this);
         this.onPointerDown = this.onPointerDown.bind(this);
 
-        // Init sizing + listeners
+        // Detect touch
+        this.isTouch =
+            "ontouchstart" in window ||
+            navigator.maxTouchPoints > 0 ||
+            navigator.msMaxTouchPoints > 0;
+
+        // Init sizing
         this.onResize();
         window.addEventListener("resize", this.onResize);
-
-        // Desktop niceties
-        window.addEventListener("mousemove", this.onMove);
-        window.addEventListener("mousedown", this.onMouseDown);
-        window.addEventListener("contextmenu", this.blockContextMenu);
-        window.addEventListener("player-fire", this.onExternalFire);
         window.addEventListener("keydown", this.onKeyDown);
+        window.addEventListener("contextmenu", (e) => e.preventDefault());
 
-        // ✅ Single, reliable input path for mobile/desktop taps
-        // Tap/click once -> set target; easing handles smooth travel.
-        this.canvas.addEventListener("pointerdown", this.onPointerDown, { passive: false });
+        // Inputs
+        // Desktop: follow mouse; Mobile: tap sets target (no jump; we glide to it)
+        if (this.isTouch) {
+            this.canvas.addEventListener("pointerdown", this.onPointerDown, { passive: false });
+            if (SHOW_MOBILE_ARROWS) this._mountArrows();
+        } else {
+            window.addEventListener("mousemove", this._onMouseMove = (e) => {
+                this._setCursor(e.clientX, e.clientY);
+            });
+            window.addEventListener("mousedown", this.onMouseDown);
+            // Also allow tap/click targeting on desktop:
+            this.canvas.addEventListener("pointerdown", this.onPointerDown, { passive: false });
+        }
 
         this.raf = requestAnimationFrame(this.frame);
     }
 
-    /** Clean teardown */
+    // ---------- teardown ----------
     destroy() {
         cancelAnimationFrame(this.raf);
         window.removeEventListener("resize", this.onResize);
-        window.removeEventListener("mousemove", this.onMove);
-        window.removeEventListener("mousedown", this.onMouseDown);
-        window.removeEventListener("contextmenu", this.blockContextMenu);
-        window.removeEventListener("player-fire", this.onExternalFire);
         window.removeEventListener("keydown", this.onKeyDown);
+        window.removeEventListener("contextmenu", this._ctxMenuBlock);
+        if (!this.isTouch) {
+            window.removeEventListener("mousemove", this._onMouseMove);
+            window.removeEventListener("mousedown", this.onMouseDown);
+        }
         this.canvas.removeEventListener("pointerdown", this.onPointerDown);
+        this._unmountArrows?.();
     }
 
-    // ----------------------------
-    // Helpers
-    // ----------------------------
-    _setCursor(x, y) {
-        this.cursorX = x;
-        this.cursorY = y;
-    }
-
-    _dist2(ax, ay, bx, by) {
-        const dx = ax - bx, dy = ay - by;
-        return dx * dx + dy * dy;
-    }
-
-    _isHit(ax, ay, bx, by, radius) {
-        const r2 = radius * radius;
-        return this._dist2(ax, ay, bx, by) <= r2;
-    }
-
-    _renorm(vx, vy, spd) {
-        const s = Math.hypot(vx, vy) || 1;
-        return [(vx / s) * spd, (vy / s) * spd];
-    }
-
+    // ---------- helpers ----------
+    _setCursor(x, y) { this.cursorX = x; this.cursorY = y; }
+    _dist2(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return dx * dx + dy * dy; }
+    _isHit(ax, ay, bx, by, r) { return this._dist2(ax, ay, bx, by) <= r * r; }
+    _renorm(vx, vy, spd) { const s = Math.hypot(vx, vy) || 1; return [(vx / s) * spd, (vy / s) * spd]; }
     _bounceWithin(x, y, vx, vy, W, H, pad) {
         if (x < pad) { x = pad; vx = Math.abs(vx); }
         else if (x > W - pad) { x = W - pad; vx = -Math.abs(vx); }
@@ -152,88 +147,33 @@ export default class Engine {
         return { x, y, vx, vy };
     }
 
-    // ----------------------------
-    // Input
-    // ----------------------------
-
-    /** Desktop: continuous mouse move (optional quality-of-life) */
-    onMove(e) {
-        // Only affects desktop; mobile won’t emit this
-        this._setCursor(e.clientX, e.clientY);
-    }
-
-    /** Tap/click to set a new target (smoothed movement handles glide) */
+    // ---------- input ----------
     onPointerDown(e) {
-        if (e.cancelable) e.preventDefault(); // stop page scroll/zoom on mobile
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        this._setCursor(x, y);
+        if (e.cancelable) e.preventDefault();
+        const r = this.canvas.getBoundingClientRect();
+        this._setCursor(e.clientX - r.left, e.clientY - r.top);
     }
 
-    /** LMB = green fire, RMB = random red/blue. */
     onMouseDown(e) {
-        if (e.button === 0) {
-            this.playerFire(); // left = green
-        } else if (e.button === 2) {
-            this.playerFire(Math.random() < 0.5 ? "red" : "blue"); // right = red/blue
-        }
-    }
-
-    blockContextMenu(e) { e.preventDefault(); }
-
-    onExternalFire(e) {
-        const { x, y, color } = e.detail || {};
-        if (typeof x === "number" && typeof y === "number") this._setCursor(x, y);
-        this.playerFire(color);
+        if (e.button === 0) this.playerFire();
+        else if (e.button === 2) this.playerFire(Math.random() < 0.5 ? "red" : "blue");
     }
 
     onKeyDown(e) {
         const key = (e.key || "").toLowerCase();
-        if (key === "r") {
-            e.preventDefault();
-            this.resetGame();
-        }
+        if (key === "r") { e.preventDefault(); this.resetGame(); }
     }
 
-    resetGame() {
-        this.victory = false;
-        this.victoryT = 0;
-        this.gameOver = false;
-        this.playerHitCount = 100;
-
-        this.inBossPhase = false;
-        this.boss = null;
-
-        this.killCount = 0;
-        this.clearWorld();
-
-        this.spawnTimer = 0;
-        this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
-
-        this.lastT = performance.now();
-        this.justReset = true;
-
-        this.onKill?.({ reset: true, kills: 0, absolute: true });
-        this.onReset?.();
-    }
-
-    // ----------------------------
-    // Canvas sizing / DPR
-    // ----------------------------
+    // ---------- sizing ----------
     _applyDPR() {
         const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
-        const cssW = window.innerWidth;
-        const cssH = window.innerHeight;
-
+        const cssW = window.innerWidth, cssH = window.innerHeight;
         this.canvas.width = Math.floor(cssW * dpr);
         this.canvas.height = Math.floor(cssH * dpr);
         this.canvas.style.width = cssW + "px";
         this.canvas.style.height = cssH + "px";
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        this.bg.W = cssW;
-        this.bg.H = cssH;
+        this.bg.W = cssW; this.bg.H = cssH;
         this.bg.resize(cssW, cssH);
     }
 
@@ -244,14 +184,25 @@ export default class Engine {
         this.playerY = this.cursorY;
     }
 
-    // ----------------------------
-    // Spawning & bullets
-    // ----------------------------
+    resetGame() {
+        this.victory = false; this.victoryT = 0;
+        this.gameOver = false; this.playerHitCount = 100;
+        this.inBossPhase = false; this.boss = null;
+        this.killCount = 0;
+        this.clearWorld();
+        this.spawnTimer = 0;
+        this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
+        this.lastT = performance.now();
+        this.justReset = true;
+        this.onKill?.({ reset: true, kills: 0, absolute: true });
+        this.onReset?.();
+    }
+
+    // ---------- spawns / bullets ----------
     spawnEnemy() {
         const { W, H, CX, CY } = this.bg;
         const edge = Math.floor(Math.random() * 4);
-        let x, y;
-        const m = 40;
+        let x, y; const m = 40;
         if (edge === 0) { x = Math.random() * W; y = -m; }
         else if (edge === 1) { x = W + m; y = Math.random() * H; }
         else if (edge === 2) { x = Math.random() * W; y = H + m; }
@@ -269,7 +220,6 @@ export default class Engine {
             fireEvery: randBetween(GAME.ENEMY_FIRE_MIN, GAME.ENEMY_FIRE_MAX),
             nextFire: now + randBetween(200, 900),
         });
-
         this.enemies.push(enemy);
     }
 
@@ -296,11 +246,7 @@ export default class Engine {
         this.myBullets.push(bullet);
     }
 
-    triggerExplosion(x, y) {
-        const ex = makeExplosion({ x, y });
-        ex.counted = false;
-        this.explosions.push(ex);
-    }
+    triggerExplosion(x, y) { const ex = makeExplosion({ x, y }); ex.counted = false; this.explosions.push(ex); }
 
     doSpawning(dt) {
         if (this.inBossPhase) return;
@@ -312,9 +258,7 @@ export default class Engine {
         }
     }
 
-    // ----------------------------
-    // Enemy & boss updates
-    // ----------------------------
+    // ---------- enemies / boss ----------
     updateEnemies(dt, now) {
         const { W, H } = this.bg;
         const PAD = 24;
@@ -395,15 +339,13 @@ export default class Engine {
             const dx = this.playerX - b.x;
             const dy = this.playerY - b.y;
             const d = Math.hypot(dx, dy) || 1;
-            const bullet = {
-                x: b.x,
-                y: b.y,
+            this.enemyBullets.push({
+                x: b.x, y: b.y,
                 vx: (dx / d) * GAME.BULLET_SPEED,
                 vy: (dy / d) * GAME.BULLET_SPEED,
                 life: GAME.BULLET_LIFE,
                 color: Math.random() < 0.5 ? "red" : "blue",
-            };
-            this.enemyBullets.push(bullet);
+            });
         }
 
         for (const pb of this.myBullets) {
@@ -423,9 +365,7 @@ export default class Engine {
         }
     }
 
-    // ----------------------------
-    // Collisions & player damage
-    // ----------------------------
+    // ---------- collisions ----------
     handleCollisions() {
         for (const pb of this.myBullets) {
             if (pb.life <= 0) continue;
@@ -444,9 +384,7 @@ export default class Engine {
     checkPlayerHit() {
         if (this.victory || this.gameOver) return;
 
-        const px = this.playerX;
-        const py = this.playerY;
-
+        const px = this.playerX, py = this.playerY;
         const R =
             (GAME && (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS))
                 ? (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS)
@@ -466,9 +404,7 @@ export default class Engine {
         }
     }
 
-    // ----------------------------
-    // UI overlays
-    // ----------------------------
+    // ---------- overlays ----------
     drawGameOver(ctx) {
         ctx.save();
         ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -493,8 +429,7 @@ export default class Engine {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        const t = this.victoryT;
-        const pulse = 1 + 0.06 * Math.sin(t * 3.2);
+        const pulse = 1 + 0.06 * Math.sin(this.victoryT * 3.2);
         ctx.translate(this.bg.CX, this.bg.CY);
         ctx.scale(pulse, pulse);
 
@@ -511,13 +446,10 @@ export default class Engine {
         ctx.restore();
     }
 
-    // ----------------------------
-    // Cleanup / culling
-    // ----------------------------
+    // ---------- culling ----------
     cull() {
         const { W, H } = this.bg;
 
-        // Enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) if (!this.enemies[i].alive) {
             this.enemies.splice(i, 1);
             if (!this.inBossPhase && !this.justReset) {
@@ -527,7 +459,6 @@ export default class Engine {
             }
         }
 
-        // Enemy bullets
         for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
             const b = this.enemyBullets[i];
             if (b.life <= 0 || b.x < -50 || b.x > W + 50 || b.y < -50 || b.y > H + 50) {
@@ -535,7 +466,6 @@ export default class Engine {
             }
         }
 
-        // Player bullets
         for (let i = this.myBullets.length - 1; i >= 0; i--) {
             const pb = this.myBullets[i];
             if (pb.life <= 0 || pb.x < -50 || pb.x > W + 50 || pb.y < -50 || pb.y > H + 50) {
@@ -543,7 +473,6 @@ export default class Engine {
             }
         }
 
-        // Explosions
         for (let i = this.explosions.length - 1; i >= 0; i--) {
             const ex = this.explosions[i];
             if (ex.t >= GAME.EXPLOSION_TIME) {
@@ -553,101 +482,110 @@ export default class Engine {
         }
     }
 
-    // ----------------------------
-    // Main loop
-    // ----------------------------
-    /**
-     * @param {number} tNow
-     */
+    // ---------- main loop ----------
     frame(tNow) {
         const dt = Math.min(0.033, (tNow - this.lastT) / 1000);
         this.lastT = tNow;
 
-        // Initialize render position once
+        // Init once
         if (this.playerX == null) { this.playerX = this.cursorX; this.playerY = this.cursorY; }
 
-        // Smooth toward target (no jump). Lambda≈8 keeps it snappy across FPS.
-        const alpha = 1 - Math.exp(-8 * dt);
+        // If mobile arrow held, nudge the *target* (cursor) horizontally.
+        if (this._moveDirX !== 0) {
+            const nx = this.cursorX + this._moveDirX * this._moveSpeed * dt;
+            this.cursorX = Math.max(0, Math.min(this.bg.W, nx));
+        }
+
+        // Smoothly glide visible ship to target
+        const alpha = 1 - Math.exp(-8 * dt); // lower = slower, higher = snappier
         this.playerX += (this.cursorX - this.playerX) * alpha;
         this.playerY += (this.cursorY - this.playerY) * alpha;
 
         const ctx = this.ctx;
         ctx.clearRect(0, 0, this.bg.W, this.bg.H);
 
-        // Background: starfield by default, galaxy after win
-        if (this.victory && this.bgImgReady) {
-            ctx.drawImage(this.bgImg, 0, 0, this.bg.W, this.bg.H);
-        } else {
-            this.bg.updateAndDraw(ctx);
-        }
+        if (this.victory && this.bgImgReady) ctx.drawImage(this.bgImg, 0, 0, this.bg.W, this.bg.H);
+        else this.bg.updateAndDraw(ctx);
 
-        // Branch: Boss vs Normal
-        if (this.inBossPhase) {
-            this.updateBoss(dt);
-            this.drawBoss(ctx);
-        } else {
+        if (this.inBossPhase) { this.updateBoss(dt); this.drawBoss(ctx); }
+        else {
             this.doSpawning(dt);
             const now = performance.now();
             this.updateEnemies(dt, now);
-            for (const e of this.enemies) {
-                if (e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
-            }
+            for (const e of this.enemies) if (e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
         }
 
-        // Victory overlay
-        if (this.victory) {
-            this.drawVictory(ctx, dt);
-        }
+        if (this.victory) this.drawVictory(ctx, dt);
 
-        // Common renders
         for (const b of this.enemyBullets) this.renderer.drawEnemyBullet(ctx, b, dt);
         for (const pb of this.myBullets) this.renderer.drawPlayerBullet(ctx, pb, dt);
 
-        // Collisions
         this.handleCollisions();
         this.checkPlayerHit();
 
-        // FX
-        for (const ex of this.explosions) {
-            ex.t += dt;
-            this.renderer.drawExplosion(ctx, ex, dt);
-        }
+        for (const ex of this.explosions) { ex.t += dt; this.renderer.drawExplosion(ctx, ex, dt); }
 
-        // Game over UI
-        if (this.gameOver) {
-            this.drawGameOver(this.ctx);
-        }
+        if (this.gameOver) this.drawGameOver(ctx);
 
-        // Prune dead/out-of-bounds
         this.cull();
-
-        // Reset reset-flag + loop
         this.justReset = false;
         this.raf = requestAnimationFrame(this.frame);
     }
 
-    // ----------------------------
-    // Rendering helpers
-    // ----------------------------
-    drawBoss(ctx) {
-        const b = this.boss;
-        if (!b || !b.alive) return;
+    // ---------- mobile arrows (optional) ----------
+    _mountArrows() {
+        const root = document.createElement("div");
+        Object.assign(root.style, {
+            position: "fixed", inset: "auto 0 16px 0",
+            display: "flex", justifyContent: "space-between",
+            pointerEvents: "none", padding: "0 16px", zIndex: "9999",
+        });
 
-        ctx.save();
-        ctx.translate(b.x, b.y);
-        ctx.rotate(b.angle);
-        const SIZE = 96;
-        if (this.bossImgReady) {
-            ctx.imageSmoothingEnabled = true;
-            ctx.shadowColor = "rgba(255,255,255,0.7)";
-            ctx.shadowBlur = 15;
-            ctx.drawImage(this.bossImg, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
-        } else {
-            ctx.fillStyle = "orange";
-            ctx.beginPath();
-            ctx.arc(0, 0, SIZE / 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
+        const mkBtn = (txt) => {
+            const b = document.createElement("button");
+            b.textContent = txt;
+            Object.assign(b.style, {
+                pointerEvents: "auto",
+                font: "600 16px system-ui",
+                padding: "12px 16px",
+                borderRadius: "12px",
+                border: "none",
+                background: "rgba(255,255,255,0.15)",
+                backdropFilter: "blur(8px)",
+                color: "#fff",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+                touchAction: "none",
+            });
+            return b;
+        };
+
+        const left = mkBtn("◀");
+        const right = mkBtn("▶");
+
+        const downLeft = (e) => { e.preventDefault(); this._moveDirX = -1; };
+        const upLeft = (e) => { e.preventDefault(); this._moveDirX = 0; };
+        const downRight = (e) => { e.preventDefault(); this._moveDirX = 1; };
+        const upRight = (e) => { e.preventDefault(); this._moveDirX = 0; };
+
+        left.addEventListener("pointerdown", downLeft, { passive: false });
+        left.addEventListener("pointerup", upLeft, { passive: false });
+        left.addEventListener("pointercancel", upLeft, { passive: false });
+        right.addEventListener("pointerdown", downRight, { passive: false });
+        right.addEventListener("pointerup", upRight, { passive: false });
+        right.addEventListener("pointercancel", upRight, { passive: false });
+
+        root.appendChild(left);
+        root.appendChild(right);
+        document.body.appendChild(root);
+
+        this._unmountArrows = () => {
+            left.removeEventListener("pointerdown", downLeft);
+            left.removeEventListener("pointerup", upLeft);
+            left.removeEventListener("pointercancel", upLeft);
+            right.removeEventListener("pointerdown", downRight);
+            right.removeEventListener("pointerup", upRight);
+            right.removeEventListener("pointercancel", upRight);
+            root.remove();
+        };
     }
 }
