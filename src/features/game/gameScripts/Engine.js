@@ -93,6 +93,11 @@ export default class Engine {
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
+        this.onPointerDown = this.onPointerDown.bind(this);
+        this.onPointerMove = this.onPointerMove.bind(this);
+        this.onPointerUp = this.onPointerUp.bind(this);
+        this.onPointerCancel = this.onPointerCancel.bind(this);
+
 
         // Init sizing + listeners
         this.onResize();
@@ -108,6 +113,12 @@ export default class Engine {
         this.canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
         this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
         this.canvas.addEventListener("gesturestart", (ev) => ev.preventDefault(), { passive: false });
+
+        this.canvas.addEventListener("pointerdown", this.onPointerDown, { passive: false });
+        this.canvas.addEventListener("pointermove", this.onPointerMove, { passive: false });
+        this.canvas.addEventListener("pointerup", this.onPointerUp, { passive: false });
+        this.canvas.addEventListener("pointercancel", this.onPointerCancel, { passive: false });
+
 
 
 
@@ -126,6 +137,11 @@ export default class Engine {
         window.removeEventListener("touchstart", this.onTouchMove);
         window.removeEventListener("touchmove", this.onTouchMove);
         window.removeEventListener("touchend", this.onTouchEnd);
+        this.canvas.removeEventListener("pointerdown", this.onPointerDown);
+        this.canvas.removeEventListener("pointermove", this.onPointerMove);
+        this.canvas.removeEventListener("pointerup", this.onPointerUp);
+        this.canvas.removeEventListener("pointercancel", this.onPointerCancel);
+
     }
 
     // ----------------------------
@@ -168,6 +184,32 @@ export default class Engine {
     // ----------------------------
     // Input
     // ----------------------------
+
+    onPointerDown(e) {
+        if (e.cancelable) e.preventDefault();
+        this.canvas.setPointerCapture?.(e.pointerId);
+        const rect = this.canvas.getBoundingClientRect();
+        this._setCursor(e.clientX - rect.left, e.clientY - rect.top);
+        this._pointerActive = true;
+    }
+
+    onPointerMove(e) {
+        if (e.cancelable) e.preventDefault();
+        if (!this._pointerActive) return;
+        const rect = this.canvas.getBoundingClientRect();
+        this._setCursor(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    onPointerUp(e) {
+        if (e.cancelable) e.preventDefault();
+        this._pointerActive = false;
+        this.canvas.releasePointerCapture?.(e.pointerId);
+    }
+
+    onPointerCancel() {
+        this._pointerActive = false;
+    }
+
 
     /** Touch = direct player movement, no scroll/zoom. */
     onTouchMove(e) {
