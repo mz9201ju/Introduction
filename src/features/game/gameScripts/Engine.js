@@ -10,8 +10,7 @@ import bossImage3 from "../assets/star.png";
 /**
  * Engine
  * Orchestrates state, physics, spawning, inputs, and the main loop.
- * NOTE: This file was annotated + lightly refactored for readability/DRY.
- * Behavior is preserved.
+ * Cleaned to support mobile "tap to move" with smooth easing (no jump).
  */
 export default class Engine {
     /**
@@ -23,8 +22,12 @@ export default class Engine {
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
         this.onReset = onReset;
+
+        // Player logical + render positions
         this.playerX = 0;
         this.playerY = 0;
+        this.cursorX = 0; // target we ease toward
+        this.cursorY = 0;
 
         /** Score & state flags */
         this.killCount = 0;
@@ -34,7 +37,7 @@ export default class Engine {
         this.justReset = false;
         this.playerHitCount = 100;
 
-        // iOS/Android: do this on the CANVAS
+        // Mobile friendliness
         Object.assign(this.canvas.style, {
             touchAction: "none",
             userSelect: "none",
@@ -45,17 +48,14 @@ export default class Engine {
         /** Boss-phase control */
         this.inBossPhase = false;
         this.boss = null;
-        this.nextEnemyAt = 0; // kept for parity w/ your notes; spawning uses spawnTimer/nextSpawnIn
 
         /** Random boss sprite */
         const bossImages = [bossImage1, bossImage2, bossImage3];
-        const randomIndex = Math.floor(Math.random() * bossImages.length);
-        const chosenImage = bossImages[randomIndex];
-
+        const chosen = bossImages[Math.floor(Math.random() * bossImages.length)];
         this.bossImg = new Image();
         this.bossImgReady = false;
         this.bossImg.onload = () => (this.bossImgReady = true);
-        this.bossImg.src = chosenImage;
+        this.bossImg.src = chosen;
 
         /** Scene pieces */
         this.bg = new StarfieldBackground();
@@ -73,10 +73,6 @@ export default class Engine {
         this.myBullets = [];
         this.explosions = [];
 
-        /** Cursor == player position */
-        this.cursorX = 0;
-        this.cursorY = 0;
-
         /** Spawn cadence */
         this.spawnTimer = 0;
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
@@ -85,49 +81,35 @@ export default class Engine {
         this.lastT = performance.now();
         this.raf = 0;
 
-        // Bind handlers once (avoids rebind churn)
+        // Bind handlers once
         this.frame = this.frame.bind(this);
-        this.onMove = this.onMove.bind(this);
+        this.onResize = this.onResize.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
         this.onMouseDown = this.onMouseDown.bind(this);
         this.blockContextMenu = this.blockContextMenu.bind(this);
         this.onExternalFire = this.onExternalFire.bind(this);
-        this.onResize = this.onResize.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
-        this.onTouchMove = this.onTouchMove.bind(this);
-        this.onTouchEnd = this.onTouchEnd.bind(this);
+        this.onMove = this.onMove.bind(this);
         this.onPointerDown = this.onPointerDown.bind(this);
-        this.onPointerMove = this.onPointerMove.bind(this);
-        this.onPointerUp = this.onPointerUp.bind(this);
-        this.onPointerCancel = this.onPointerCancel.bind(this);
-
 
         // Init sizing + listeners
         this.onResize();
         window.addEventListener("resize", this.onResize);
+
+        // Desktop niceties
         window.addEventListener("mousemove", this.onMove);
         window.addEventListener("mousedown", this.onMouseDown);
         window.addEventListener("contextmenu", this.blockContextMenu);
         window.addEventListener("player-fire", this.onExternalFire);
         window.addEventListener("keydown", this.onKeyDown);
 
-        // Touch support (passive:false so preventDefault() works)
-        this.canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
-        this.canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
-        this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
-        this.canvas.addEventListener("gesturestart", (ev) => ev.preventDefault(), { passive: false });
-
+        // ✅ Single, reliable input path for mobile/desktop taps
+        // Tap/click once -> set target; easing handles smooth travel.
         this.canvas.addEventListener("pointerdown", this.onPointerDown, { passive: false });
-        this.canvas.addEventListener("pointermove", this.onPointerMove, { passive: false });
-        this.canvas.addEventListener("pointerup", this.onPointerUp, { passive: false });
-        this.canvas.addEventListener("pointercancel", this.onPointerCancel, { passive: false });
-
-
-
 
         this.raf = requestAnimationFrame(this.frame);
     }
 
-    /** Clean teardown: cancel frame + detach listeners. */
+    /** Clean teardown */
     destroy() {
         cancelAnimationFrame(this.raf);
         window.removeEventListener("resize", this.onResize);
@@ -136,45 +118,32 @@ export default class Engine {
         window.removeEventListener("contextmenu", this.blockContextMenu);
         window.removeEventListener("player-fire", this.onExternalFire);
         window.removeEventListener("keydown", this.onKeyDown);
-        this.canvas.removeEventListener("touchstart", this.onTouchStart);
-        this.canvas.removeEventListener("touchmove", this.onTouchMove);
-        this.canvas.removeEventListener("touchend", this.onTouchEnd);
         this.canvas.removeEventListener("pointerdown", this.onPointerDown);
-        this.canvas.removeEventListener("pointermove", this.onPointerMove);
-        this.canvas.removeEventListener("pointerup", this.onPointerUp);
-        this.canvas.removeEventListener("pointercancel", this.onPointerCancel);
-
     }
 
     // ----------------------------
-    // Small, reusable helpers (DRY)
+    // Helpers
     // ----------------------------
-
-    /** Centralize player/cursor updates (mouse, touch, external). */
     _setCursor(x, y) {
         this.cursorX = x;
         this.cursorY = y;
     }
 
-    /** Fast distance^2 (avoids sqrt). */
     _dist2(ax, ay, bx, by) {
         const dx = ax - bx, dy = ay - by;
         return dx * dx + dy * dy;
     }
 
-    /** Circle hit test using squared radius. */
     _isHit(ax, ay, bx, by, radius) {
         const r2 = radius * radius;
         return this._dist2(ax, ay, bx, by) <= r2;
     }
 
-    /** Renormalize (vx,vy) to target speed `spd` while preserving direction. */
     _renorm(vx, vy, spd) {
         const s = Math.hypot(vx, vy) || 1;
         return [(vx / s) * spd, (vy / s) * spd];
     }
 
-    /** Bounce point+velocity within W×H padded bounds, return new {x,y,vx,vy}. */
     _bounceWithin(x, y, vx, vy, W, H, pad) {
         if (x < pad) { x = pad; vx = Math.abs(vx); }
         else if (x > W - pad) { x = W - pad; vx = -Math.abs(vx); }
@@ -187,98 +156,46 @@ export default class Engine {
     // Input
     // ----------------------------
 
-    onTouchStart(e) {
-        if (e.cancelable) e.preventDefault();
-        this._pointerActive = true; // start tracking, but don't set cursor yet
+    /** Desktop: continuous mouse move (optional quality-of-life) */
+    onMove(e) {
+        // Only affects desktop; mobile won’t emit this
+        this._setCursor(e.clientX, e.clientY);
     }
 
+    /** Tap/click to set a new target (smoothed movement handles glide) */
     onPointerDown(e) {
-        if (e.cancelable) e.preventDefault();
-        this.canvas.setPointerCapture?.(e.pointerId);
-        this._pointerActive = true; // no cursor set here -> avoids the initial jump
-    }
-
-
-    onPointerMove(e) {
-        if (e.cancelable) e.preventDefault();
-        if (!this._pointerActive) return;
+        if (e.cancelable) e.preventDefault(); // stop page scroll/zoom on mobile
         const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left, y = e.clientY - rect.top;
-        // console.log('pointermove', x, y);  // TEMP
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
         this._setCursor(x, y);
     }
 
-
-    onPointerUp(e) {
-        if (e.cancelable) e.preventDefault();
-        this._pointerActive = false;
-        this.canvas.releasePointerCapture?.(e.pointerId);
+    /** LMB = green fire, RMB = random red/blue. */
+    onMouseDown(e) {
+        if (e.button === 0) {
+            this.playerFire(); // left = green
+        } else if (e.button === 2) {
+            this.playerFire(Math.random() < 0.5 ? "red" : "blue"); // right = red/blue
+        }
     }
 
-    onPointerCancel() {
-        this._pointerActive = false;
+    blockContextMenu(e) { e.preventDefault(); }
+
+    onExternalFire(e) {
+        const { x, y, color } = e.detail || {};
+        if (typeof x === "number" && typeof y === "number") this._setCursor(x, y);
+        this.playerFire(color);
     }
 
-
-    /** Touch = direct player movement, no scroll/zoom. */
-    onTouchMove(e) {
-        if (e.cancelable) e.preventDefault(); // avoids console warnings on some browsers // stop page scroll/zoom
-        const t = e.touches[0] || e.changedTouches[0];
-        if (!t) return;
-        const rect = this.canvas.getBoundingClientRect();
-        const x = t.clientX - rect.left;
-        const y = t.clientY - rect.top;
-        this._setCursor(x, y);
-    }
-
-    onTouchEnd(e) {
-        if (e.cancelable) e.preventDefault(); // avoids console warnings on some browsers
-        // Optional: fire, stop thrust, tap actions, etc.
-    }
-
-    /** Keyboard: 'R' = reset (works in all states). */
     onKeyDown(e) {
         const key = (e.key || "").toLowerCase();
-        // Always allow 'R' to reset, regardless of state
         if (key === "r") {
             e.preventDefault();
             this.resetGame();
         }
-
-        /**
-         * NOTE: The block below duplicates reset semantics specifically when victory is true.
-         * Kept as-is to preserve your exact behavior.
-         * If you want to fully DRY this, you can remove this block and rely solely on resetGame().
-         */
-        if (e.key.toLowerCase() === "r" && this.victory) {
-            this.victory = false;
-            this.victoryT = 0;
-            this.gameOver = false;     // ← allow restart after death
-            this.playerHitCount = 100;
-
-            this.inBossPhase = false;
-            this.boss = null;
-
-            this.killCount = 0;
-            this.clearWorld();
-
-            this.spawnTimer = 0;
-            this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
-
-            this.lastT = performance.now();
-            this.justReset = true; // <-- tells cull() to ignore any stale explosions this frame
-
-            this.onKill?.({ reset: true, kills: 0, absolute: true });
-            this.onReset?.();  // <- tell UI to set score = 0
-        }
-
-        /**
-         * // ✅ DRY alternative (commented, identical behavior):
-         * if (key === "r") this.resetGame();
-         */
     }
 
-    /** One source of truth for a clean restart. */
     resetGame() {
         this.victory = false;
         this.victoryT = 0;
@@ -301,67 +218,35 @@ export default class Engine {
         this.onReset?.();
     }
 
-    /** Scale canvas for devicePixelRatio while keeping logic in CSS pixels */
+    // ----------------------------
+    // Canvas sizing / DPR
+    // ----------------------------
     _applyDPR() {
         const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
         const cssW = window.innerWidth;
         const cssH = window.innerHeight;
 
-        // Set backing store size
         this.canvas.width = Math.floor(cssW * dpr);
         this.canvas.height = Math.floor(cssH * dpr);
-
-        // Keep CSS size unchanged
         this.canvas.style.width = cssW + "px";
         this.canvas.style.height = cssH + "px";
-
-        // Draw using CSS-px coordinates
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // Your game world uses CSS pixels
         this.bg.W = cssW;
         this.bg.H = cssH;
         this.bg.resize(cssW, cssH);
     }
 
-
-    /** Maintain canvas & background sizes on resize. */
     onResize() {
         this._applyDPR();
         this._setCursor(this.bg.CX, this.bg.CY);
-        this.playerX = this.cursorX; this.playerY = this.cursorY;
-    }
-
-
-    /** Mouse move drives cursor (player) position. */
-    onMove(e) {
-        this._setCursor(e.clientX, e.clientY);
-    }
-
-    /** LMB = green fire, RMB = random red/blue. */
-    onMouseDown(e) {
-        if (e.button === 0) {
-            this.playerFire(); // left = green
-        } else if (e.button === 2) {
-            this.playerFire(Math.random() < 0.5 ? "red" : "blue"); // right = red/blue
-        }
-    }
-
-    /** No context menu in-game. */
-    blockContextMenu(e) { e.preventDefault(); }
-
-    /** External fire events (e.g., UI button) can also reposition aim. */
-    onExternalFire(e) {
-        const { x, y, color } = e.detail || {};
-        if (typeof x === "number" && typeof y === "number") this._setCursor(x, y);
-        this.playerFire(color);
+        this.playerX = this.cursorX;
+        this.playerY = this.cursorY;
     }
 
     // ----------------------------
     // Spawning & bullets
     // ----------------------------
-
-    /** Spawn a single enemy outside the screen, moving toward center. */
     spawnEnemy() {
         const { W, H, CX, CY } = this.bg;
         const edge = Math.floor(Math.random() * 4);
@@ -388,7 +273,6 @@ export default class Engine {
         this.enemies.push(enemy);
     }
 
-    /** Enemy bullet aimed at current cursor position. */
     enemyFire(e) {
         const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
         const d = Math.hypot(dx, dy) || 1;
@@ -402,7 +286,6 @@ export default class Engine {
         this.enemyBullets.push(bullet);
     }
 
-    /** Player bullet; `colorOverride` defaults to green. */
     playerFire(colorOverride) {
         const bullet = makePlayerBullet({
             x: this.cursorX, y: this.cursorY,
@@ -413,16 +296,14 @@ export default class Engine {
         this.myBullets.push(bullet);
     }
 
-    /** Explosion FX (uncounted until culled). */
     triggerExplosion(x, y) {
         const ex = makeExplosion({ x, y });
         ex.counted = false;
         this.explosions.push(ex);
     }
 
-    /** Controls spawn cadence in normal phase. */
     doSpawning(dt) {
-        if (this.inBossPhase) return; // freeze spawns during boss
+        if (this.inBossPhase) return;
         this.spawnTimer += dt * 1000;
         if (this.spawnTimer >= this.nextSpawnIn) {
             this.spawnTimer = 0;
@@ -434,16 +315,13 @@ export default class Engine {
     // ----------------------------
     // Enemy & boss updates
     // ----------------------------
-
-    /** Apply movement, wobble, bounce, retarget fire. */
     updateEnemies(dt, now) {
         const { W, H } = this.bg;
-        const PAD = 24; // inset to avoid clipping
+        const PAD = 24;
 
         for (const e of this.enemies) {
             if (!e.alive) continue;
 
-            // Curved path wobble
             e.wobblePhase += dt * 2.2;
             const wobble = Math.sin(e.wobblePhase) * 18;
             const ux = e.vx / (e.spd || 1), uy = e.vy / (e.spd || 1);
@@ -452,39 +330,29 @@ export default class Engine {
             e.x += e.vx * dt + nx * wobble * dt;
             e.y += e.vy * dt + ny * wobble * dt;
 
-            // Bounce off walls, then re-normalize speed
-            {
-                const b = this._bounceWithin(e.x, e.y, e.vx, e.vy, W, H, PAD);
-                e.x = b.x; e.y = b.y; e.vx = b.vx; e.vy = b.vy;
-                const [vx, vy] = this._renorm(e.vx, e.vy, e.spd);
-                e.vx = vx; e.vy = vy;
-            }
+            const b = this._bounceWithin(e.x, e.y, e.vx, e.vy, W, H, PAD);
+            e.x = b.x; e.y = b.y; e.vx = b.vx; e.vy = b.vy;
+            const [vx, vy] = this._renorm(e.vx, e.vy, e.spd);
+            e.vx = vx; e.vy = vy;
 
-            // Face player
             const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
             e.angle = Math.atan2(dy, dx);
 
-            // Fire cadence
             if (now >= e.nextFire) {
                 this.enemyFire(e);
                 e.nextFire = now + e.fireEvery;
-                if (Math.random() < 0.25) e.nextFire = now + e.fireEvery * 0.45; // occasional burst
+                if (Math.random() < 0.25) e.nextFire = now + e.fireEvery * 0.45;
             }
         }
     }
 
-    /** Hard clear of dynamic entities; keeps engine running. */
     clearWorld() {
         this.enemies.length = 0;
         this.enemyBullets.length = 0;
         this.myBullets.length = 0;
         this.explosions.length = 0;
-
-        // freeze regular spawning (kept for your reference)
-        this.nextEnemyAt = Infinity;
     }
 
-    /** Transition into boss phase (idempotent). */
     enterBossPhase() {
         if (this.inBossPhase) return;
         this.inBossPhase = true;
@@ -494,11 +362,10 @@ export default class Engine {
         this.spawnBoss();
     }
 
-    /** Create boss with movement + fire cadence. */
     spawnBoss() {
         this.boss = {
-            x: this.bg.CX,             // center horizontally
-            y: this.bg.CY * 0.5,       // roughly top middle
+            x: this.bg.CX,
+            y: this.bg.CY * 0.5,
             vx: 180 * (Math.random() < 0.5 ? 1 : -1),
             vy: 140 * (Math.random() < 0.5 ? 1 : -1),
             angle: 0,
@@ -510,12 +377,10 @@ export default class Engine {
         };
     }
 
-    /** Boss movement, bounce, aim/fire, and damage intake. */
     updateBoss(dt) {
         const b = this.boss;
         if (!b || !b.alive) return;
 
-        // Move + bounce
         b.x += b.vx * dt;
         b.y += b.vy * dt;
         const pad = 40;
@@ -524,7 +389,6 @@ export default class Engine {
 
         b.angle += 0.8 * dt;
 
-        // Fire toward player
         b.fireT += dt * 1000;
         if (b.fireT >= b.fireEvery) {
             b.fireT = 0;
@@ -542,7 +406,6 @@ export default class Engine {
             this.enemyBullets.push(bullet);
         }
 
-        // Player bullets hit boss
         for (const pb of this.myBullets) {
             if (pb.life <= 0) continue;
             if (this._isHit(b.x, b.y, pb.x, pb.y, b.radius)) {
@@ -552,10 +415,9 @@ export default class Engine {
 
                 if (b.hp <= 0 && b.alive) {
                     b.alive = false;
-                    this.victory = true;     // win flag
+                    this.victory = true;
                     this.victoryT = 0;
-                    this.clearWorld();       // wipe bullets/fx (optional)
-                    // do not re-enter boss phase here
+                    this.clearWorld();
                 }
             }
         }
@@ -564,8 +426,6 @@ export default class Engine {
     // ----------------------------
     // Collisions & player damage
     // ----------------------------
-
-    /** Player bullets vs. regular enemies. One bullet = max one kill. */
     handleCollisions() {
         for (const pb of this.myBullets) {
             if (pb.life <= 0) continue;
@@ -581,14 +441,12 @@ export default class Engine {
         }
     }
 
-    /** Enemy/boss bullets vs. player (cursor). */
     checkPlayerHit() {
         if (this.victory || this.gameOver) return;
 
         const px = this.cursorX;
         const py = this.cursorY;
 
-        // Prefer GAME.PLAYER_HIT_RADIUS if provided, otherwise fallback.
         const R =
             (GAME && (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS))
                 ? (GAME.PLAYER_HIT_RADIUS || GAME.HIT_RADIUS)
@@ -597,11 +455,10 @@ export default class Engine {
         for (const b of this.enemyBullets) {
             if (b.life <= 0) continue;
             if (this._isHit(px, py, b.x, b.y, R)) {
-                // bullet hits the player
                 b.life = 0;
                 this.triggerExplosion(px, py);
                 if (this.playerHitCount == 50) {
-                    this.gameOver = true; // hard stop; frame() overlays UI
+                    this.gameOver = true;
                     break;
                 }
                 this.playerHitCount--;
@@ -612,8 +469,6 @@ export default class Engine {
     // ----------------------------
     // UI overlays
     // ----------------------------
-
-    /** Non-intrusive "Game Over" overlay (keeps scene beneath). */
     drawGameOver(ctx) {
         ctx.save();
         ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -631,7 +486,6 @@ export default class Engine {
         ctx.restore();
     }
 
-    /** Pulsing "VICTORY!" + subtle celebration. */
     drawVictory(ctx, dt) {
         this.victoryT += dt;
 
@@ -660,15 +514,12 @@ export default class Engine {
     // ----------------------------
     // Cleanup / culling
     // ----------------------------
-
-    /** Remove dead entities + count kills + phase transition. */
     cull() {
         const { W, H } = this.bg;
 
         // Enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) if (!this.enemies[i].alive) {
             this.enemies.splice(i, 1);
-            // Only count during normal phase AND not on the reset frame
             if (!this.inBossPhase && !this.justReset) {
                 this.killCount++;
                 this.onKill?.({ kills: this.killCount, absolute: true });
@@ -705,19 +556,17 @@ export default class Engine {
     // ----------------------------
     // Main loop
     // ----------------------------
-
     /**
-     * Core frame: update, draw, overlay, cull, schedule next tick.
      * @param {number} tNow
      */
     frame(tNow) {
         const dt = Math.min(0.033, (tNow - this.lastT) / 1000);
         this.lastT = tNow;
 
-        // init once
+        // Initialize render position once
         if (this.playerX == null) { this.playerX = this.cursorX; this.playerY = this.cursorY; }
 
-        // exponential smoothing (lambda≈8 feels snappy)
+        // Smooth toward target (no jump). Lambda≈8 keeps it snappy across FPS.
         const alpha = 1 - Math.exp(-8 * dt);
         this.playerX += (this.cursorX - this.playerX) * alpha;
         this.playerY += (this.cursorY - this.playerY) * alpha;
@@ -745,7 +594,7 @@ export default class Engine {
             }
         }
 
-        // Victory overlay (after bg + phase branch)
+        // Victory overlay
         if (this.victory) {
             this.drawVictory(ctx, dt);
         }
@@ -764,7 +613,7 @@ export default class Engine {
             this.renderer.drawExplosion(ctx, ex, dt);
         }
 
-        // Game over UI overlay (keeps scene)
+        // Game over UI
         if (this.gameOver) {
             this.drawGameOver(this.ctx);
         }
@@ -778,10 +627,8 @@ export default class Engine {
     }
 
     // ----------------------------
-    // Rendering helpers (kept same)
+    // Rendering helpers
     // ----------------------------
-
-    /** Boss draw with glow + fallback circle. */
     drawBoss(ctx) {
         const b = this.boss;
         if (!b || !b.alive) return;
