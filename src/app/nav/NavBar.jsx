@@ -37,6 +37,7 @@ export default function NavBar() {
                         aria-label="Toggle menu"
                         aria-expanded={isOpen}
                         style={{
+                            ...baseBtnStyle,
                             position: "relative",          // ⬅ must have
                             width: 36,
                             height: 36,
