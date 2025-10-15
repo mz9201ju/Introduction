@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { baseBtnStyle, activeBtnStyle } from "./navStyles";
-import { useLocation } from "react-router-dom";
 
 const links = [
     { to: "/", label: "Home" },
@@ -11,8 +10,6 @@ const links = [
 
 export default function NavBar() {
     const [isOpen, setIsOpen] = useState(false);
-    const location = useLocation();
-    const hideTitle = location.pathname === "/darthVader"; // your PlayGame route
 
     return (
         <>
@@ -34,20 +31,6 @@ export default function NavBar() {
                         position: "relative",
                     }}
                 >
-                    {!hideTitle && (
-                        <h1
-                            style={{
-                                fontWeight: "bold",
-                                fontSize: "1.2rem",
-                                color: "#fff",
-                                textAlign: "center",
-                                flex: "1",
-                            }}
-                        >
-                            🚀 Space Nerd
-                        </h1>
-                    )}
-
                     {/* Burger button absolutely positioned on the right */}
                     <button
                         onClick={() => setIsOpen(!isOpen)}
