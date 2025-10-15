@@ -4,8 +4,8 @@ export default function Scoreboard({ kills }) {
             <div
                 style={{
                     position: "fixed",
-                    top: 12,
-                    right: 12,
+                    top: 18,
+                    right: 100,
                     zIndex: 20,
                     padding: "8px 12px",
                     background: "rgba(0,0,0,0.55)",
