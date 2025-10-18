@@ -4,9 +4,9 @@ import spaceship from "/spaceship.png";
 
 /**
  * 🚀 SpaceshipCursor
- * - Follows mouse or touch input (mobile-friendly)
- * - Fires lasers on right-click, long-press, or second-finger tap
- * - Clean + reusable event setup
+ * - Follows mouse or touch (mobile-friendly)
+ * - Fires on right-click, long-press, or second-finger tap
+ * - Prevents screen zooming/resizing on mobile
  */
 export default function SpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -15,10 +15,10 @@ export default function SpaceshipCursor() {
   const lastClickRef = useRef(0);
 
   const FAST_CLICK_MS = 220;
-  const TOUCH_FIRE_DELAY = 400; // ms for long-press to fire
+  const TOUCH_FIRE_DELAY = 400; // ms
 
   /* ==========================================================
-     🎯 Helper functions (reusable & isolated)
+     ⚙️ Helper utilities
      ========================================================== */
   const updatePosition = (x, y) => {
     const newPos = { x, y };
@@ -33,16 +33,14 @@ export default function SpaceshipCursor() {
     const driftX = (Math.random() - 0.5) * 6;
     const { x, y } = posRef.current;
 
-    // 🔊 Dispatch event for external listeners (e.g., explosions or sound)
     window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y, color } }));
 
-    // Add and auto-remove the laser beam
     setLasers((prev) => [...prev, { id, x, y, color, length, width, driftX }]);
     setTimeout(() => setLasers((prev) => prev.filter((l) => l.id !== id)), 850);
   };
 
   /* ==========================================================
-     🧭 Track mouse/touch movement
+     🧭 Movement tracking (mouse + touch)
      ========================================================== */
   useEffect(() => {
     const onMove = (e) => {
@@ -60,7 +58,6 @@ export default function SpaceshipCursor() {
       setPos(p);
       posRef.current = p;
 
-      // 🚨 Broadcast movement globally for tracking
       window.dispatchEvent(new CustomEvent("player-move", { detail: p }));
     };
 
@@ -74,17 +71,15 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
-     🖱️ Fire laser on right-click / long-press / second-finger
+     🔫 Fire logic (desktop + mobile)
      ========================================================== */
   useEffect(() => {
-    // 🧱 Block default right-click menu
     const blockCtx = (e) => e.preventDefault();
     document.addEventListener("contextmenu", blockCtx, { capture: true });
 
     const onCtx = (e) => {
       e.preventDefault();
 
-      // 💥 Detect double-tap for red laser
       const now = performance.now();
       const delta = now - (lastClickRef.current || 0);
       lastClickRef.current = now;
@@ -95,22 +90,19 @@ export default function SpaceshipCursor() {
 
     window.addEventListener("contextmenu", onCtx);
 
-    // Mobile: long press OR second finger triggers fire
     let touchTimer;
     const onTouchStart = (e) => {
       if (e.touches.length === 2) {
-        // 🚀 Second finger detected → immediate fire
+        // 🚀 Fire when second finger detected
         addLaser("blue");
         return;
       }
-
-      // 🕒 Long press fallback
       touchTimer = setTimeout(() => onCtx(e), TOUCH_FIRE_DELAY);
     };
 
     const onTouchEnd = () => clearTimeout(touchTimer);
 
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
@@ -122,7 +114,48 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
-     🎨 Laser color definitions
+     🧱 Prevent mobile screen resizing / zooming
+     ========================================================== */
+  useEffect(() => {
+    // ✅ Lock viewport scale to prevent zoom
+    const meta = document.querySelector("meta[name=viewport]");
+    if (meta) {
+      meta.setAttribute(
+        "content",
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      );
+    } else {
+      const newMeta = document.createElement("meta");
+      newMeta.name = "viewport";
+      newMeta.content =
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+      document.head.appendChild(newMeta);
+    }
+
+    // 🧤 Prevent pinch zoom
+    const blockZoom = (e) => {
+      if (e.touches && e.touches.length > 1) e.preventDefault();
+    };
+
+    // 🧤 Prevent double-tap zoom
+    let lastTouchEnd = 0;
+    const preventDoubleTapZoom = (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    };
+
+    document.addEventListener("touchmove", blockZoom, { passive: false });
+    document.addEventListener("touchend", preventDoubleTapZoom, { passive: false });
+
+    return () => {
+      document.removeEventListener("touchmove", blockZoom);
+      document.removeEventListener("touchend", preventDoubleTapZoom);
+    };
+  }, []);
+
+  /* ==========================================================
+     🎨 Laser colors
      ========================================================== */
   const colorMap = {
     red: {
@@ -140,7 +173,7 @@ export default function SpaceshipCursor() {
      ========================================================== */
   return createPortal(
     <>
-      {/* 🛸 Spaceship follows pointer */}
+      {/* 🛸 Spaceship follows finger/mouse */}
       <img
         src={spaceship}
         alt="Spaceship Cursor"
@@ -159,7 +192,7 @@ export default function SpaceshipCursor() {
         }}
       />
 
-      {/* 🔫 Render all laser beams */}
+      {/* 🔫 Render lasers */}
       {lasers.map((l) => {
         const c = colorMap[l.color];
         return (
@@ -184,7 +217,6 @@ export default function SpaceshipCursor() {
         );
       })}
 
-      {/* ✨ Animations */}
       <style>{`
         @keyframes laserUp {
           from { transform: translate(-50%, -50%) translate(0, 0); }
