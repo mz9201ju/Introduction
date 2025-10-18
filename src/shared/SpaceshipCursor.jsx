@@ -5,8 +5,8 @@ import spaceship from "/spaceship.png";
 /**
  * 🚀 SpaceshipCursor
  * - Follows mouse or touch input (mobile-friendly)
- * - Fires lasers on right-click (or long-press on touch)
- * - Smooth & reusable event setup
+ * - Fires lasers on right-click, long-press, or second-finger tap
+ * - Clean + reusable event setup
  */
 export default function SpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -26,27 +26,27 @@ export default function SpaceshipCursor() {
     posRef.current = newPos;
   };
 
-  const addLaser = (color) => {
+  const addLaser = (color = "blue") => {
     const id = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
     const length = 18 + Math.floor(Math.random() * 14);
     const width = 3 + Math.floor(Math.random() * 2);
     const driftX = (Math.random() - 0.5) * 6;
     const { x, y } = posRef.current;
 
-    // Dispatch event for external listeners (e.g., explosions, sound, etc.)
+    // 🔊 Dispatch event for external listeners (e.g., explosions or sound)
     window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y, color } }));
 
-    // Add and auto-remove laser
+    // Add and auto-remove the laser beam
     setLasers((prev) => [...prev, { id, x, y, color, length, width, driftX }]);
     setTimeout(() => setLasers((prev) => prev.filter((l) => l.id !== id)), 850);
   };
 
-  // 🧭 Track both mouse & touch movement
+  /* ==========================================================
+     🧭 Track mouse/touch movement
+     ========================================================== */
   useEffect(() => {
-    // 🧭 Track both mouse & touch movement + notify listeners
     const onMove = (e) => {
       let x, y;
-
       if (e.touches && e.touches.length > 0) {
         const touch = e.touches[0];
         x = touch.clientX;
@@ -60,13 +60,10 @@ export default function SpaceshipCursor() {
       setPos(p);
       posRef.current = p;
 
-      // 🚨 Broadcast global movement event
-      // So enemies or AI can track the spaceship’s current position
+      // 🚨 Broadcast movement globally for tracking
       window.dispatchEvent(new CustomEvent("player-move", { detail: p }));
     };
 
-
-    // ✅ Attach both event types
     window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("touchmove", onMove, { passive: true });
 
@@ -76,19 +73,18 @@ export default function SpaceshipCursor() {
     };
   }, []);
 
-
   /* ==========================================================
-     🖱️ Fire laser on right-click or long-press
+     🖱️ Fire laser on right-click / long-press / second-finger
      ========================================================== */
   useEffect(() => {
-    // Block default context menu
+    // 🧱 Block default right-click menu
     const blockCtx = (e) => e.preventDefault();
     document.addEventListener("contextmenu", blockCtx, { capture: true });
 
     const onCtx = (e) => {
       e.preventDefault();
 
-      // Detect double-fire (fast clicks)
+      // 💥 Detect double-tap for red laser
       const now = performance.now();
       const delta = now - (lastClickRef.current || 0);
       lastClickRef.current = now;
@@ -99,11 +95,19 @@ export default function SpaceshipCursor() {
 
     window.addEventListener("contextmenu", onCtx);
 
-    // Mobile: support long-press to fire
+    // Mobile: long press OR second finger triggers fire
     let touchTimer;
     const onTouchStart = (e) => {
+      if (e.touches.length === 2) {
+        // 🚀 Second finger detected → immediate fire
+        addLaser("blue");
+        return;
+      }
+
+      // 🕒 Long press fallback
       touchTimer = setTimeout(() => onCtx(e), TOUCH_FIRE_DELAY);
     };
+
     const onTouchEnd = () => clearTimeout(touchTimer);
 
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -118,7 +122,7 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
-     🎨 Laser color map
+     🎨 Laser color definitions
      ========================================================== */
   const colorMap = {
     red: {
@@ -132,11 +136,11 @@ export default function SpaceshipCursor() {
   };
 
   /* ==========================================================
-     🧩 Render spaceship and lasers (portal for performance)
+     🧩 Render spaceship & lasers
      ========================================================== */
   return createPortal(
     <>
-      {/* 🛸 Spaceship follows finger/mouse */}
+      {/* 🛸 Spaceship follows pointer */}
       <img
         src={spaceship}
         alt="Spaceship Cursor"
@@ -150,13 +154,12 @@ export default function SpaceshipCursor() {
           pointerEvents: "none",
           zIndex: 2147483647,
           willChange: "transform",
-          WebkitUserSelect: "none",
           userSelect: "none",
           WebkitTouchCallout: "none",
         }}
       />
 
-      {/* 🔫 Render each laser beam */}
+      {/* 🔫 Render all laser beams */}
       {lasers.map((l) => {
         const c = colorMap[l.color];
         return (
@@ -181,7 +184,7 @@ export default function SpaceshipCursor() {
         );
       })}
 
-      {/* ✨ Animations for laser effects */}
+      {/* ✨ Animations */}
       <style>{`
         @keyframes laserUp {
           from { transform: translate(-50%, -50%) translate(0, 0); }
