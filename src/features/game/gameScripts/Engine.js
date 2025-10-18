@@ -10,8 +10,7 @@ import bossImage3 from "../assets/star.png";
 /**
  * Engine
  * Orchestrates state, physics, spawning, inputs, and the main loop.
- * NOTE: This file was annotated + lightly refactored for readability/DRY.
- * Behavior is preserved.
+ * NOTE: Annotated + refactored for readability/DRY. Behavior preserved.
  */
 export default class Engine {
     /**
@@ -41,12 +40,11 @@ export default class Engine {
         /** Boss-phase control */
         this.inBossPhase = false;
         this.boss = null;
-        this.nextEnemyAt = 0; // kept for parity w/ your notes; spawning uses spawnTimer/nextSpawnIn
+        this.nextEnemyAt = 0; // kept for parity w/ your notes
 
         /** Random boss sprite */
         const bossImages = [bossImage1, bossImage2, bossImage3];
-        const randomIndex = Math.floor(Math.random() * bossImages.length);
-        const chosenImage = bossImages[randomIndex];
+        const chosenImage = bossImages[Math.floor(Math.random() * bossImages.length)];
 
         this.bossImg = new Image();
         this.bossImgReady = false;
@@ -57,13 +55,13 @@ export default class Engine {
         this.bg = new StarfieldBackground();
         this.renderer = new Renderer();
 
-        /** Galaxy background shown only after victory */
+        /** Galaxy background (post-victory) */
         this.bgImg = new Image();
         this.bgImgReady = false;
         this.bgImg.onload = () => (this.bgImgReady = true);
         this.bgImg.src = new URL("../assets/galaxy.jpeg", import.meta.url).href;
 
-        /** Runtime state containers */
+        /** Runtime containers */
         this.enemies = [];
         this.enemyBullets = [];
         this.myBullets = [];
@@ -87,6 +85,7 @@ export default class Engine {
         this.onMouseDown = this.onMouseDown.bind(this);
         this.blockContextMenu = this.blockContextMenu.bind(this);
         this.onExternalFire = this.onExternalFire.bind(this);
+        this.onExternalMove = this.onExternalMove.bind(this); // ✅ NEW: listen for spaceship drag events
         this.onResize = this.onResize.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
@@ -99,6 +98,11 @@ export default class Engine {
         window.addEventListener("mousedown", this.onMouseDown);
         window.addEventListener("contextmenu", this.blockContextMenu);
         window.addEventListener("player-fire", this.onExternalFire);
+
+        // ✅ NEW: External spaceship drag support
+        // (React SpaceshipCursor dispatches `player-move` for touch/mouse drag)
+        window.addEventListener("player-move", this.onExternalMove);
+
         window.addEventListener("keydown", this.onKeyDown);
 
         // Touch support (passive:false so preventDefault() works)
@@ -117,6 +121,7 @@ export default class Engine {
         window.removeEventListener("mousedown", this.onMouseDown);
         window.removeEventListener("contextmenu", this.blockContextMenu);
         window.removeEventListener("player-fire", this.onExternalFire);
+        window.removeEventListener("player-move", this.onExternalMove); // ✅ cleanup
         window.removeEventListener("keydown", this.onKeyDown);
         this.canvas.removeEventListener("touchstart", this.onTouchMove);
         this.canvas.removeEventListener("touchmove", this.onTouchMove);
@@ -135,7 +140,8 @@ export default class Engine {
 
     /** Fast distance^2 (avoids sqrt). */
     _dist2(ax, ay, bx, by) {
-        const dx = ax - bx, dy = ay - by;
+        const dx = ax - bx,
+            dy = ay - by;
         return dx * dx + dy * dy;
     }
 
@@ -148,15 +154,25 @@ export default class Engine {
     /** Renormalize (vx,vy) to target speed `spd` while preserving direction. */
     _renorm(vx, vy, spd) {
         const s = Math.hypot(vx, vy) || 1;
-        return [ (vx / s) * spd, (vy / s) * spd ];
+        return [(vx / s) * spd, (vy / s) * spd];
     }
 
     /** Bounce point+velocity within W×H padded bounds, return new {x,y,vx,vy}. */
     _bounceWithin(x, y, vx, vy, W, H, pad) {
-        if (x < pad)        { x = pad;        vx = Math.abs(vx); }
-        else if (x > W-pad) { x = W - pad;    vx = -Math.abs(vx); }
-        if (y < pad)        { y = pad;        vy = Math.abs(vy); }
-        else if (y > H-pad) { y = H - pad;    vy = -Math.abs(vy); }
+        if (x < pad) {
+            x = pad;
+            vx = Math.abs(vx);
+        } else if (x > W - pad) {
+            x = W - pad;
+            vx = -Math.abs(vx);
+        }
+        if (y < pad) {
+            y = pad;
+            vy = Math.abs(vy);
+        } else if (y > H - pad) {
+            y = H - pad;
+            vy = -Math.abs(vy);
+        }
         return { x, y, vx, vy };
     }
 
@@ -183,21 +199,16 @@ export default class Engine {
     /** Keyboard: 'R' = reset (works in all states). */
     onKeyDown(e) {
         const key = (e.key || "").toLowerCase();
-        // Always allow 'R' to reset, regardless of state
         if (key === "r") {
             e.preventDefault();
             this.resetGame();
         }
 
-        /**
-         * NOTE: The block below duplicates reset semantics specifically when victory is true.
-         * Kept as-is to preserve your exact behavior.
-         * If you want to fully DRY this, you can remove this block and rely solely on resetGame().
-         */
+        // Preserve your original redundant reset logic
         if (e.key.toLowerCase() === "r" && this.victory) {
             this.victory = false;
             this.victoryT = 0;
-            this.gameOver = false;     // ← allow restart after death
+            this.gameOver = false;
             this.playerHitCount = 100;
 
             this.inBossPhase = false;
@@ -210,16 +221,11 @@ export default class Engine {
             this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
 
             this.lastT = performance.now();
-            this.justReset = true; // <-- tells cull() to ignore any stale explosions this frame
+            this.justReset = true;
 
             this.onKill?.({ reset: true, kills: 0, absolute: true });
-            this.onReset?.();  // <- tell UI to set score = 0
+            this.onReset?.();
         }
-
-        /**
-         * // ✅ DRY alternative (commented, identical behavior):
-         * if (key === "r") this.resetGame();
-         */
     }
 
     /** One source of truth for a clean restart. */
@@ -228,19 +234,14 @@ export default class Engine {
         this.victoryT = 0;
         this.gameOver = false;
         this.playerHitCount = 100;
-
         this.inBossPhase = false;
         this.boss = null;
-
         this.killCount = 0;
         this.clearWorld();
-
         this.spawnTimer = 0;
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
-
         this.lastT = performance.now();
         this.justReset = true;
-
         this.onKill?.({ reset: true, kills: 0, absolute: true });
         this.onReset?.();
     }
@@ -263,25 +264,35 @@ export default class Engine {
         if (e.button === 0) {
             this.playerFire(); // left = green
         } else if (e.button === 2) {
-            this.playerFire(Math.random() < 0.5 ? "red" : "blue"); // right = red/blue
+            this.playerFire(Math.random() < 0.5 ? "red" : "blue");
         }
     }
 
     /** No context menu in-game. */
-    blockContextMenu(e) { e.preventDefault(); }
+    blockContextMenu(e) {
+        e.preventDefault();
+    }
 
-    /** External fire events (e.g., UI button) can also reposition aim. */
+    /** External fire events (from React, buttons, etc.). */
     onExternalFire(e) {
         const { x, y, color } = e.detail || {};
         if (typeof x === "number" && typeof y === "number") this._setCursor(x, y);
         this.playerFire(color);
     }
 
+    /** ✅ External move events (from SpaceshipCursor on drag/touch)
+     * Keeps engine enemies & boss synced with the spaceship position.
+     */
+    onExternalMove(e) {
+        const { x, y } = e.detail || {};
+        if (typeof x === "number" && typeof y === "number") {
+            this._setCursor(x, y);
+        }
+    }
+
     // ----------------------------
     // Spawning & bullets
     // ----------------------------
-
-    /** Spawn a single enemy outside the screen, moving toward center. */
     spawnEnemy() {
         const { W, H, CX, CY } = this.bg;
         const edge = Math.floor(Math.random() * 4);
@@ -308,7 +319,6 @@ export default class Engine {
         this.enemies.push(enemy);
     }
 
-    /** Enemy bullet aimed at current cursor position. */
     enemyFire(e) {
         const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
         const d = Math.hypot(dx, dy) || 1;
@@ -322,7 +332,6 @@ export default class Engine {
         this.enemyBullets.push(bullet);
     }
 
-    /** Player bullet; `colorOverride` defaults to green. */
     playerFire(colorOverride) {
         const bullet = makePlayerBullet({
             x: this.cursorX, y: this.cursorY,
@@ -333,16 +342,14 @@ export default class Engine {
         this.myBullets.push(bullet);
     }
 
-    /** Explosion FX (uncounted until culled). */
     triggerExplosion(x, y) {
         const ex = makeExplosion({ x, y });
         ex.counted = false;
         this.explosions.push(ex);
     }
 
-    /** Controls spawn cadence in normal phase. */
     doSpawning(dt) {
-        if (this.inBossPhase) return; // freeze spawns during boss
+        if (this.inBossPhase) return;
         this.spawnTimer += dt * 1000;
         if (this.spawnTimer >= this.nextSpawnIn) {
             this.spawnTimer = 0;
