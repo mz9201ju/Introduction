@@ -74,8 +74,8 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
-    🔫 Fire logic (desktop + mobile)
-    ========================================================== */
+   🔫 Fire logic (desktop + mobile)
+   ========================================================== */
   useEffect(() => {
     const blockCtx = (e) => e.preventDefault();
     document.addEventListener("contextmenu", blockCtx, { capture: true });
@@ -91,21 +91,31 @@ export default function SpaceshipCursor() {
     };
     window.addEventListener("contextmenu", onCtx);
 
-    // 📱 Mobile: single press → fire; hold >3s → red
+    // 📱 Mobile: single press fires; hold >3s turns red
     let holdTimer, fireInterval, colorState = "blue", pressedTime = 0;
 
     const isInteractiveElement = (el) => {
       if (!el) return false;
       const tag = el.tagName?.toLowerCase();
-      return ["button", "a", "input", "textarea", "select", "label"].includes(tag)
-        || el.closest?.("button, a, input, textarea, select, label, [role='button']");
+      return (
+        ["button", "a", "input", "textarea", "select", "label"].includes(tag) ||
+        el.closest?.("button, a, input, textarea, select, label, [role='button']")
+      );
     };
 
+    // 🎮 Only attach touch events inside game container
+    const gameRoot =
+      document.querySelector("#game-root") ||
+      document.querySelector("canvas") ||
+      document.body;
+
     const startFiring = (e) => {
-      // 🚫 Skip firing if the touch started on a UI element
+      // 🚫 Skip if started on UI element
       if (isInteractiveElement(e.target)) return;
 
-      e.preventDefault();
+      // ✅ Only block default if inside game area
+      if (gameRoot.contains(e.target)) e.preventDefault();
+      else return; // let page scroll freely
 
       const startTime = Date.now();
       colorState = "blue";
@@ -128,16 +138,18 @@ export default function SpaceshipCursor() {
       colorState = "blue";
     };
 
-    window.addEventListener("touchstart", startFiring, { passive: false });
-    window.addEventListener("touchend", stopFiring, { passive: true });
+    // 👇 Scoped to game area
+    gameRoot.addEventListener("touchstart", startFiring, { passive: false });
+    gameRoot.addEventListener("touchend", stopFiring, { passive: true });
 
     return () => {
       document.removeEventListener("contextmenu", blockCtx, { capture: true });
       window.removeEventListener("contextmenu", onCtx);
-      window.removeEventListener("touchstart", startFiring);
-      window.removeEventListener("touchend", stopFiring);
+      gameRoot.removeEventListener("touchstart", startFiring);
+      gameRoot.removeEventListener("touchend", stopFiring);
     };
   }, []);
+
 
 
   /* ==========================================================
