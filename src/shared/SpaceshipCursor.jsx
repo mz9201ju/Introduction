@@ -74,8 +74,8 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
-     🔫 Fire logic (desktop + mobile)
-     ========================================================== */
+    🔫 Fire logic (desktop + mobile)
+    ========================================================== */
   useEffect(() => {
     const blockCtx = (e) => e.preventDefault();
     document.addEventListener("contextmenu", blockCtx, { capture: true });
@@ -91,21 +91,28 @@ export default function SpaceshipCursor() {
     };
     window.addEventListener("contextmenu", onCtx);
 
-    // 📱 Mobile: press + hold to fire (no second finger)
+    // 📱 Mobile: single press → fire; hold >3s → red
     let holdTimer, fireInterval, colorState = "blue", pressedTime = 0;
 
+    const isInteractiveElement = (el) => {
+      if (!el) return false;
+      const tag = el.tagName?.toLowerCase();
+      return ["button", "a", "input", "textarea", "select", "label"].includes(tag)
+        || el.closest?.("button, a, input, textarea, select, label, [role='button']");
+    };
+
     const startFiring = (e) => {
+      // 🚫 Skip firing if the touch started on a UI element
+      if (isInteractiveElement(e.target)) return;
+
       e.preventDefault();
 
-      // Start tracking hold duration
       const startTime = Date.now();
       colorState = "blue";
       addLaser("blue");
 
-      // Fire repeatedly every 300ms
       fireInterval = setInterval(() => addLaser(colorState), 300);
 
-      // Track if held >3s → upgrade to red laser
       holdTimer = setInterval(() => {
         pressedTime = Date.now() - startTime;
         if (pressedTime >= LONG_PRESS_THRESHOLD && colorState !== "red") {
@@ -131,6 +138,7 @@ export default function SpaceshipCursor() {
       window.removeEventListener("touchend", stopFiring);
     };
   }, []);
+
 
   /* ==========================================================
      🧱 Prevent mobile screen resizing / zooming
