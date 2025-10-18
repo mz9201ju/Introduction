@@ -5,8 +5,9 @@ import spaceship from "/spaceship.png";
 /**
  * 🚀 SpaceshipCursor
  * - Follows mouse or touch (mobile-friendly)
- * - Fires on right-click, long-press, or second-finger tap
- * - Prevents screen zooming/resizing on mobile
+ * - Fires on right-click (desktop) or long-press (mobile)
+ * - Prevents zoom/pinch gestures on mobile
+ * - Turns red if pressed >3s continuously
  */
 export default function SpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -15,7 +16,7 @@ export default function SpaceshipCursor() {
   const lastClickRef = useRef(0);
 
   const FAST_CLICK_MS = 220;
-  const TOUCH_FIRE_DELAY = 400; // ms
+  const LONG_PRESS_THRESHOLD = 3000; // 🔥 3s for red laser
 
   /* ==========================================================
      ⚙️ Helper utilities
@@ -33,10 +34,15 @@ export default function SpaceshipCursor() {
     const driftX = (Math.random() - 0.5) * 6;
     const { x, y } = posRef.current;
 
-    window.dispatchEvent(new CustomEvent("player-fire", { detail: { x, y, color } }));
+    window.dispatchEvent(
+      new CustomEvent("player-fire", { detail: { x, y, color } })
+    );
 
     setLasers((prev) => [...prev, { id, x, y, color, length, width, driftX }]);
-    setTimeout(() => setLasers((prev) => prev.filter((l) => l.id !== id)), 850);
+    setTimeout(
+      () => setLasers((prev) => prev.filter((l) => l.id !== id)),
+      850
+    );
   };
 
   /* ==========================================================
@@ -54,11 +60,8 @@ export default function SpaceshipCursor() {
         y = e.clientY;
       }
 
-      const p = { x, y };
-      setPos(p);
-      posRef.current = p;
-
-      window.dispatchEvent(new CustomEvent("player-move", { detail: p }));
+      updatePosition(x, y);
+      window.dispatchEvent(new CustomEvent("player-move", { detail: { x, y } }));
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -77,39 +80,55 @@ export default function SpaceshipCursor() {
     const blockCtx = (e) => e.preventDefault();
     document.addEventListener("contextmenu", blockCtx, { capture: true });
 
+    // 🖱️ Desktop: right-click firing
     const onCtx = (e) => {
       e.preventDefault();
-
       const now = performance.now();
       const delta = now - (lastClickRef.current || 0);
       lastClickRef.current = now;
-
       const color = delta > 0 && delta < FAST_CLICK_MS ? "red" : "blue";
       addLaser(color);
     };
-
     window.addEventListener("contextmenu", onCtx);
 
-    let touchTimer;
-    const onTouchStart = (e) => {
-      if (e.touches.length === 2) {
-        // 🚀 Fire when second finger detected
-        addLaser("blue");
-        return;
-      }
-      touchTimer = setTimeout(() => onCtx(e), TOUCH_FIRE_DELAY);
+    // 📱 Mobile: press + hold to fire (no second finger)
+    let holdTimer, fireInterval, colorState = "blue", pressedTime = 0;
+
+    const startFiring = (e) => {
+      e.preventDefault();
+
+      // Start tracking hold duration
+      const startTime = Date.now();
+      colorState = "blue";
+      addLaser("blue");
+
+      // Fire repeatedly every 300ms
+      fireInterval = setInterval(() => addLaser(colorState), 300);
+
+      // Track if held >3s → upgrade to red laser
+      holdTimer = setInterval(() => {
+        pressedTime = Date.now() - startTime;
+        if (pressedTime >= LONG_PRESS_THRESHOLD && colorState !== "red") {
+          colorState = "red";
+        }
+      }, 200);
     };
 
-    const onTouchEnd = () => clearTimeout(touchTimer);
+    const stopFiring = () => {
+      clearInterval(fireInterval);
+      clearInterval(holdTimer);
+      pressedTime = 0;
+      colorState = "blue";
+    };
 
-    window.addEventListener("touchstart", onTouchStart, { passive: false });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchstart", startFiring, { passive: false });
+    window.addEventListener("touchend", stopFiring, { passive: true });
 
     return () => {
-      window.removeEventListener("contextmenu", onCtx);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("contextmenu", blockCtx, { capture: true });
+      window.removeEventListener("contextmenu", onCtx);
+      window.removeEventListener("touchstart", startFiring);
+      window.removeEventListener("touchend", stopFiring);
     };
   }, []);
 
@@ -117,7 +136,6 @@ export default function SpaceshipCursor() {
      🧱 Prevent mobile screen resizing / zooming
      ========================================================== */
   useEffect(() => {
-    // ✅ Lock viewport scale
     const meta = document.querySelector("meta[name=viewport]");
     if (meta) {
       meta.setAttribute(
@@ -132,7 +150,6 @@ export default function SpaceshipCursor() {
       document.head.appendChild(newMeta);
     }
 
-    // 🧤 Prevent pinch & gesture zooms
     const blockZoom = (e) => {
       if (e.touches && e.touches.length > 1) {
         e.preventDefault();
@@ -146,7 +163,6 @@ export default function SpaceshipCursor() {
     document.addEventListener("gesturechange", (e) => e.preventDefault());
     document.addEventListener("gestureend", (e) => e.preventDefault());
 
-    // 🧤 Prevent double-tap zoom
     let lastTouchEnd = 0;
     const preventDoubleTapZoom = (e) => {
       const now = Date.now();
@@ -164,7 +180,6 @@ export default function SpaceshipCursor() {
       document.removeEventListener("touchend", preventDoubleTapZoom);
     };
   }, []);
-
 
   /* ==========================================================
      🎨 Laser colors
@@ -218,7 +233,8 @@ export default function SpaceshipCursor() {
               height: `${l.length}px`,
               backgroundColor: c.fill,
               transform: "translate(-50%, -50%)",
-              animation: `laserUp 0.85s linear forwards, fadeOut 0.85s linear forwards`,
+              animation:
+                "laserUp 0.85s linear forwards, fadeOut 0.85s linear forwards",
               zIndex: 2147483646,
               boxShadow: c.glow,
               borderRadius: "2px",
