@@ -117,7 +117,7 @@ export default function SpaceshipCursor() {
      🧱 Prevent mobile screen resizing / zooming
      ========================================================== */
   useEffect(() => {
-    // ✅ Lock viewport scale to prevent zoom
+    // ✅ Lock viewport scale
     const meta = document.querySelector("meta[name=viewport]");
     if (meta) {
       meta.setAttribute(
@@ -132,10 +132,19 @@ export default function SpaceshipCursor() {
       document.head.appendChild(newMeta);
     }
 
-    // 🧤 Prevent pinch zoom
+    // 🧤 Prevent pinch & gesture zooms
     const blockZoom = (e) => {
-      if (e.touches && e.touches.length > 1) e.preventDefault();
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     };
+
+    document.addEventListener("touchstart", blockZoom, { passive: false });
+    document.addEventListener("touchmove", blockZoom, { passive: false });
+    document.addEventListener("gesturestart", (e) => e.preventDefault());
+    document.addEventListener("gesturechange", (e) => e.preventDefault());
+    document.addEventListener("gestureend", (e) => e.preventDefault());
 
     // 🧤 Prevent double-tap zoom
     let lastTouchEnd = 0;
@@ -144,15 +153,18 @@ export default function SpaceshipCursor() {
       if (now - lastTouchEnd <= 300) e.preventDefault();
       lastTouchEnd = now;
     };
-
-    document.addEventListener("touchmove", blockZoom, { passive: false });
     document.addEventListener("touchend", preventDoubleTapZoom, { passive: false });
 
     return () => {
+      document.removeEventListener("touchstart", blockZoom);
       document.removeEventListener("touchmove", blockZoom);
+      document.removeEventListener("gesturestart", (e) => e.preventDefault());
+      document.removeEventListener("gesturechange", (e) => e.preventDefault());
+      document.removeEventListener("gestureend", (e) => e.preventDefault());
       document.removeEventListener("touchend", preventDoubleTapZoom);
     };
   }, []);
+
 
   /* ==========================================================
      🎨 Laser colors
