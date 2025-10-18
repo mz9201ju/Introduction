@@ -575,7 +575,7 @@ export default class Engine {
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.shadowColor = "rgba(255,255,150,0.9)";
         ctx.shadowBlur = 30;
-        ctx.fillText("VICTORY! 100 shots!", 0, 0);
+        ctx.fillText("VICTORY!", 0, 0);
 
         ctx.font = "20px system-ui";
         ctx.shadowBlur = 0;
