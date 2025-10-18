@@ -6,23 +6,25 @@ export default function PlayGame() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [kills, setKills] = useState(0);
 
-  // memoize so Engine doesn't get recreated from a new function ref
+  // ✅ Memoized so Engine doesn’t reinitialize
   const handleKill = useCallback((payload = {}) => {
     const { reset, kills: k, absolute } = payload;
-    if (reset) {                // Engine pressed "R" → hard reset UI
+    if (reset) {
       setKills(0);
       return;
     }
     if (absolute && typeof k === "number") {
-      setKills(k);              // Engine is source of truth (e.g., +1 after explosion)
+      setKills(k);
       return;
     }
-    // Fallback if Engine ever emits legacy "increment" signals
-    setKills(prev => prev + 1);
+    setKills((prev) => prev + 1);
   }, []);
 
+  /* ==========================================================
+     ⏱️ Show instructions for 10 seconds, then fade out
+     ========================================================== */
   useEffect(() => {
-    const timer = setTimeout(() => setShowInstructions(false), 5000);
+    const timer = setTimeout(() => setShowInstructions(false), 10000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -35,46 +37,51 @@ export default function PlayGame() {
         <div
           style={{
             position: "fixed",
-            bottom: 12,
-            left: 12,
-            zIndex: 10,
-            padding: "10px 12px",
-            background: "rgba(0,0,0,0.45)",
+            bottom: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 20,
+            padding: "14px 18px",
+            background: "rgba(0,0,0,0.55)",
             color: "#e8f0ff",
-            borderRadius: 10,
-            backdropFilter: "blur(4px)",
+            borderRadius: 12,
+            backdropFilter: "blur(5px)",
             fontFamily:
               "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto",
-            lineHeight: 1.35,
-            transition: "opacity 0.3s ease-in-out",
+            lineHeight: 1.45,
+            textAlign: "center",
+            maxWidth: "90%",
+            boxShadow: "0 0 12px rgba(0,0,0,0.4)",
+            animation: "fadeOut 0.6s ease-in-out 9.4s forwards",
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>How to Play</div>
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
-            <li>Move your mouse to aim the ship.</li>
-            <li>Left click = green laser. Right click = red/blue.</li>
-            <li>Enemies fire at their <code>fireEvery</code> interval.</li>
+          <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 16 }}>
+            🚀 How to Play
+          </div>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: 0,
+              listStyle: "none",
+              fontSize: 14,
+            }}
+          >
+            <li>👉 Move your mouse or finger to aim the ship.</li>
+            <li>💥 Right click or second finger = fire laser.</li>
+            <li>⚡ Dodge enemy bullets and survive as long as you can.</li>
           </ul>
         </div>
       )}
 
-      {showInstructions && (
-        <div
-          style={{
-            position: "fixed",
-            right: 12,
-            bottom: 12,
-            zIndex: 10,
-            padding: "8px 10px",
-            background: "rgba(0,0,0,0.35)",
-            color: "#cfe3ff",
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-        >
-          Tip: Keep moving — wobbling enemies miss more often. (10 kills bring in BOSS!)
-        </div>
-      )}
+      {/* ✨ Fade-out animation for smooth disappearance */}
+      <style>{`
+        @keyframes fadeOut {
+          to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+          }
+        }
+      `}</style>
     </div>
   );
 }
