@@ -153,8 +153,8 @@ export default function SpaceshipCursor() {
 
 
   /* ==========================================================
-     🧱 Prevent mobile screen resizing / zooming
-     ========================================================== */
+   🧱 Prevent mobile zoom/pinch — allow normal scroll
+   ========================================================== */
   useEffect(() => {
     const meta = document.querySelector("meta[name=viewport]");
     if (meta) {
@@ -170,36 +170,30 @@ export default function SpaceshipCursor() {
       document.head.appendChild(newMeta);
     }
 
-    const blockZoom = (e) => {
+    // ✅ Only block pinch zoom (multi-touch), not regular scroll
+    const blockPinch = (e) => {
       if (e.touches && e.touches.length > 1) {
         e.preventDefault();
-        e.stopPropagation();
       }
     };
 
-    document.addEventListener("touchstart", blockZoom, { passive: false });
-    document.addEventListener("touchmove", blockZoom, { passive: false });
-    document.addEventListener("gesturestart", (e) => e.preventDefault());
-    document.addEventListener("gesturechange", (e) => e.preventDefault());
-    document.addEventListener("gestureend", (e) => e.preventDefault());
-
+    // ✅ Still block double-tap zooms
     let lastTouchEnd = 0;
     const preventDoubleTapZoom = (e) => {
       const now = Date.now();
       if (now - lastTouchEnd <= 300) e.preventDefault();
       lastTouchEnd = now;
     };
+
+    document.addEventListener("touchstart", blockPinch, { passive: false });
     document.addEventListener("touchend", preventDoubleTapZoom, { passive: false });
 
     return () => {
-      document.removeEventListener("touchstart", blockZoom);
-      document.removeEventListener("touchmove", blockZoom);
-      document.removeEventListener("gesturestart", (e) => e.preventDefault());
-      document.removeEventListener("gesturechange", (e) => e.preventDefault());
-      document.removeEventListener("gestureend", (e) => e.preventDefault());
+      document.removeEventListener("touchstart", blockPinch);
       document.removeEventListener("touchend", preventDoubleTapZoom);
     };
   }, []);
+
 
   /* ==========================================================
      🎨 Laser colors
