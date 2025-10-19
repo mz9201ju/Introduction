@@ -1,5 +1,5 @@
 // App.jsx (shell)
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import NavBar from "@app/nav/NavBar";
 import AppRoutes from "@app/routes/AppRoutes";
 import SpaceChatHost from "@app/chat/SpaceChatHost";
@@ -8,7 +8,7 @@ import WarpDriveFX from "@app/routes/WarpDriveFX";
 
 export default function App() {
   return (
-    <BrowserRouter basename="/Introduction/">
+    <HashRouter>
       {/* Chrome */}
       <NavBar />
 
@@ -20,6 +20,6 @@ export default function App() {
 
       {/* Lazy chat */}
       <SpaceChatHost />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
