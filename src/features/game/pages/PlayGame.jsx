@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Starfield from "@game/components/Starfield";
 import Scoreboard from "@game/components/Scoreboard";
+import SpaceshipCursor from "@game/pages/SpaceshipCursor";
 
 export default function PlayGame() {
   const [showInstructions, setShowInstructions] = useState(true);
@@ -30,6 +31,9 @@ export default function PlayGame() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
+      {/* Global effects across all pages */}
+      <SpaceshipCursor />
+      
       <Starfield onKill={handleKill} />
       <Scoreboard kills={kills} />
 

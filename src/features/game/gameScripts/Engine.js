@@ -362,43 +362,62 @@ export default class Engine {
     // Enemy & boss updates
     // ----------------------------
 
-    /** Apply movement, wobble, bounce, retarget fire. */
+    /** 🧠 Enemy AI update: seek player smoothly + bounce + fire */
     updateEnemies(dt, now) {
         const { W, H } = this.bg;
         const PAD = 24; // inset to avoid clipping
 
+        // 🧩 reusable helper for steering toward player (kept inline for perf)
+        const seekTarget = (enemy, targetX, targetY, followStrength = 0.05) => {
+            // Direction vector toward player
+            const dx = targetX - enemy.x;
+            const dy = targetY - enemy.y;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            // Normalize to desired speed
+            const desiredVX = (dx / dist) * enemy.spd;
+            const desiredVY = (dy / dist) * enemy.spd;
+
+            // Smoothly blend current velocity toward desired vector
+            enemy.vx += (desiredVX - enemy.vx) * followStrength;
+            enemy.vy += (desiredVY - enemy.vy) * followStrength;
+        };
+
         for (const e of this.enemies) {
             if (!e.alive) continue;
 
-            // Curved path wobble
+            // 🧭 Adjust direction toward current spaceship position
+            seekTarget(e, this.cursorX, this.cursorY, 0.08);
+
+            // Add wobble for less robotic motion
             e.wobblePhase += dt * 2.2;
             const wobble = Math.sin(e.wobblePhase) * 18;
-            const ux = e.vx / (e.spd || 1), uy = e.vy / (e.spd || 1);
+            const ux = e.vx / (e.spd || 1);
+            const uy = e.vy / (e.spd || 1);
             const nx = -uy, ny = ux;
 
             e.x += e.vx * dt + nx * wobble * dt;
             e.y += e.vy * dt + ny * wobble * dt;
 
-            // Bounce off walls, then re-normalize speed
-            {
-                const b = this._bounceWithin(e.x, e.y, e.vx, e.vy, W, H, PAD);
-                e.x = b.x; e.y = b.y; e.vx = b.vx; e.vy = b.vy;
-                const [vx, vy] = this._renorm(e.vx, e.vy, e.spd);
-                e.vx = vx; e.vy = vy;
-            }
+            // 🔄 Bounce off edges and renormalize
+            const b = this._bounceWithin(e.x, e.y, e.vx, e.vy, W, H, PAD);
+            e.x = b.x; e.y = b.y; e.vx = b.vx; e.vy = b.vy;
+            const [vx, vy] = this._renorm(e.vx, e.vy, e.spd);
+            e.vx = vx; e.vy = vy;
 
-            // Face player
+            // 🧍 Face player for rendering
             const dx = this.cursorX - e.x, dy = this.cursorY - e.y;
             e.angle = Math.atan2(dy, dx);
 
-            // Fire cadence
+            // 🔫 Fire cadence
             if (now >= e.nextFire) {
                 this.enemyFire(e);
                 e.nextFire = now + e.fireEvery;
-                if (Math.random() < 0.25) e.nextFire = now + e.fireEvery * 0.45; // occasional burst
+                if (Math.random() < 0.25) e.nextFire = now + e.fireEvery * 0.45; // burst chance
             }
         }
     }
+
 
     /** Hard clear of dynamic entities; keeps engine running. */
     clearWorld() {

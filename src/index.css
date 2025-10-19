@@ -179,3 +179,7 @@ canvas {
 }
 
 /* prevents rubber-band while dragging */
+
+#game-root, canvas {
+  touch-action: none;     /* 👈 allows touchmove + prevents scroll */
+}

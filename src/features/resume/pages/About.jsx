@@ -1,9 +1,10 @@
-import { useNavigate } from "react-router-dom"; // ✅ import navigate hook
+import SimpleSpaceshipCursor from "@shared/SimpleSpaceshipCursor";
 
 export default function About() {
-    const navigate = useNavigate(); // ✅ initialize navigate function
     return (
         <div style={{ textAlign: "center", padding: "4rem" }}>
+            {/* Simple Space Cursor */}
+            <SimpleSpaceshipCursor />
             <section style={{ marginTop: "3rem" }}>
                 <h2>About Me 🚀</h2>
                 <div
@@ -87,12 +88,12 @@ export default function About() {
                 >
                     <h3>✈️ Bell Aviation / ROMISOFT LLC</h3>
                     <p>
-                        Bell Aviation Services has a rich history in Aircraft Maintenance, Repair, Operations, Worldwide Recovery, Avionics, 
-                        Fleet Maintenance & Logistics. Building on foundational services, the software arm of this business 
+                        Bell Aviation Services has a rich history in Aircraft Maintenance, Repair, Operations, Worldwide Recovery, Avionics,
+                        Fleet Maintenance & Logistics. Building on foundational services, the software arm of this business
                         is ROMISOFT supporting both commercial and military aircraft mixed fleet operations.
-                         We also offer individualized FAA part 61 training for High Performance, 
-                         Complex, and Tail Wheel endorsements using our own classic airplanes. 
-                         We are a small business and veteran owned.
+                        We also offer individualized FAA part 61 training for High Performance,
+                        Complex, and Tail Wheel endorsements using our own classic airplanes.
+                        We are a small business and veteran owned.
                     </p>
 
                     {/* Static website preview */}
@@ -145,10 +146,10 @@ export default function About() {
                     <h3>👶 Deeba's Day Care</h3>
                     <p>
                         It can be not easy adjusting your work schedule around the school hours
-                         of your children.At Deeba's Daycare, we offer exceptional home day care services, 
-                         so the little ones are properly taken care of during your busy day.Our extended hours 
-                         accommodate any situation, allowing parents with early morning shifts to commute faster 
-                         or those with long nights to finish paperwork related to work.
+                        of your children.At Deeba's Daycare, we offer exceptional home day care services,
+                        so the little ones are properly taken care of during your busy day.Our extended hours
+                        accommodate any situation, allowing parents with early morning shifts to commute faster
+                        or those with long nights to finish paperwork related to work.
                     </p>
 
                     {/* Static website preview */}
