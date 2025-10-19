@@ -17,6 +17,7 @@ export const GAME = {
 
     MY_BULLET_SPEED: 800,
     MY_BULLET_LIFE: 0.9,
+    BOSS_BULLET_SPEED: 900, // 💥 boss laser speed (was ~GAME.BULLET_SPEED)
 
     HIT_RADIUS: 24,
     EXPLOSION_TIME: 0.4,
