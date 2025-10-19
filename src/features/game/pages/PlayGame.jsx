@@ -67,7 +67,7 @@ export default function PlayGame() {
               margin: 0,
               paddingLeft: 0,
               listStyle: "none",
-              fontSize: 40,
+              fontSize: 20,
             }}
           >
             <li>👉 Move your mouse or finger to aim the ship.</li>
