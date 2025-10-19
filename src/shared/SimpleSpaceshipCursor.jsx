@@ -3,9 +3,10 @@ import spaceship from "/spaceship.png";
 
 /**
  * 🛸 SimpleSpaceshipCursor
- * - Follows mouse or touch smoothly
- * - No firing, no scroll blocking
- * - Works on all pages except PlayGame
+ * - Smoothly follows mouse position
+ * - Hidden on mobile/touch devices
+ * - Disabled during PlayGame route
+ * - Always stays above other UI (e.g., chatbot)
  */
 export default function SimpleSpaceshipCursor() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -15,23 +16,29 @@ export default function SimpleSpaceshipCursor() {
     const el = cursorRef.current;
     if (!el) return;
 
-    // Hide if user is typing or using coarse pointer (e.g. touchscreen)
+    // 💡 Hide on touch devices (coarse pointer = touchscreen)
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
     if (isTouch) {
       el.style.display = "none";
       return;
     }
 
+    // 🎯 Mouse movement tracking
     const handleMove = (e) => {
-      setPos({ x: e.clientX, y: e.clientY });
+      // Use requestAnimationFrame for smoother motion + lower layout thrash
+      requestAnimationFrame(() => {
+        setPos({ x: e.clientX, y: e.clientY });
+      });
     };
 
     window.addEventListener("mousemove", handleMove);
     return () => window.removeEventListener("mousemove", handleMove);
   }, []);
 
-  // Hide cursor when on PlayGame route
-  const isPlayGame = window.location.pathname.includes("/PlayGame");
+  // 🎮 Disable spaceship cursor on PlayGame route
+  const isPlayGame =
+    window.location.pathname.toLowerCase().includes("/playgame") ||
+    window.location.pathname.toLowerCase().includes("/darthvader");
   if (isPlayGame) return null;
 
   return (
@@ -39,8 +46,14 @@ export default function SimpleSpaceshipCursor() {
       ref={cursorRef}
       className="spaceship-cursor"
       style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
         transform: `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`,
         transition: "transform 0.05s linear",
+        pointerEvents: "none", // ensures it never blocks clicks
+        userSelect: "none",
+        zIndex: 10000, // 🧠 sits ABOVE chatbot (chatbot is 9999)
       }}
     >
       <img
@@ -48,7 +61,12 @@ export default function SimpleSpaceshipCursor() {
         alt="Spaceship Cursor"
         width={48}
         height={48}
-        style={{ pointerEvents: "none", userSelect: "none" }}
+        style={{
+          display: "block",
+          pointerEvents: "none",
+          userSelect: "none",
+          filter: "drop-shadow(0 0 6px rgba(150,200,255,0.6))", // ✨ optional glow
+        }}
       />
     </div>
   );
