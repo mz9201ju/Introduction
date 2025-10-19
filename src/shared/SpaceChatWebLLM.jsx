@@ -1,10 +1,12 @@
 // src/components/SpaceChatWebLLM.jsx
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import darth from "../features/game/assets/helmet.png";
 
 const PROXY_URL = "https://gh-ai-proxy.omer-mnsu.workers.dev/AI/chat";
 
-/* === PRIVATE KNOWLEDGE (never shown to user) === */
+/* ==========================================================
+   🌍 SITE CONTEXT (PRIVATE KNOWLEDGE - NOT SHOWN TO USERS)
+   ========================================================== */
 const INITIAL_SITE_CONTEXT = {
     siteName: "Space Nerd Portfolio",
     baseUrl: "https://mz9201ju.github.io/Introduction/",
@@ -32,6 +34,9 @@ const INITIAL_SITE_CONTEXT = {
     contact: { email: ["omer.zahid@mnsu.edu", "omer.zahid@hotmail.com"] },
 };
 
+/* ==========================================================
+   👨‍🚀 ABOUT OMER (used in system prompt)
+   ========================================================== */
 const ABOUT_OMER = `
 Name: Omer Zahid (aka “Darth Vader”)
 Role: Senior Software Engineer
@@ -41,6 +46,9 @@ Certifications: AZ-900, Google Cloud CDL, Preparing AZ-204.
 Personality: security-first innovator who builds simple solutions that generate value —not bills.
 `;
 
+/* ==========================================================
+   🧠 SYSTEM PROMPT BUILDER
+   ========================================================== */
 function makeSystemPrompt() {
     return [
         "You are **Darth Vader**, the SpaceNerd Copilot. Remain fully in-character.",
@@ -56,60 +64,118 @@ function makeSystemPrompt() {
     ].join("\n");
 }
 
+/* ==========================================================
+   🚀 SPACE CHAT COMPONENT
+   ========================================================== */
 export default function SpaceChatWebLLM() {
-    const [open, setOpen] = useState(false);
-    const [busy, setBusy] = useState(false);
-    const [input, setInput] = useState("");
+    /* ---------- STATE HOOKS ---------- */
+    const [open, setOpen] = useState(false);        // Chat visibility
+    const [busy, setBusy] = useState(false);        // Loading state
+    const [input, setInput] = useState("");         // User input text
     const [firstUserMsg, setFirstUserMsg] = useState(false);
     const [siteCtx, setSiteCtx] = useState(INITIAL_SITE_CONTEXT);
-    const listRef = useRef(null);
+    const [msgs, setMsgs] = useState([]);
 
-    const systemMsg = useMemo(() => ({ role: "system", content: makeSystemPrompt() }), [siteCtx]);
-    const [msgs, setMsgs] = useState(() => [
-        systemMsg,
-        { role: "assistant", content: "I sense your presence. This portfolio is operational. What do you seek?" },
-    ]);
+    /* ---------- REFS ---------- */
+    const listRef = useRef(null);   // Scroll container
+    const panelRef = useRef(null);  // Chat panel
+    const fabRef = useRef(null);    // Floating button (FAB)
 
-    // Auto-scroll chat
+    /* ---------- SYSTEM MESSAGE MEMO ---------- */
+    const systemMsg = useMemo(
+        () => ({ role: "system", content: makeSystemPrompt() }),
+        [siteCtx]
+    );
+
+    // ---------- INITIALIZE MESSAGES (only once) ----------
     useEffect(() => {
-        if (!open) return;
-        const el = listRef.current;
-        if (el) el.scrollTop = el.scrollHeight;
+        setMsgs([
+            { role: "system", content: makeSystemPrompt() },
+            {
+                role: "assistant",
+                content: "I sense your presence. This portfolio is operational. What do you seek?",
+            },
+        ]);
+        // Run only once when component mounts
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
+    /* ==========================================================
+       🧩 HANDLE CHAT TOGGLE + CLICK OUTSIDE DETECTION
+       ========================================================== */
+
+    // Toggle chat open/close with optional forced close
+    const handleToggle = useCallback((forceClose = false) => {
+        if (forceClose || open) {
+            // Just close panel — don't reset anything
+            setOpen(false);
+        } else {
+            setOpen(true);
+        }
+    }, [open]);
+
+
+    // Detect and close when clicking outside the chat panel or FAB
+    useEffect(() => {
+        const handleOutsideClick = (e) => {
+            const clickedOutsidePanel =
+                panelRef.current && !panelRef.current.contains(e.target);
+            const clickedOutsideFab =
+                fabRef.current && !fabRef.current.contains(e.target);
+
+            if (open && clickedOutsidePanel && clickedOutsideFab) {
+                handleToggle(true);
+            }
+        };
+
+        if (open) {
+            document.addEventListener("mousedown", handleOutsideClick);
+            document.addEventListener("touchstart", handleOutsideClick);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+            document.removeEventListener("touchstart", handleOutsideClick);
+        };
+    }, [open, handleToggle]);
+
+    /* ==========================================================
+       📜 AUTO-SCROLL CHAT TO LATEST MESSAGE
+       ========================================================== */
+    useEffect(() => {
+        if (open && listRef.current) {
+            const el = listRef.current;
+            el.scrollTop = el.scrollHeight;
+        }
     }, [open, msgs]);
 
-    // 🔄 Reset all state when chat closes
-    const handleToggle = () => {
-        if (open) {
-            // Reset everything on close
-            setMsgs([
-                systemMsg,
-                { role: "assistant", content: "I sense your presence. This portfolio is operational. What do you seek?" },
-            ]);
-            setInput("");
-            setFirstUserMsg(false);
-            setBusy(false);
-            setSiteCtx(INITIAL_SITE_CONTEXT);
-        }
-        setOpen(!open);
-    };
-
-    async function send() {
+    /* ==========================================================
+       💬 SEND MESSAGE HANDLER
+       ========================================================== */
+    const send = useCallback(async () => {
         const q = input.trim();
         if (!q || busy) return;
 
+        // Mark first message and clear site context after intro
         if (!firstUserMsg) {
             setFirstUserMsg(true);
-            setSiteCtx({}); // wipe context after first use
+            setSiteCtx({}); // still clears context, not messages
         }
 
+
         setInput("");
-        setMsgs((m) => [...m, { role: "user", content: q }, { role: "assistant", content: "…" }]);
+        setMsgs((m) => [
+            ...m,
+            { role: "user", content: q },
+            { role: "assistant", content: "…" },
+        ]);
         setBusy(true);
 
         try {
             const history = [
                 { role: "system", content: makeSystemPrompt() },
-                ...msgs.filter(Boolean).map(({ role, content }) => ({ role, content })),
+                ...msgs.filter(Boolean),
                 { role: "user", content: q },
             ];
 
@@ -121,19 +187,15 @@ export default function SpaceChatWebLLM() {
 
             if (!res.ok) {
                 const raw = await res.text();
-                let msg = "API error.";
-                try { msg = JSON.parse(raw)?.error?.message || msg; } catch { }
-                setMsgs((m) => {
-                    const copy = [...m];
-                    copy[copy.length - 1] = { role: "assistant", content: `⚠️ ${msg}` };
-                    return copy;
-                });
-                setBusy(false);
-                return;
+                const msg =
+                    JSON.parse(raw)?.error?.message || "API connection error.";
+                throw new Error(msg);
             }
 
             const data = await res.json();
-            const text = data?.choices?.[0]?.message?.content?.trim() || "(no output)";
+            const text =
+                data?.choices?.[0]?.message?.content?.trim() ||
+                "(no response from AI)";
             setMsgs((m) => {
                 const copy = [...m];
                 copy[copy.length - 1] = { role: "assistant", content: text };
@@ -152,8 +214,11 @@ export default function SpaceChatWebLLM() {
         } finally {
             setBusy(false);
         }
-    }
+    }, [busy, input, msgs, firstUserMsg]);
 
+    /* ==========================================================
+       ⌨️ ENTER KEY SHORTCUT
+       ========================================================== */
     const handleKey = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -161,58 +226,104 @@ export default function SpaceChatWebLLM() {
         }
     };
 
+    /* ==========================================================
+       🧱 RENDER
+       ========================================================== */
     return (
         <>
-            {/* Toggle FAB */}
-            <button onClick={handleToggle} style={styles.fab} aria-label="Open AI chat">
-                {open ? "✖" : (
+            {/* Floating Action Button (FAB) */}
+            <button
+                ref={fabRef}
+                onClick={() => handleToggle()}
+                style={styles.fab}
+                aria-label="Open AI chat"
+            >
+                {open ? (
+                    "✖"
+                ) : (
                     <img
                         src={darth}
                         alt="🛰️"
                         width="60"
                         height="50"
-                        style={{ backgroundColor: "white", borderRadius: "50%", padding: 0, marginLeft: "-9px" }}
+                        style={{
+                            backgroundColor: "white",
+                            borderRadius: "50%",
+                            padding: 0,
+                            marginLeft: "-9px",
+                        }}
                     />
                 )}
             </button>
 
             {/* Chat Panel */}
             {open && (
-                <div style={styles.panel}>
+                <div ref={panelRef} style={styles.panel}>
+                    {/* Header */}
                     <div style={styles.header}>
                         <span>Space Copilot • Welcome Darth Vader</span>
                         <span style={styles.pulse}>●</span>
                     </div>
 
-                    {/* Show About Omer only before first message */}
+                    {/* About section (shown before first message) */}
                     {!firstUserMsg && (
                         <div style={styles.aboutCard}>
-                            <div style={{ fontWeight: 700, marginBottom: 4 }}>About Omer Zahid</div>
-                            <div style={{ fontSize: 12, opacity: 0.9, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>
+                            <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                                About Omer Zahid
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: 12,
+                                    opacity: 0.9,
+                                    lineHeight: 1.45,
+                                    whiteSpace: "pre-wrap",
+                                }}
+                            >
                                 {ABOUT_OMER.trim()}
                             </div>
                         </div>
                     )}
 
+                    {/* Message List */}
                     <div ref={listRef} style={styles.list}>
-                        {msgs.filter((m) => m.role !== "system").map((m, i) => (
-                            <div key={i} style={m.role === "user" ? styles.userMsg : styles.botMsg}>
-                                <div style={styles.bubble}>{m.content}</div>
-                            </div>
-                        ))}
+                        {msgs
+                            .filter((m) => m.role !== "system")
+                            .map((m, i) => (
+                                <div
+                                    key={i}
+                                    style={
+                                        m.role === "user"
+                                            ? styles.userMsg
+                                            : styles.botMsg
+                                    }
+                                >
+                                    <div style={styles.bubble}>
+                                        {m.content}
+                                    </div>
+                                </div>
+                            ))}
                     </div>
 
+                    {/* Input + Send */}
                     <div style={styles.inputRow}>
                         <textarea
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKey}
-                            placeholder={busy ? "Plotting a course…" : "Ask about this site or the galaxy…"}
+                            placeholder={
+                                busy
+                                    ? "Plotting a course…"
+                                    : "Ask about this site or the galaxy…"
+                            }
                             disabled={busy}
                             rows={2}
                             style={styles.textarea}
                         />
-                        <button onClick={send} disabled={busy || !input.trim()} style={styles.sendBtn}>
+                        <button
+                            onClick={send}
+                            disabled={busy || !input.trim()}
+                            style={styles.sendBtn}
+                        >
                             {busy ? "…" : "Send"}
                         </button>
                     </div>
@@ -222,7 +333,9 @@ export default function SpaceChatWebLLM() {
     );
 }
 
-/* === STYLES === */
+/* ==========================================================
+   🎨 STYLES
+   ========================================================== */
 const styles = {
     fab: {
         position: "fixed",
@@ -238,6 +351,7 @@ const styles = {
         fontSize: 22,
         cursor: "pointer",
         boxShadow: "0 0 18px rgba(80,160,255,0.35)",
+        transition: "transform 0.2s ease, opacity 0.2s ease",
     },
     panel: {
         position: "fixed",
@@ -249,12 +363,14 @@ const styles = {
         display: "flex",
         flexDirection: "column",
         border: "1px solid rgba(120,200,255,0.35)",
-        background: "linear-gradient(180deg,rgba(5,10,24,0.96),rgba(5,8,18,0.96))",
+        background:
+            "linear-gradient(180deg,rgba(5,10,24,0.96),rgba(5,8,18,0.96))",
         borderRadius: 14,
         overflow: "hidden",
         boxShadow:
             "0 0 32px rgba(80,160,255,0.25), inset 0 0 24px rgba(40,80,160,0.12)",
         backdropFilter: "blur(6px)",
+        animation: "fadeIn 0.3s ease",
     },
     header: {
         padding: "10px 12px",
@@ -319,7 +435,14 @@ const styles = {
     },
 };
 
-// optional animation
+/* ==========================================================
+   ✨ ANIMATIONS
+   ========================================================== */
 const styleEl = document.createElement("style");
-styleEl.innerHTML = `@keyframes load { from { width: 18%; } to { width: 78%; } }`;
+styleEl.innerHTML = `
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+`;
 document.head.appendChild(styleEl);
