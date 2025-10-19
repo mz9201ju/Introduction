@@ -90,6 +90,8 @@ export default class Engine {
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onTouchMove = this.onTouchMove.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
+        this.onMultiTouch = this.onMultiTouch.bind(this);
+
 
         // Init sizing + listeners
         this.onResize();
@@ -110,8 +112,30 @@ export default class Engine {
         this.canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
         this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
 
+        // ✅ NEW: detect multi-touch for restart / R-trigger
+        window.addEventListener("touchstart", this.onMultiTouch, { passive: false });
+
         this.raf = requestAnimationFrame(this.frame);
     }
+
+    /** 🖐 Multi-touch gestures
+ * - Two fingers: hard reset game
+ * - Three fingers: dispatch synthetic "R" key event
+ */
+    onMultiTouch(e) {
+        const touches = e.touches?.length || 0;
+        if (touches === 2) {
+            e.preventDefault();
+            console.log("✌️ Two-finger restart");
+            this.resetGame();
+        } else if (touches === 3) {
+            e.preventDefault();
+            console.log("🤟 Three-finger 'R' event");
+            const evt = new KeyboardEvent("keydown", { key: "r", code: "KeyR" });
+            window.dispatchEvent(evt);
+        }
+    }
+
 
     /** Clean teardown: cancel frame + detach listeners. */
     destroy() {
@@ -126,6 +150,7 @@ export default class Engine {
         this.canvas.removeEventListener("touchstart", this.onTouchMove);
         this.canvas.removeEventListener("touchmove", this.onTouchMove);
         this.canvas.removeEventListener("touchend", this.onTouchEnd);
+        window.removeEventListener("touchstart", this.onMultiTouch);
     }
 
     // ----------------------------
@@ -559,25 +584,54 @@ export default class Engine {
     // UI overlays
     // ----------------------------
 
-    /** Non-intrusive "Game Over" overlay (keeps scene beneath). */
+    /** ⚰️ Game Over overlay — adaptive for desktop/mobile */
     drawGameOver(ctx) {
         ctx.save();
+
+        // Semi-transparent dark overlay to keep background visible
         ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, 0, this.bg.W, this.bg.H);
 
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
+        // 🩸 Main title
         ctx.font = "bold 56px system-ui";
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(255,0,0,0.9)";
+        ctx.shadowBlur = 20;
         ctx.fillText("GAME OVER", this.bg.CX, this.bg.CY - 10);
 
+        // 🔍 Detect device type
+        const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        const isMobile =
+            /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+                navigator.userAgent
+            );
+
+        let restartMessage = "Press R to restart"; // Default desktop
+        if (isMobile && isTouch) {
+            restartMessage = "✌️ Two-finger tap to restart";
+        } else if (isTouch) {
+            restartMessage = "Press R or tap ✌️ to restart";
+        }
+
+        // 🕹️ Subtext
         ctx.font = "20px system-ui";
-        ctx.fillText("Press R to restart", this.bg.CX, this.bg.CY + 28);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillText(restartMessage, this.bg.CX, this.bg.CY + 28);
+
+        const alpha = 0.6 + 0.4 * Math.sin(Date.now() / 400);
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.fillText(restartMessage, this.bg.CX, this.bg.CY + 28);
+
+
         ctx.restore();
     }
 
-    /** Pulsing "VICTORY!" + subtle celebration. */
+
+    /** Pulsing "VICTORY!" + adaptive celebration message */
     drawVictory(ctx, dt) {
         this.victoryT += dt;
 
@@ -590,18 +644,36 @@ export default class Engine {
         ctx.translate(this.bg.CX, this.bg.CY);
         ctx.scale(pulse, pulse);
 
+        // 🌟 Title
         ctx.font = "bold 64px system-ui";
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.shadowColor = "rgba(255,255,150,0.9)";
         ctx.shadowBlur = 30;
         ctx.fillText("VICTORY!", 0, 0);
 
+        // 🔍 Detect device type
+        const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        const isMobile =
+            /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+                navigator.userAgent
+            );
+
+        let message = "Press R to restart"; // default for desktop
+        if (isMobile && isTouch) {
+            message = "✌️ Two-finger tap to restart";
+        } else if (isTouch) {
+            message = "Press R or tap ✌️ to restart";
+        }
+
+        // 🪶 Subtext message
         ctx.font = "20px system-ui";
         ctx.shadowBlur = 0;
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
-        ctx.fillText("Press R to restart", 0, 52);
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillText(message, 0, 52);
+
         ctx.restore();
     }
+
 
     // ----------------------------
     // Cleanup / culling
@@ -618,7 +690,7 @@ export default class Engine {
             if (!this.inBossPhase && !this.justReset) {
                 this.killCount++;
                 this.onKill?.({ kills: this.killCount, absolute: true });
-                if (this.killCount >= 20) this.enterBossPhase();
+                if (this.killCount >= 10) this.enterBossPhase();
             }
         }
 
