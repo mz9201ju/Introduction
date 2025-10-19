@@ -14,6 +14,7 @@ import bossImage3 from "../assets/star.png";
  */
 export default class Engine {
     constructor(canvas, { onKill, onReset } = {}) {
+        this.maxLevels = 3;
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
@@ -26,6 +27,12 @@ export default class Engine {
         this.victoryT = 0;
         this.justReset = false;
         this.playerHitCount = 100;
+
+        // 🎬 Level Transition Overlay
+        this.showLevelText = true;
+        this.levelTextTimer = 0;
+        this.levelTextDuration = 2.0; // seconds to show level banner
+
 
         // iOS Safari fix for touch drag
         this.canvas.style.touchAction = "none";
@@ -137,11 +144,17 @@ export default class Engine {
         this.inBossPhase = false;
         this.boss = null;
         this.killCount = 0;
+        this.killsThisLevel = 0;    // ✅ Reset kills this level
+        this.level = 1;             // ✅ Reset level back to 1
+        this.showLevelText = true;  // ✅ Show "LEVEL 1" banner again
+        this.levelTextTimer = 0;
+
         this.clearWorld();
         this.spawnTimer = 0;
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
         this.lastT = performance.now();
         this.justReset = true;
+
         // ✅ Emit all key stats on each update
         this.onKill?.({
             kills: this.killCount,
@@ -490,6 +503,30 @@ export default class Engine {
         ctx.restore();
     }
 
+    /** 🪩 Displays 'LEVEL X' overlay for a few seconds */
+    drawLevelText(ctx, dt) {
+        if (!this.showLevelText) return;
+
+        this.levelTextTimer += dt;
+        if (this.levelTextTimer > this.levelTextDuration) {
+            this.showLevelText = false;
+            return;
+        }
+
+        const alpha = Math.max(0, 1 - (this.levelTextTimer / this.levelTextDuration)); // fade out
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 72px system-ui";
+        ctx.fillStyle = "#fff";
+        ctx.shadowColor = "rgba(255,255,255,0.8)";
+        ctx.shadowBlur = 30;
+        ctx.fillText(`LEVEL ${this.level}`, this.bg.CX, this.bg.CY * 0.6);
+        ctx.restore();
+    }
+
+
     // ============================================================
     // ♻️ Cleanup + Culling
     // ============================================================
@@ -517,6 +554,10 @@ export default class Engine {
                     if (this.killsThisLevel >= 10 && this.level < this.maxLevels) {
                         this.level++;
                         this.killsThisLevel = 0;
+
+                        // 🪩 Show level-up overlay
+                        this.showLevelText = true;
+                        this.levelTextTimer = 0;
                         console.log(`🆙 Level Up → ${this.level}`);
                     } else if (this.level === this.maxLevels && this.killsThisLevel >= 10) {
                         this.enterBossPhase();
@@ -557,6 +598,7 @@ export default class Engine {
             for (const e of this.enemies) if (e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
         }
 
+        this.drawLevelText(ctx, dt);
         // Overlays + rendering
         if (this.victory) this.drawVictory(ctx, dt);
         for (const b of this.enemyBullets) this.renderer.drawEnemyBullet(ctx, b, dt);
