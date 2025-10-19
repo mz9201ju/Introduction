@@ -132,7 +132,15 @@ export default class Engine {
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
         this.lastT = performance.now();
         this.justReset = true;
-        this.onKill?.({ reset: true, kills: 0, absolute: true });
+        // ✅ Emit all key stats on each update
+        this.onKill?.({
+            kills: this.killCount,
+            playerHP: this.playerHitCount,
+            victory: this.victory,
+            loss: this.gameOver,
+            reset: this.justReset,
+        });
+
         this.onReset?.();
     }
 
@@ -401,8 +409,15 @@ export default class Engine {
             if (b.life <= 0) continue;
             if (this._isHit(this.cursorX, this.cursorY, b.x, b.y, R)) {
                 b.life = 0; this.triggerExplosion(this.cursorX, this.cursorY);
-                if (this.playerHitCount == 50) { this.gameOver = true; break; }
+                if (this.playerHitCount == 0) { this.gameOver = true; break; }
                 this.playerHitCount--;
+                this.onKill?.({
+                    kills: this.killCount,
+                    playerHP: this.playerHitCount,
+                    victory: this.victory,
+                    loss: this.gameOver,
+                });
+
             }
         }
     }
@@ -465,7 +480,14 @@ export default class Engine {
                 this.enemies.splice(i, 1);
                 if (!this.inBossPhase && !this.justReset) {
                     this.killCount++;
-                    this.onKill?.({ kills: this.killCount, absolute: true });
+                    // ✅ Emit all key stats on each update
+                    this.onKill?.({
+                        kills: this.killCount,
+                        playerHP: this.playerHitCount,
+                        victory: this.victory,
+                        loss: this.gameOver,
+                        reset: this.justReset,
+                    });
                     if (this.killCount >= 10) this.enterBossPhase();
                 }
             }

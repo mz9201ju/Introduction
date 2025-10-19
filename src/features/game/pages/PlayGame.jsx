@@ -5,20 +5,27 @@ import SpaceshipCursor from "@game/pages/SpaceshipCursor";
 
 export default function PlayGame() {
   const [showInstructions, setShowInstructions] = useState(true);
-  const [kills, setKills] = useState(0);
+  const [stats, setStats] = useState({
+    kills: 0,
+    playerHP: 100,
+    victory: false,
+    loss: false,
+  });
 
-  // ✅ Memoized so Engine doesn’t reinitialize
   const handleKill = useCallback((payload = {}) => {
-    const { reset, kills: k, absolute } = payload;
+    const { reset, kills, playerHP, victory, loss } = payload;
+
     if (reset) {
-      setKills(0);
+      setStats({ kills: 0, playerHP: 100, victory: false, loss: false });
       return;
     }
-    if (absolute && typeof k === "number") {
-      setKills(k);
-      return;
-    }
-    setKills((prev) => prev + 1);
+
+    setStats(prev => ({
+      kills: typeof kills === "number" ? kills : prev.kills,
+      playerHP: typeof playerHP === "number" ? playerHP : prev.playerHP,
+      victory: victory ?? prev.victory,
+      loss: loss ?? prev.loss,
+    }));
   }, []);
 
   /* ==========================================================
@@ -33,9 +40,9 @@ export default function PlayGame() {
     <div style={{ minHeight: "100vh" }}>
       {/* Global effects across all pages */}
       <SpaceshipCursor />
-      
+
+      <Scoreboard stats={stats} />
       <Starfield onKill={handleKill} />
-      <Scoreboard kills={kills} />
 
       {showInstructions && (
         <div
