@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import darth from "../features/game/assets/helmet.png";
 
-const PROXY_URL = "https://gh-ai-proxy.omer-mnsu.workers.dev/api";
+const PROXY_URL = "https://gh-ai-proxy.omer-mnsu.workers.dev/AI/chat";
 
 /* === PRIVATE KNOWLEDGE (never shown to user) === */
 const INITIAL_SITE_CONTEXT = {

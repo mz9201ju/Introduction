@@ -29,7 +29,7 @@ The goal is to create an immersive, space-inspired experience where visitors can
 
 ## 🛰️ AI Chatbot Integration
 
-The AI chatbot is powered through a **[proxy endpoint](https://gh-ai-proxy.omer-mnsu.workers.dev/api)** that securely connects to OpenAI.
+The AI chatbot is powered through a **[proxy endpoint](https://gh-ai-proxy.omer-mnsu.workers.dev/AI/chat)** that securely connects to OpenAI.
 
 ## ⚙️ Local Development
 
@@ -41,7 +41,7 @@ npm install
 ### 3️⃣ Run Locally
 npm run dev
 ### 4️⃣ Test the Proxy Endpoint
-curl -X POST "https://gh-ai-proxy.omer-mnsu.workers.dev/api" \
+curl -X POST "https://gh-ai-proxy.omer-mnsu.workers.dev/AI/chat" \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"Hello from local dev!"}]}'
 
