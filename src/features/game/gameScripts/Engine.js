@@ -38,6 +38,11 @@ export default class Engine {
         this.boss = null;
         this.nextEnemyAt = 0;
 
+        // 🆙 Level System
+        this.killsThisLevel = 0;
+        this.level = 1;
+        this.maxLevels = 3; // after 3 levels → boss phase
+
         // Randomize boss image
         const bossImages = [bossImage1, bossImage2, bossImage3];
         this.bossImg = new Image();
@@ -110,6 +115,11 @@ export default class Engine {
     _setCursor(x, y) { this.cursorX = x; this.cursorY = y; }
     _dist2(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return dx * dx + dy * dy; }
     _isHit(ax, ay, bx, by, radius) { return this._dist2(ax, ay, bx, by) <= radius * radius; }
+
+    /** 📈 Scales values based on current level (linear growth) */
+    _scaleByLevel(base, factor = 0.25) {
+        return base * (1 + factor * (this.level - 1));
+    }
 
     /** Device detection (centralized for reuse). */
     _deviceType() {
@@ -235,6 +245,7 @@ export default class Engine {
         const m = 40;
         let x, y;
 
+        // Pick random edge
         if (edge === 0) { x = Math.random() * W; y = -m; }
         else if (edge === 1) { x = W + m; y = Math.random() * H; }
         else if (edge === 2) { x = Math.random() * W; y = H + m; }
@@ -244,33 +255,39 @@ export default class Engine {
         const toCX = CX - x;
         const toCY = CY - y;
         const len = Math.hypot(toCX, toCY) || 1;
-        const vx = (toCX / len) * GAME.ENEMY_SPEED;
-        const vy = (toCY / len) * GAME.ENEMY_SPEED;
+
+        // ✅ Define speed BEFORE using it
+        const spd = this._scaleByLevel(GAME.ENEMY_SPEED);
+        const vx = (toCX / len) * spd;
+        const vy = (toCY / len) * spd;
+
+        // 🔥 Faster fire at higher levels
+        const fireMin = this._scaleByLevel(GAME.ENEMY_FIRE_MIN, -0.2);
+        const fireMax = this._scaleByLevel(GAME.ENEMY_FIRE_MAX, -0.2);
 
         const now = performance.now();
 
-        // ✅ Create full enemy object with all expected props
+        // ✅ Create full enemy object
         const enemy = makeEnemy({
             x,
             y,
             vx,
             vy,
-            spd: GAME.ENEMY_SPEED,
-            alive: true,           // must exist or won’t render
-            angle: 0,              // required for Renderer.rotate()
-            wobblePhase: 0,        // used in updateEnemies()
-            fireEvery: randBetween(GAME.ENEMY_FIRE_MIN, GAME.ENEMY_FIRE_MAX),
+            spd,
+            alive: true,
+            angle: 0,
+            wobblePhase: 0,
+            fireEvery: randBetween(fireMin, fireMax),
             nextFire: now + randBetween(200, 900),
         });
 
-        // 👇 Fix: entry boost to avoid edge-idle delay
+        // 👇 Entry boost to avoid idle spawn delay
         const ENTRY_BOOST = 1.8;
         enemy.x += vx * ENTRY_BOOST;
         enemy.y += vy * ENTRY_BOOST;
 
         this.enemies.push(enemy);
     }
-
 
 
     enemyFire(e) {
@@ -298,12 +315,17 @@ export default class Engine {
     doSpawning(dt) {
         if (this.inBossPhase) return;
         this.spawnTimer += dt * 1000;
-        if (this.spawnTimer >= this.nextSpawnIn) {
+
+        // ⏱️ Shorter spawn time at higher levels
+        const scaledSpawn = this._scaleByLevel(this.nextSpawnIn, -0.1);
+
+        if (this.spawnTimer >= scaledSpawn) {
             this.spawnTimer = 0;
             this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
             this.spawnEnemy();
         }
     }
+
 
     enterBossPhase() {
         if (this.inBossPhase) return;
@@ -488,7 +510,17 @@ export default class Engine {
                         loss: this.gameOver,
                         reset: this.justReset,
                     });
-                    if (this.killCount >= 10) this.enterBossPhase();
+
+                    // 🎯 Level Progression
+                    this.killsThisLevel++;
+
+                    if (this.killsThisLevel >= 10 && this.level < this.maxLevels) {
+                        this.level++;
+                        this.killsThisLevel = 0;
+                        console.log(`🆙 Level Up → ${this.level}`);
+                    } else if (this.level === this.maxLevels && this.killsThisLevel >= 10) {
+                        this.enterBossPhase();
+                    }
                 }
             }
         }
