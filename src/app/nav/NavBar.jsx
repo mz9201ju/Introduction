@@ -88,6 +88,7 @@ export default function NavBar() {
                             background: "transparent",
                             cursor: "pointer",
                             position: "relative",
+                            ...baseBtnStyle
                         }}
                     >
                         <span
