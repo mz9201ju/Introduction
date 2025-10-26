@@ -27,5 +27,12 @@ export default defineConfig({
         }
       }
     }
-  }
+  },
+  server: {
+    historyApiFallback: false,
+    fs: { strict: false },
+  },
+  preview: {
+    historyApiFallback: true, // ✅ this works for `vite preview` (post-build)
+  },
 });
