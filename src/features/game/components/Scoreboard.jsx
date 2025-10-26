@@ -14,7 +14,7 @@ export default function Scoreboard({ stats }) {
                 top: 18,
                 right: 100,
                 zIndex: 20,
-                padding: "10px 14px",
+                padding: "90px 14px",
                 color: "#e8f0ff",
                 fontWeight: 700,
                 textShadow: "0 1px 2px rgba(0,0,0,0.8)",
