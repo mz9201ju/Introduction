@@ -3,9 +3,9 @@
 # 🚀 Introduction — Omer Zahid
 Welcome to the **Introduction Project**, a personal portfolio site and interactive AI experience built by **Omer Zahid**.
 
-- **Resume:** [https://mz9201ju.github.io/Introduction/](https://mz9201ju.github.io/Introduction/)
-- **Projects for Businesses:** [https://mz9201ju.github.io/Introduction/about](https://mz9201ju.github.io/Introduction/about)
-- **PlayGame!** [https://mz9201ju.github.io/Introduction/darthVader](https://mz9201ju.github.io/Introduction/darthVader)
+- **Resume:** [https://www.omerzahid.com](https://www.omerzahid.com)
+- **Projects for Businesses:** [https://www.omerzahid.com/#/about](https://www.omerzahid.com/#/about)
+- **PlayGame!** [https://www.omerzahid.com/#/darthVader](https://www.omerzahid.com/#/darthVader)
 
 ## 🌌 Overview
 
