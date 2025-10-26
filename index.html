@@ -2,59 +2,109 @@
 <html lang="en">
 
 <head>
-  <title>Omer Zahid – Senior Software Engineer</title>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/spaceship.png" />
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://www.omerzahid.com/sitemap.xml">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <!-- 🧠 SEO Essentials -->
+  <!-- =========================================================
+       🧠 BASIC SEO & BRAND IDENTITY
+  ========================================================= -->
+  <title>Omer Zahid – Senior Software Engineer</title>
   <meta name="description"
     content="Official website of Omer Zahid, a Senior Software Engineer specializing in React, Spring Boot, and DevOps. Explore projects, resume, and contact info.">
   <meta name="keywords" content="Omer Zahid, Software Engineer, React Developer, Spring Boot, Azure DevOps, Portfolio">
   <meta name="author" content="Omer Zahid">
 
-  <!-- 🔗 Open Graph / Facebook -->
+  <!-- ✅ Canonical URL (prevents duplicate content penalties) -->
+  <link rel="canonical" href="https://omerzahid.com/">
+
+  <!-- ✅ Sitemap reference -->
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://www.omerzahid.com/sitemap.xml">
+
+  <!-- ✅ Favicon -->
+  <link rel="icon" type="image/png" href="/spaceship.png" />
+  <link rel="apple-touch-icon" href="/OMER_ZAHID.jpeg">
+
+  <!-- =========================================================
+       🔗 OPEN GRAPH (Facebook / LinkedIn / Slack / Discord)
+  ========================================================= -->
   <meta property="og:title" content="Omer Zahid – Senior Software Engineer">
   <meta property="og:description" content="Full-stack engineer crafting innovative digital experiences.">
   <meta property="og:url" content="https://omerzahid.com/">
   <meta property="og:type" content="profile">
-  <meta property="og:image" content="https://omerzahid.com/OMER_ZAHID.jpeg">
+  <meta property="og:image" content="https://omerzahid.com/OMER_ZAHID.jpeg?v=1">
   <meta property="profile:first_name" content="Omer">
   <meta property="profile:last_name" content="Zahid">
+  <meta property="og:locale" content="en_US">
 
-  <!-- 🐦 Twitter Cards -->
+  <!-- =========================================================
+       🐦 TWITTER CARDS (X)
+  ========================================================= -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Omer Zahid – Senior Software Engineer">
   <meta name="twitter:description" content="Full-stack engineer crafting innovative digital experiences.">
-  <meta name="twitter:image" content="https://omerzahid.com/OMER_ZAHID.jpeg">
+  <meta name="twitter:image" content="https://omerzahid.com/OMER_ZAHID.jpeg?v=1">
+  <meta name="twitter:site" content="@omerzahid">
+  <meta name="twitter:creator" content="@omerzahid">
 
-  <!-- 🧩 Structured Data (Schema.org Person) -->
+  <!-- =========================================================
+       🖼️ MICRODATA FALLBACK (helps Bing / Yandex / AI scrapers)
+  ========================================================= -->
+  <meta itemprop="name" content="Omer Zahid – Senior Software Engineer">
+  <meta itemprop="description" content="Full-stack engineer crafting innovative digital experiences.">
+  <meta itemprop="image" content="https://omerzahid.com/OMER_ZAHID.jpeg">
+
+  <!-- =========================================================
+       🧩 STRUCTURED DATA (JSON-LD)
+       - Person + Organization (Knowledge Graph Optimization)
+  ========================================================= -->
   <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Omer Zahid",
-      "alternateName": "Darth Vader",
-      "url": "https://omerzahid.com",
-      "image": "https://omerzahid.com/OMER_ZAHID.jpeg",
-      "jobTitle": "Senior Software Engineer",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Omer Zahid Labs"
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "name": "Omer Zahid",
+        "alternateName": "Darth Vader",
+        "url": "https://omerzahid.com",
+        "image": "https://omerzahid.com/OMER_ZAHID.jpeg",
+        "jobTitle": "Senior Software Engineer",
+        "description": "Senior Software Engineer specializing in React, Spring Boot, and DevOps automation. Creator of modern web projects like Space Nerd, ELIA Barber Shop, and Bell Aviation.",
+        "worksFor": { "@type": "Organization", "name": "Omer Zahid Labs" },
+        "sameAs": [
+          "https://www.linkedin.com/in/omer-zahid-developer/",
+          "https://github.com/mz9201ju",
+          "https://x.com/omerzahid",
+          "https://www.instagram.com/omerzahid"
+        ]
       },
-      "description": "Senior Software Engineer specializing in React, Spring Boot, and DevOps automation. Creator of modern web projects like Space Nerd, ELIA Barber Shop, and Bell Aviation.",
-      "sameAs": [
-        "https://www.linkedin.com/in/omer-zahid-developer/",
-        "https://github.com/mz9201ju",
-        "https://x.com/omerzahid",
-        "https://www.instagram.com/omerzahid"
-      ]
-    }
+      {
+        "@type": "Organization",
+        "name": "Omer Zahid Labs",
+        "url": "https://omerzahid.com",
+        "logo": "https://omerzahid.com/OMER_ZAHID.jpeg"
+      },
+      {
+        "@type": "WebSite",
+        "url": "https://omerzahid.com/",
+        "name": "Omer Zahid Portfolio",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Omer Zahid Labs",
+          "logo": { "@type": "ImageObject", "url": "https://omerzahid.com/OMER_ZAHID.jpeg" }
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://omerzahid.com/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  }
   </script>
 </head>
 
 <body>
+  <!-- ⚙️ React mounts here -->
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
