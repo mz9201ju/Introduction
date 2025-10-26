@@ -12,7 +12,7 @@ export default function Home() {
       {/* Simple Space Cursor */}
       <SimpleSpaceshipCursor />
       <main className="container">
-        <div className="grid">
+        <div className="grid" style={{ marginTop: "4rem" }}>
           <div>
             <Hero profile={profile} />
             <div style={{ height: 16 }} />
