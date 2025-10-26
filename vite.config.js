@@ -5,7 +5,7 @@ import compression from "vite-plugin-compression";
 
 export default defineConfig({
   plugins: [react(), compression({ algorithm: "brotliCompress" })],
-  base: "/Introduction/",
+  base: "/",
   resolve: {
     alias: {
       "@game": path.resolve(__dirname, "src/features/game"),
