@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { baseBtnStyle, activeBtnStyle } from "./navStyles";
 
@@ -10,10 +10,24 @@ const links = [
 
 export default function NavBar() {
     const [isOpen, setIsOpen] = useState(false);
+    const navRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (navRef.current && !navRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
 
     return (
         <>
             <nav
+                ref={navRef}
                 style={{
                     padding: "12px",
                     position: "sticky",
