@@ -36,8 +36,8 @@ body {
   background: #000;
   color: var(--ink);
   cursor: none;
+  /* hidden everywhere by default */
 }
-
 
 .container {
   max-width: 1100px;
@@ -45,13 +45,11 @@ body {
   padding: 24px;
 }
 
-
 .grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 24px;
 }
-
 
 .card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
@@ -60,7 +58,6 @@ body {
   padding: 20px;
   backdrop-filter: blur(6px);
 }
-
 
 .h {
   margin: 0 0 8px;
@@ -82,7 +79,6 @@ body {
   margin-top: 18px;
 }
 
-
 .badges {
   display: flex;
   flex-wrap: wrap;
@@ -98,7 +94,6 @@ body {
   font-size: 12px;
 }
 
-
 ul.clean {
   list-style: none;
   padding-left: 0;
@@ -109,14 +104,12 @@ ul.clean li {
   line-height: 1.4;
 }
 
-
 .footer {
   opacity: 0.7;
   font-size: 12px;
   text-align: center;
   margin-top: 24px;
 }
-
 
 /* small screens */
 @media (max-width: 900px) {
@@ -125,9 +118,7 @@ ul.clean li {
   }
 }
 
-/* ===== root-level spaceship cursor fix ===== */
-
-/* Completely hide system cursor across the site */
+/* ===== Global cursor hiding (default) ===== */
 html,
 body,
 :root,
@@ -136,14 +127,14 @@ body,
   cursor: none !important;
 }
 
-/* Keep normal cursor for typing areas */
+/* Typing fields */
 input,
 textarea,
 [contenteditable="true"] {
   cursor: text !important;
 }
 
-/* Ensure links and buttons don’t override with pointer */
+/* Prevent link hover cursors globally */
 a,
 a:hover,
 a:focus,
@@ -154,7 +145,7 @@ button:focus,
   cursor: none !important;
 }
 
-/* Optional: fix for canvases or special game areas */
+/* For canvas areas (like your game) */
 canvas {
   cursor: none !important;
   touch-action: none;
@@ -164,8 +155,7 @@ canvas {
   pointer-events: auto;
 }
 
-
-/* Safety: prevent custom cursor container from blocking clicks */
+/* Prevent custom cursor container blocking clicks */
 .spaceship-cursor {
   position: fixed;
   top: 0;
@@ -178,8 +168,21 @@ canvas {
   overscroll-behavior: none;
 }
 
-/* prevents rubber-band while dragging */
+/* Prevent rubber-band while dragging */
+#game-root,
+canvas {
+  touch-action: none;
+}
 
-#game-root, canvas {
-  touch-action: none;     /* 👈 allows touchmove + prevents scroll */
+/* ========================================================= */
+/* ✅ Cursor visible ONLY on AskMe page */
+/* ========================================================= */
+
+.askme-wrapper,
+.askme-wrapper *,
+.askme-wrapper a,
+.askme-wrapper button,
+.askme-wrapper [role="button"] {
+  cursor: auto !important;
+  /* Bring back normal cursor just here */
 }

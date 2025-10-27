@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "@resume/pages/Home";
 import About from "@resume/pages/About";
 import PlayGame from "@game/pages/PlayGame";
+import AskMe from "../../features/askme/AskMe"
 
 export default function AppRoutes() {
     return (
@@ -9,6 +10,7 @@ export default function AppRoutes() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/darthVader" element={<PlayGame />} />
+            <Route path="/ask-me" element={<AskMe />} />
             <Route path="*" element={<Home />} />
         </Routes>
     );

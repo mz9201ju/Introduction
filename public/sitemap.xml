@@ -12,9 +12,15 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Ask Me Page -->
+  <url>
+    <loc>https://www.omerzahid.com/#/ask-me</loc>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Game Page -->
   <url>
     <loc>https://www.omerzahid.com/#/darthVader</loc>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
   </url>
 </urlset>

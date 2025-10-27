@@ -5,6 +5,7 @@ import { baseBtnStyle, activeBtnStyle } from "./navStyles";
 const links = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
+    { to: "/ask-me", label: "Ask Me" },
     { to: "/darthVader", label: "PlayGame!" },
 ];
 
