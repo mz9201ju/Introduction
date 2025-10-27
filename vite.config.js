@@ -20,7 +20,6 @@ export default defineConfig({
     alias: {
       "@game": path.resolve(__dirname, "src/features/game"),
       "@resume": path.resolve(__dirname, "src/features/resume"),
-      "@shared": path.resolve(__dirname, "src/shared"),
       "@app": path.resolve(__dirname, "src/app")
     }
   },

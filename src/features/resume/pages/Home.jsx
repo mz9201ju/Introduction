@@ -2,7 +2,7 @@ import Hero from "@resume/components/Hero";
 import Experience from "@resume/components/Experience";
 import Skills from "@resume/components/Skills";
 import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
-import SimpleSpaceshipCursor from "@shared/SimpleSpaceshipCursor";
+import SimpleSpaceshipCursor from "@resume/pages/SimpleSpaceshipCursor";
 // remove page-level CSS import; load index.css once in main.jsx
 
 
