@@ -1,10 +1,20 @@
 import { defineConfig } from "vite";
+import { visualizer } from "rollup-plugin-visualizer";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 import compression from "vite-plugin-compression";
 
 export default defineConfig({
-  plugins: [react(), compression({ algorithm: "brotliCompress" })],
+  plugins: [
+    react(),
+
+    // 🗜️ Generate BOTH Brotli (.br) and Gzip (.gz) assets
+    compression({ algorithm: "brotliCompress", ext: ".br" }),
+    compression({ algorithm: "gzip", ext: ".gz" }),
+
+    // 📊 Opens visual bundle report after build
+    visualizer({ open: true }),
+  ],
   base: "/",
   resolve: {
     alias: {
@@ -16,6 +26,8 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1500,
+    minify: "terser",
+    terserOptions: { compress: { drop_console: true } },
     assetsInlineLimit: 0,
     rollupOptions: {
       output: {
@@ -24,15 +36,15 @@ export default defineConfig({
             if (id.includes("react")) return "react-vendor";
             return "vendor";
           }
-        }
-      }
-    }
+        },
+      },
+    },
   },
   server: {
     historyApiFallback: false,
     fs: { strict: false },
   },
   preview: {
-    historyApiFallback: true, // ✅ this works for `vite preview` (post-build)
+    historyApiFallback: true, // ✅ Works for vite preview (SPA routing)
   },
 });
