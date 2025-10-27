@@ -30,7 +30,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="footer">© {new Date().getFullYear()} {profile.name} — built with React & Vite</div>
+        <div className="footer">© {new Date().getFullYear()} {profile.name} — Senior Software Engineer</div>
       </main>
     </>
   );
