@@ -139,6 +139,28 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
+     📱 Mobile-only gentle lift logic
+     ========================================================== */
+  const [isTouching, setIsTouching] = useState(false);
+
+  useEffect(() => {
+    const handleTouchStart = () => {
+      if (window.innerWidth < 768) setIsTouching(true);
+    };
+    const handleTouchEnd = () => {
+      if (window.innerWidth < 768) setIsTouching(false);
+    };
+
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
+
+  /* ==========================================================
      🧩 Render spaceship cursor
      ========================================================== */
   return createPortal(
@@ -151,13 +173,13 @@ export default function SpaceshipCursor() {
         top: pos.y,
         width: 40,
         height: 40,
-        transform: "translate(-50%, -50%)",
+        transform: `translate(-50%, calc(-50% ${isTouching ? "- 30px" : ""}))`,
         pointerEvents: "none",
         zIndex: 2147483647,
         willChange: "transform",
         userSelect: "none",
         WebkitTouchCallout: "none",
-        transition: "transform 0.05s linear",
+        transition: "transform 0.3s ease-out",
         filter:
           color === "red"
             ? "drop-shadow(0 0 10px rgba(255,0,0,0.9)) saturate(150%)"
