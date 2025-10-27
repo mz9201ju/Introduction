@@ -18,7 +18,6 @@ export default class Engine {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
-        this.onReset = onReset;
 
         // --- Game State ---
         this.killCount = 0;
@@ -164,7 +163,8 @@ export default class Engine {
             reset: this.justReset,
         });
 
-        this.onReset?.();
+        cancelAnimationFrame(this.raf); // 🧹 stop old loop if any
+        this.raf = requestAnimationFrame(this.frame); // 🔄 start fresh
     }
 
     // ============================================================
@@ -607,7 +607,11 @@ export default class Engine {
         this.checkPlayerHit();
 
         for (const ex of this.explosions) { ex.t += dt; this.renderer.drawExplosion(ctx, ex, dt); }
-        if (this.gameOver) this.drawGameOver(ctx);
+        if (this.gameOver) {
+            this.drawGameOver(ctx);
+            this.justReset = true;
+            return; // 🧊 stop loop — no new frame requested
+        }
 
         this.cull();
         this.justReset = false;
