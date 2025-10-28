@@ -7,7 +7,38 @@ export default function AskMe() {
   const endRef = useRef(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    const chatArea = endRef.current?.parentElement;
+    if (!chatArea) return;
+
+    let isUserScrolling = false;
+    let frame;
+
+    const handleUserScroll = () => {
+      isUserScrolling = true;
+      // after a few seconds of no activity, re-enable auto scroll
+      clearTimeout(chatArea._scrollTimeout);
+      chatArea._scrollTimeout = setTimeout(() => {
+        isUserScrolling = false;
+      }, 2500);
+    };
+
+    const smoothFollow = () => {
+      if (!isUserScrolling) {
+        const target = chatArea.scrollHeight - chatArea.clientHeight;
+        const delta = target - chatArea.scrollTop;
+        chatArea.scrollTop += delta * 0.2; // smooth ease
+      }
+      frame = requestAnimationFrame(smoothFollow);
+    };
+
+    chatArea.addEventListener("scroll", handleUserScroll);
+    frame = requestAnimationFrame(smoothFollow);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      chatArea.removeEventListener("scroll", handleUserScroll);
+      clearTimeout(chatArea._scrollTimeout);
+    };
   }, [messages, isTyping]);
 
   useEffect(() => {
