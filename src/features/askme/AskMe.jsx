@@ -34,7 +34,7 @@ export default function AskMe() {
     z-index: 0;
     height: 100vh;
     overflow: hidden;
-    background: radial-gradient(circle at center, #002200 0%, #000000 90%) !important;
+    background: transparent !important; /* 👈 make it see-through */
     font-family: monospace !important;
     color: #00ff99;
     cursor: auto !important;
@@ -199,10 +199,67 @@ export default function AskMe() {
       font-size: 0.9rem;
     }
   }
+      /* === Matrix Falling Code Background === */
+    .matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1 !important;  /* 👈 Move it behind everything */
+    width: 100%;
+    height: 100%;
+    background: black;
+    pointer-events: none !important;
+  }
   `;
     document.head.appendChild(style);
     return () => style.remove();
   }, []);
+
+  // === 💻 Matrix Falling Code Background ===
+  useEffect(() => {
+    const canvas = document.createElement("canvas");
+    canvas.className = "matrix-bg";
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+    const fontSize = 14;
+    const columns = Math.floor(width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#00ff99";
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = Math.random() > 0.5 ? "1" : "0";
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    const interval = setInterval(draw, 33);
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", handleResize);
+      canvas.remove();
+    };
+  }, []);
+
 
   const askAI = async () => {
     if (!input.trim()) return;
