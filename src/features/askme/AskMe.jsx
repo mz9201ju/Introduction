@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 
 export default function AskMe() {
   const [input, setInput] = useState("");
@@ -65,52 +66,49 @@ export default function AskMe() {
     z-index: 0;
     height: 100vh;
     overflow: hidden;
-    background: transparent !important; /* 👈 make it see-through */
+    background: transparent !important;
     font-family: monospace !important;
     color: #00ff99;
-    cursor: auto !important;
+    cursor: none !important; /* 👈 restore default */
   }
 
-    html,
-    body,
-    :root,
-    #root,
-    * {
+  html,
+  body,
+  :root,
+  #root,
+  * {
+    cursor: none !important; /* 👈 restore normal cursor globally */
+  }
+
+  a,
+  a:hover,
+  a:focus,
+  button,
+  button:hover,
+  button:focus,
+  [role="button"] {
+    cursor: pointer !important; /* 👈 clickable elements show pointer hand */
+  }
+
+  canvas {
     cursor: auto !important;
-    }
+    touch-action: none;
+    display: block;
+    position: relative;
+    z-index: 9999 !important;
+    pointer-events: auto;
+  }
 
-    a,
-    a:hover,
-    a:focus,
-    button,
-    button:hover,
-    button:focus,
-    [role="button"] {
-    cursor: auto !important;
-    }
-
-    /* For canvas areas (like your game) */
-    canvas {
-        cursor: auto !important;
-        touch-action: none;
-        display: block;
-        position: relative;
-        z-index: 9999 !important;
-        pointer-events: auto;
-    }
-
-
-  /* === Spaceship cursor stays top but only inside AskMe === */
   .askme-wrapper canvas,
   .askme-wrapper .spaceship-cursor,
   .askme-wrapper #spaceship-cursor {
     position: fixed !important;
     inset: 0;
     pointer-events: none !important;
-    z-index: 99999 !important; /* ✅ on top of nav + send button */
+    z-index: 99999 !important;
+    cursor: none !important; /* 👈 keep normal cursor */
   }
 
-  /* === Navbar + buttons clickable === */
   .askme-wrapper nav,
   .askme-wrapper button,
   .askme-wrapper .navbar,
@@ -118,7 +116,7 @@ export default function AskMe() {
   .askme-wrapper .send-button {
     position: relative !important;
     z-index: 2 !important;
-    cursor: pointer !important;
+    cursor: pointer !important; /* 👈 normal button cursor */
   }
 
   /* === Terminal === */
@@ -337,39 +335,42 @@ export default function AskMe() {
   };
 
   return (
-    <div className="askme-wrapper">
-      <div className="ask-omer-page">
-        <div className="terminal-card">
-          <div className="matrix-title">OMER-AI TERMINAL v1.0</div>
+    <>
+      <SimpleSpaceshipCursor />
+      <div className="askme-wrapper">
+        <div className="ask-omer-page">
+          <div className="terminal-card">
+            <div className="matrix-title">OMER-AI TERMINAL v1.0</div>
 
-          <div className="chat-area">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`mb-2 ${msg.role === "user" ? "text-blue-400" : "text-green-400"}`}
-              >
-                <span className="opacity-70">
-                  {msg.role === "user" ? "🧑 YOU" : "🤖 OMER-AI"}:
-                </span>{" "}
-                <span className="whitespace-pre-wrap">{msg.content}</span>
-              </div>
-            ))}
-            {isTyping && <div className="text-green-500 animate-pulse">▌</div>}
-            <div ref={endRef} />
-          </div>
+            <div className="chat-area">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`mb-2 ${msg.role === "user" ? "text-blue-400" : "text-green-400"}`}
+                >
+                  <span className="opacity-70">
+                    {msg.role === "user" ? "🧑 YOU" : "🤖 OMER-AI"}:
+                  </span>{" "}
+                  <span className="whitespace-pre-wrap">{msg.content}</span>
+                </div>
+              ))}
+              {isTyping && <div className="text-green-500 animate-pulse">▌</div>}
+              <div ref={endRef} />
+            </div>
 
-          <div className="input-section">
-            <textarea
-              aria-label="Ask Omer AI chat input"
-              placeholder="Type your question..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), askAI())}
-            />
-            <button onClick={askAI}>Send</button>
+            <div className="input-section">
+              <textarea
+                aria-label="Ask Omer AI chat input"
+                placeholder="Type your question..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), askAI())}
+              />
+              <button onClick={askAI}>Send</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

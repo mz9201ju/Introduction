@@ -173,16 +173,3 @@ canvas {
 canvas {
   touch-action: none;
 }
-
-/* ========================================================= */
-/* ✅ Cursor visible ONLY on AskMe page */
-/* ========================================================= */
-
-.askme-wrapper,
-.askme-wrapper *,
-.askme-wrapper a,
-.askme-wrapper button,
-.askme-wrapper [role="button"] {
-  cursor: auto !important;
-  /* Bring back normal cursor just here */
-}

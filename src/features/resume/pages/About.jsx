@@ -1,4 +1,4 @@
-import SimpleSpaceshipCursor from "@resume/pages/SimpleSpaceshipCursor";
+import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 
 export default function About() {
     return (

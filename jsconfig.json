@@ -8,6 +8,9 @@
             "@resume/*": [
                 "src/features/resume/*"
             ],
+            "@features/*": [
+                "src/features/*"
+            ],
             "@app/*": [
                 "src/app/*"
             ]
