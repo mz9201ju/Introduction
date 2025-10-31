@@ -6,6 +6,7 @@ export default function AskMe() {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const endRef = useRef(null);
+  const [isMatrixActive, setIsMatrixActive] = useState(false);
 
   useEffect(() => {
     const chatArea = endRef.current?.parentElement;
@@ -244,8 +245,10 @@ export default function AskMe() {
     return () => style.remove();
   }, []);
 
-  // === 💻 Matrix Falling Code Background ===
+  // === 💻 Matrix Falling Code Background (controlled) ===
   useEffect(() => {
+    if (!isMatrixActive) return; // Only run when active
+
     const canvas = document.createElement("canvas");
     canvas.className = "matrix-bg";
     document.body.appendChild(canvas);
@@ -257,24 +260,22 @@ export default function AskMe() {
     const columns = Math.floor(width / fontSize);
     const drops = Array(columns).fill(1);
 
+    let frame;
     function draw() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
       ctx.fillRect(0, 0, width, height);
       ctx.fillStyle = "#00ff99";
       ctx.font = `${fontSize}px monospace`;
-
       for (let i = 0; i < drops.length; i++) {
         const text = Math.random() > 0.5 ? "1" : "0";
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
+        if (drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
       }
+      frame = requestAnimationFrame(draw);
     }
 
-    const interval = setInterval(draw, 33);
+    draw();
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
@@ -283,12 +284,11 @@ export default function AskMe() {
     window.addEventListener("resize", handleResize);
 
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
       canvas.remove();
     };
-  }, []);
-
+  }, [isMatrixActive]);
 
   const askAI = async () => {
     if (!input.trim()) return;
@@ -296,6 +296,7 @@ export default function AskMe() {
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setIsTyping(true);
+    setIsMatrixActive(true); // 🔥 Start matrix when asking
 
     try {
       const res = await fetch("https://gh-ai-proxy.omer-mnsu.workers.dev/AI/ask", {
@@ -304,8 +305,7 @@ export default function AskMe() {
         body: JSON.stringify({ question: input }),
       });
       const data = await res.json();
-      const text =
-        data.choices?.[0]?.message?.content || "⚠️ No response from AI.";
+      const text = data.choices?.[0]?.message?.content || "⚠️ No response from AI.";
       typeEffect(text);
     } catch (err) {
       console.error(err);
@@ -330,6 +330,7 @@ export default function AskMe() {
       if (i >= text.length) {
         clearInterval(interval);
         setIsTyping(false);
+        setIsMatrixActive(false); // 🛑 Stop matrix when AI done typing
       }
     }, 15);
   };
