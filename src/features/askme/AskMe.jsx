@@ -245,7 +245,7 @@ export default function AskMe() {
     return () => style.remove();
   }, []);
 
-  // === 💻 Matrix Falling Code Background (controlled) ===
+  // === 💻 Matrix Falling Code Background (controlled, smooth fade) ===
   useEffect(() => {
     if (!isMatrixActive) return; // Only run when active
 
@@ -283,10 +283,18 @@ export default function AskMe() {
     };
     window.addEventListener("resize", handleResize);
 
+    // 🪄 Fade-out animation on cleanup
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
-      canvas.remove();
+
+      // smooth fade instead of instant removal
+      canvas.style.transition = "opacity 1s ease-out";
+      canvas.style.opacity = "0";
+
+      setTimeout(() => {
+        canvas.remove();
+      }, 1000); // wait for fade to finish before removing
     };
   }, [isMatrixActive]);
 
