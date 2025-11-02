@@ -41,9 +41,10 @@ export const baseBtnStyle = {
   // Smooth feel
   transition: "transform 180ms ease, filter 180ms ease, box-shadow 220ms ease",
 
-  // 🎨 Animated layered gradients (aurora vibe)
-  background: [
-    // moving aurora layer
+  // 🎨 Replace shorthand 'background' with explicit longhands:
+  backgroundColor: "rgba(10,16,60,0.95)", // fallback base color
+  backgroundImage: [
+    // moving aurora layer (top)
     "linear-gradient(135deg, rgba(30,50,130,0.95) 0%, rgba(10,16,60,0.95) 100%)",
     // color wash that drifts
     "radial-gradient(120% 120% at 25% 25%, rgba(80,140,255,0.22) 0%, rgba(0,0,0,0) 60%)",
@@ -66,11 +67,16 @@ export const baseBtnStyle = {
 
 // Active: brighter neon, slight scale-up, crisper halo
 export const activeBtnStyle = {
-  background: [
+  // use longhand backgroundImage here too (no shorthand)
+  backgroundColor: "rgba(18,26,110,0.96)",
+  backgroundImage: [
     "linear-gradient(135deg, rgba(55,95,255,0.96) 0%, rgba(18,26,110,0.96) 100%)",
     "radial-gradient(120% 120% at 30% 30%, rgba(120,190,255,0.30) 0%, rgba(0,0,0,0) 60%)",
     "radial-gradient(80% 60% at 50% 120%, rgba(140,210,255,0.22) 0%, rgba(0,0,0,0) 70%)",
   ].join(", "),
+  backgroundBlendMode: "screen, lighten, normal",
+  backgroundSize: "200% 200%, 180% 180%, 100% 100%",
+
   boxShadow: "0 0 26px rgba(120,190,255,1), 0 0 56px rgba(90,160,255,.85)",
   textShadow: "0 0 14px rgba(210,230,255,1), 0 0 26px rgba(140,170,255,.9)",
   transform: "scale(1.035)",
