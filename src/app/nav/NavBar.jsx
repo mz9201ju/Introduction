@@ -319,10 +319,8 @@ export default function NavBar() {
                 left: 0,
                 width: "100%",
                 zIndex: 1000,
-                background: compactMode ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.3)",
                 padding: compactMode ? "6px 10px" : "12px 10px",
                 transition: "all 0.3s ease-in-out",
-                boxShadow: compactMode ? "0 2px 6px rgba(0,0,0,0.3)" : "none",
                 marginTop: "27px",
             }}
         >
