@@ -1,4 +1,6 @@
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
+import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
+import Footer from "@app/nav/Footer"
 
 export default function About() {
     return (
@@ -191,6 +193,7 @@ export default function About() {
                     <p>React • Vite • Tailwind</p>
                 </div>
             </section>
+            <Footer profile={profile}/>
         </div>
     );
 }

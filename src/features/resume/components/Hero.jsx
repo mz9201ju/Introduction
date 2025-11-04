@@ -111,9 +111,6 @@ export default function Hero({ profile }) {
             <p style={{ marginTop: 14, color: "var(--ink)" }}>{profile.blurb}</p>
 
             <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
-                <StyledLink href={profile.links.email} label="Email" isEmail />
-                <StyledLink href={profile.links.linkedin} label="LinkedIn" />
-                <StyledLink href={profile.links.github} label="GitHub" />
                 <MeetingInvite />
             </div>
         </header>

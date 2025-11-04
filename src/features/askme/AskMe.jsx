@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
+import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
+import Footer from "@app/nav/Footer"
 
 export default function AskMe() {
   const [input, setInput] = useState("");
@@ -378,6 +380,7 @@ export default function AskMe() {
               <button onClick={askAI}>Send</button>
             </div>
           </div>
+          <Footer profile={profile}/>
         </div>
       </div>
     </>

@@ -3,6 +3,7 @@ import Experience from "@resume/components/Experience";
 import Skills from "@resume/components/Skills";
 import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
+import Footer from "@app/nav/Footer"
 // remove page-level CSS import; load index.css once in main.jsx
 
 
@@ -30,7 +31,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="footer">© {new Date().getFullYear()} {profile.name} — Senior Software Engineer</div>
+        <Footer profile={profile}/>
       </main>
     </>
   );

@@ -1,0 +1,79 @@
+:root {
+    --bg: #0b1020;
+    /* deep space */
+    --card: #121936;
+    /* space navy */
+    --ink: #e6ecff;
+    /* off white */
+    --muted: #9db2ff;
+    /* soft blue */
+    --accent: #8ab4ff;
+    /* neon-ish */
+}
+
+/* Footer text */
+.footer {
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: var(--muted);
+}
+
+/* Social Links Section */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Social Button Styles */
+.social-button {
+    background-color: var(--accent);
+    color: var(--ink);
+    padding: 12px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Social Button Hover Effects */
+.social-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Specific Social Button Colors */
+.social-button.github {
+    background-color: #333;
+    /* Dark background for GitHub */
+}
+
+.social-button.linkedin {
+    background-color: #0077b5;
+    /* LinkedIn blue */
+}
+
+.social-button.youtube {
+    background-color: #ff0000;
+    /* YouTube red */
+}
+
+.social-button.facebook {
+    background-color: #1877f2;
+    /* Facebook blue */
+}
+
+.social-button.email {
+    background-color: #d14836;
+    /* Email red */
+}
+
+/* Font Awesome icon size adjustment */
+.fab,
+.fas {
+    font-size: 20px;
+}

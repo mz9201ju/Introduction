@@ -7,8 +7,10 @@ export const profile = {
         Adept at embedding AI/ML workflows into CI/CD pipelines for continuous training, validation, and deployment. Experienced in Agile frameworks including Scrum and Kanban, managing multi-program sprints and delivering iterative solutions with measurable performance gains. Advanced scripting in YAML, PowerShell, Bash, and JSON across both Windows and Linux environments. Known for leading modernization efforts, reducing latency, and improving system reliability. A proactive collaborator and mentor, fostering innovation through technical leadership, automation, and AI-driven process improvements across complex enterprise systems.",
     links: {
         linkedin: "https://linkedin.com/in/omer-zahid-developer",
-        github: "https://github.com/mz9201ju/Introduction",
-        email: "omer.zahid@mnsu.edu"
+        github: "https://github.com/mz9201ju    ",
+        email: "omer.zahid@mnsu.edu",
+        facebook: "https://www.facebook.com/abuyousufdeveloper",
+        youtube: "https://www.youtube.com/@AbuvYousuf"
     },
     skills: [
         "Java", "Spring Boot", "React", "Redux", "Python", "SQL",
