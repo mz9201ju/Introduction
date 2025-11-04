@@ -90,7 +90,7 @@ export default function AskMe() {
   button:hover,
   button:focus,
   [role="button"] {
-    cursor: pointer !important; /* 👈 clickable elements show pointer hand */
+    cursor: none !important; /* 👈 clickable elements show pointer hand */
   }
 
   canvas {
@@ -119,7 +119,7 @@ export default function AskMe() {
   .askme-wrapper .send-button {
     position: relative !important;
     z-index: 2 !important;
-    cursor: pointer !important; /* 👈 normal button cursor */
+    cursor: none !important; /* 👈 normal button cursor */
   }
 
   /* === Terminal === */

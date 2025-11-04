@@ -16,6 +16,7 @@ const links = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
     { to: "/ask-me", label: "Ask Me" },
+    { to: "/resume-generator", label: "Resume Generator" },
     { to: "/darthVader", label: "PlayGame!" },
 ];
 
@@ -56,12 +57,17 @@ export default function NavBar() {
     }, []);
 
     // ----------------------------
-    // Compact mode: on scroll or PlayGame page
+    // Compact mode: on scroll or PlayGame or Resume Generator Page
     // ----------------------------
     useEffect(() => {
         const handleScroll = () => {
             const scrollY = window.scrollY;
-            if (scrollY > 300 || location.pathname === "/darthVader") {
+            if (scrollY > 300 
+                || location.pathname === "/darthVader" 
+                || location.pathname === "/resume-generator"
+                || location.pathname === "/about"
+                || location.pathname === "/ask-me"
+            ) {
                 setCompactMode(true);
             } else {
                 setCompactMode(false);
@@ -152,7 +158,7 @@ export default function NavBar() {
 
         /* our custom translate panel */
         .nav-translate-panel { position: absolute; right: 10px; top: 56px; z-index: 1200; background: rgba(0,0,0,0.65); padding: 8px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-        .nav-translate-panel .lang-btn { margin: 6px 6px 0 0; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-weight:700; border:1px solid rgba(90,140,255,0.45); background: transparent; color: #e0e6ff; }
+        .nav-translate-panel .lang-btn { margin: 6px 6px 0 0; padding: 6px 10px; border-radius: 8px; cursor: none; font-weight:700; border:1px solid rgba(90,140,255,0.45); background: transparent; color: #e0e6ff; }
       `;
             const s = document.createElement("style");
             s.setAttribute("data-google-trans-style", "true");
@@ -359,7 +365,7 @@ export default function NavBar() {
                             height: 36,
                             border: "none",
                             background: "transparent",
-                            cursor: "pointer",
+                            cursor: "none",
                             position: "relative",
                             ...baseBtnStyle,
                         }}

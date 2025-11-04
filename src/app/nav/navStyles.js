@@ -36,7 +36,7 @@ export const baseBtnStyle = {
   fontWeight: 800,
   letterSpacing: "0.6px",
   border: "1px solid rgba(90,140,255,0.65)",
-  cursor: "pointer",
+  cursor: "none",
 
   // Smooth feel
   transition: "transform 180ms ease, filter 180ms ease, box-shadow 220ms ease",

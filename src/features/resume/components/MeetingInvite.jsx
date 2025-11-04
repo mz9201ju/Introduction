@@ -36,7 +36,7 @@ export default function MeetingInvite() {
                 borderRadius: "10px",
                 boxShadow: "0 0 10px #00bfff88, 0 0 30px #0077ff44",
                 transition: "all 0.3s ease",
-                cursor: "pointer",
+                cursor: "none",
                 textDecoration: "none",
                 display: "inline-block",
             }}

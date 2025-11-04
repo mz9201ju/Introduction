@@ -123,7 +123,7 @@
     border: none;
     border-radius: 12px;
     /* 👈 Adds rounded corners */
-    cursor: pointer;
+    cursor: none;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -141,7 +141,7 @@
     border: none;
     padding: 10px 20px;
     font-size: 16px;
-    cursor: pointer;
+    cursor: none;
     border-radius: 30px;
     /* 👈 Makes pill-shaped edges */
     transition: background-color 0.3s ease, transform 0.3s ease;
