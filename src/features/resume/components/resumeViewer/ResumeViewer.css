@@ -1,0 +1,47 @@
+/* Keep buttons aligned horizontally and vertically */
+.resume-viewer-container {
+    display: flex;
+    align-items: center;
+}
+
+/* Match Meet with Omer Zahid button exactly */
+.download-resume-btn {
+    background: #4285f4 radial-gradient(circle at 50% 50%, #00bfff, #0077ff 70%);
+    font-weight: 700;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00bfff88, 0 0 30px #0077ff44;
+    transition: all 0.3s ease;
+    cursor: none;
+    /* match UX */
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    white-space: nowrap;
+
+    /* Force identical button size */
+    min-width: 220px;
+    text-align: center;
+    height: 42px;
+    /* match height visually */
+    line-height: 22px;
+    /* vertical centering */
+}
+
+/* --- Responsive fix for mobile --- */
+@media (max-width: 600px) {
+    .resume-viewer-container {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .download-resume-btn {
+        font-size: 15px;
+        padding: 12px 22px;
+        width:74%;
+        height: auto;
+        min-width: unset;
+        text-align: center;
+    }
+}

@@ -1,4 +1,5 @@
 import MeetingInvite from "./MeetingInvite";
+import ResumeViewer from "./resumeViewer/ResumeViewer";
 
 
 // 🔹 Shared style (applies to all buttons/links)
@@ -120,8 +121,18 @@ export default function Hero({ profile }) {
             </div>
 
 
-            <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
+            <div
+                style={{
+                    marginTop: 14,
+                    display: "flex",
+                    gap: 16,
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
                 <MeetingInvite />
+                <ResumeViewer />
             </div>
         </header>
     );
