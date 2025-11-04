@@ -108,7 +108,17 @@ export default function Hero({ profile }) {
                 </div>
             </div>
 
-            <p style={{ marginTop: 14, color: "var(--ink)" }}>{profile.blurb}</p>
+            <div style={{ marginTop: 14, color: "var(--ink)" }}>
+                {profile.blurb
+                    ?.split(/\n+/) // split on one or more newlines
+                    .filter(line => line.trim() !== "") // ignore empty lines
+                    .map((line, i) => (
+                        <p key={i} style={{ marginBottom: 10, color: "var(--ink)" }}>
+                            {line.trim()}
+                        </p>
+                    ))}
+            </div>
+
 
             <div style={{ marginTop: 14, display: "flex", gap: 16 }}>
                 <MeetingInvite />
