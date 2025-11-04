@@ -11,7 +11,8 @@ export const profile = {
         github: "https://github.com/mz9201ju    ",
         email: "info@omerzahid.com",
         facebook: "https://www.facebook.com/abuyousufdeveloper",
-        youtube: "https://www.youtube.com/@AbuvYousuf"
+        youtube: "https://www.youtube.com/@AbuvYousuf",
+        instagram: "https://www.instagram.com/abuyousufdeveloper"
     },
     skills: [
         "Java", "Spring Boot", "React", "Redux", "Python", "SQL",

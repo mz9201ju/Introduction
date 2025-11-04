@@ -23,27 +23,50 @@
     display: flex;
     justify-content: center;
     gap: 15px;
+    flex-wrap: wrap;
+    /* 👈 allows wrapping on small screens */
+    max-width: 100%;
+    /* 👈 prevents overflow */
+    padding: 0 10px;
+    /* 👈 gives breathing room near edges */
+    box-sizing: border-box;
 }
 
-/* Social Button Styles */
+/* Each Social Button */
 .social-button {
     background-color: var(--accent);
     color: var(--ink);
-    padding: 12px 20px;
-    border-radius: 30px;
+    width: 45px;
+    /* 👈 fixed width for uniform icons */
+    height: 45px;
+    /* 👈 same height */
+    border-radius: 50%;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 20px;
     transition: all 0.3s ease;
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
 }
 
 /* Social Button Hover Effects */
 .social-button:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Make sure icons stay inside viewport on small screens */
+@media (max-width: 480px) {
+    .social-links {
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .social-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
 }
 
 /* Specific Social Button Colors */
@@ -70,6 +93,11 @@
 .social-button.email {
     background-color: #d14836;
     /* Email red */
+}
+
+.social-button.instagram {
+    background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+    /* Instagram */
 }
 
 /* Font Awesome icon size adjustment */

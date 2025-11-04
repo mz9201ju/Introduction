@@ -2,39 +2,31 @@
 <html lang="en">
 
 <head>
+  <!-- ============================= -->
+  <!-- 🌌 Basic Meta + Styling Setup -->
+  <!-- ============================= -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
 
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="application-name" content="Omer Zahid" />
+  <meta name="apple-mobile-web-app-title" content="Omer Zahid" />
+
+
   <title>Omer Zahid – Senior Software Engineer</title>
   <meta name="description"
     content="Omer Zahid — Senior Software Engineer specializing in React, Spring Boot, and DevOps automation." />
+  <meta name="publisher" content="Omer Zahid" />
   <meta name="author" content="Omer Zahid" />
   <meta name="keywords"
     content="Omer Zahid, omer zahid software engineer, React, Spring Boot, Azure DevOps, portfolio, web developer" />
-
-  <!-- Non-standard but harmless hint for some crawlers/apps -->
   <meta name="alternate-name" content="Omer Zahid; Omer Z; Omar Zahid; Darth Vader; عمر زاہد" />
 
-  <!-- Canonical Link (Only one) -->
-  <link rel="canonical" href="https://www.omerzahid.com/" />
-
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" href="/logo.png" />
-  <link rel="apple-touch-icon" href="/OMER_ZAHID.jpeg" />
-
-  <!-- Preconnect + dns-prefetch (safe; won't 404) -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-
-  <!-- Preload hero image you already reference (helps LCP) -->
-  <link rel="preload" as="image" href="/OMER_ZAHID.jpeg">
-
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-
-  <!-- Open Graph -->
+  <!-- ============================= -->
+  <!-- 🪟 Open Graph (Facebook / LinkedIn) -->
+  <!-- ============================= -->
   <meta property="og:site_name" content="Omer Zahid Portfolio" />
   <meta property="og:title" content="Omer Zahid – Senior Software Engineer" />
   <meta property="og:description"
@@ -47,7 +39,31 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="1200" />
 
-  <!-- Twitter -->
+  <!-- ✅ Canonical URL (keep only one to avoid duplication) -->
+  <link rel="canonical" href="https://www.omerzahid.com/" />
+
+  <!-- ============================= -->
+  <!-- 🧩 Favicons -->
+  <!-- ============================= -->
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <link rel="apple-touch-icon" href="/OMER_ZAHID.jpeg" />
+
+  <!-- ============================= -->
+  <!-- ⚡ Performance Prefetch/Preload -->
+  <!-- ============================= -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+  <link rel="preload" as="image" href="/OMER_ZAHID.jpeg">
+
+  <!-- ============================= -->
+  <!-- 🤖 Robots -->
+  <!-- ============================= -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+  <!-- ============================= -->
+  <!-- 🐦 Twitter Card -->
+  <!-- ============================= -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Omer Zahid – Senior Software Engineer" />
   <meta name="twitter:description"
@@ -56,23 +72,29 @@
   <meta name="twitter:site" content="@omerzahid" />
   <meta name="twitter:creator" content="@omerzahid" />
 
-  <!-- Microdata fallback -->
+  <!-- ============================= -->
+  <!-- 🧠 Microdata fallback -->
+  <!-- ============================= -->
   <meta itemprop="name" content="Omer Zahid – Senior Software Engineer" />
   <meta itemprop="description"
     content="Full-stack engineer crafting innovative digital experiences with React, Spring Boot, and DevOps automation." />
   <meta itemprop="image" content="https://www.omerzahid.com/OMER_ZAHID.jpeg?v=1" />
 
-  <!-- Accessibility / mobile hint -->
+  <!-- ============================= -->
+  <!-- 📱 Accessibility / mobile hint -->
+  <!-- ============================= -->
   <meta name="format-detection" content="telephone=no" />
 
-  <!-- JSON-LD with alternateName / givenName / familyName -->
+  <!-- ============================= -->
+  <!-- 🧩 JSON-LD Structured Data -->
+  <!-- ============================= -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "Person",
-        "@id": "https://www.omerzahid.com/#person",
+        "@id": "https://www.omerzahid.com/#omerzahid",
         "name": "Omer Zahid",
         "givenName": "Omer",
         "familyName": "Zahid",
@@ -83,8 +105,7 @@
           "Omer Zahid Engineer",
           "Darth Vader",
           "Omer Zahid (عمر زاہد)",
-          "Omer Zahid – Space Nerd",
-          "Omer"
+          "Omer Zahid – Space Nerd"
         ],
         "url": "https://www.omerzahid.com/",
         "image": {
@@ -96,20 +117,16 @@
         },
         "jobTitle": "Senior Software Engineer",
         "description": "Senior Software Engineer specializing in React, Spring Boot, and DevOps automation.",
-        "knowsAbout": [
-          "React",
-          "Spring Boot",
-          "DevOps",
-          "Azure DevOps",
-          "Cloudflare Workers",
-          "Full Stack Development"
-        ],
+        "knowsAbout": ["React", "Spring Boot", "DevOps", "Azure DevOps", "Cloudflare Workers", "Full Stack Development"],
         "sameAs": [
           "https://www.linkedin.com/in/omer-zahid-developer/",
           "https://github.com/mz9201ju",
           "https://x.com/omerzahid",
-          "https://www.instagram.com/omerzahid"
-        ]
+          "https://www.instagram.com/abuyousufdeveloper/",
+          "https://www.youtube.com/@AbuvYousuf",
+          "https://www.facebook.com/abuyousufdeveloper"
+        ],
+        "mainEntityOfPage": { "@id": "https://www.omerzahid.com/#webpage" }
       },
       {
         "@type": "Organization",
@@ -127,17 +144,37 @@
           "https://www.linkedin.com/in/omer-zahid-developer/",
           "https://github.com/mz9201ju",
           "https://x.com/omerzahid",
-          "https://www.instagram.com/omerzahid"
+          "https://www.instagram.com/abuyousufdeveloper/",
+          "https://www.youtube.com/@AbuvYousuf",
+          "https://www.facebook.com/abuyousufdeveloper"
         ]
+      },
+      {
+        "@type": "ProfessionalService",
+        "@id": "https://www.omerzahid.com/#service",
+        "name": "Omer Zahid – Senior Software Engineer",
+        "image": "https://www.omerzahid.com/OMER_ZAHID.jpeg?v=1",
+        "url": "https://www.omerzahid.com/",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Seattle",
+          "addressRegion": "WA",
+          "addressCountry": "US"
+        },
+        "priceRange": "$$",
+        "telephone": "+1-425-375-1844",
+        "sameAs": [
+          "https://www.linkedin.com/in/omer-zahid-developer/",
+          "https://github.com/mz9201ju"
+        ],
+        "description": "Enterprise-level web solutions, cloud deployments, and DevOps automation."
       },
       {
         "@type": "WebSite",
         "@id": "https://www.omerzahid.com/#website",
         "url": "https://www.omerzahid.com/",
         "name": "Omer Zahid Portfolio",
-        "publisher": {
-          "@id": "https://www.omerzahid.com/#organization"
-        },
+        "publisher": { "@id": "https://www.omerzahid.com/#organization" },
         "potentialAction": {
           "@type": "SearchAction",
           "target": "https://www.omerzahid.com/?q={search_term_string}",
@@ -151,29 +188,50 @@
         "name": "Home — Omer Zahid",
         "description": "Home page for Omer Zahid — Senior Software Engineer. Portfolio, projects, and contact.",
         "inLanguage": "en-US",
-        "isPartOf": {
-          "@id": "https://www.omerzahid.com/#website"
-        },
-        "mainEntity": {
-          "@id": "https://www.omerzahid.com/#person"
-        }
+        "isPartOf": { "@id": "https://www.omerzahid.com/#website" },
+        "mainEntity": { "@id": "https://www.omerzahid.com/#omerzahid" }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://www.omerzahid.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What does Omer Zahid specialize in?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Omer specializes in full-stack web development using React, Spring Boot, and DevOps automation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Where can I see Omer Zahid’s portfolio?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can visit https://www.omerzahid.com to explore his projects and contact details."
+            }
+          }
+        ]
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://www.omerzahid.com/"
-          }
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.omerzahid.com/" }
         ]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://www.omerzahid.com/#logo",
+        "url": "https://www.omerzahid.com/",
+        "logo": "https://www.omerzahid.com/OMER_ZAHID.jpeg?v=1"
       }
     ]
   }
   </script>
 
-  <!-- Analytics -->
+  <!-- ============================= -->
+  <!-- 📊 Google Analytics -->
+  <!-- ============================= -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-YJRLD3DJ1E"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -182,6 +240,9 @@
     gtag('config', 'G-YJRLD3DJ1E', { 'anonymize_ip': false });
   </script>
 
+  <!-- ============================= -->
+  <!-- 🎨 Base Styles -->
+  <!-- ============================= -->
   <style>
     html {
       box-sizing: border-box;
@@ -202,7 +263,9 @@
 </head>
 
 <body>
-  <!-- Hidden SEO section -->
+  <!-- ============================= -->
+  <!-- 🔒 Hidden SEO Content Section -->
+  <!-- ============================= -->
   <aside id="seo-hints-hidden" aria-hidden="true" style="display: none;">
     <nav>
       <ul>
@@ -227,6 +290,9 @@
     </section>
   </aside>
 
+  <!-- ============================= -->
+  <!-- ⚙️ React Root -->
+  <!-- ============================= -->
   <div id="root" aria-live="polite"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

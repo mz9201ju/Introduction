@@ -52,6 +52,16 @@ const Footer = ({ profile }) => {
                     <i className="fas fa-envelope"></i> {/* Font Awesome Email Icon */}
                     {profile.links.email ? null : " (Email)"}
                 </a>
+                {/* Instagram Link */}
+                <a
+                    href={profile.links.instagram}
+                    className="social-button instagram"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i className="fab fa-instagram"></i> {/* Font Awesome Instagram Icon */}
+                    <span className="sr-only">Instagram</span> {/* Accessibility-friendly label */}
+                </a>
             </div>
             <div className="buy-coffee-container">
                 <a
