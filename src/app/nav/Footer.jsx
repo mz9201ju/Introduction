@@ -53,6 +53,19 @@ const Footer = ({ profile }) => {
                     {profile.links.email ? null : " (Email)"}
                 </a>
             </div>
+            <div className="buy-coffee-container">
+                <a
+                    href="https://www.buymeacoffee.com/omerzahid"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="buy-coffee-btn"
+                >
+                    <img
+                        src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
+                        alt="Buy Me a Coffee"
+                    />
+                </a>
+            </div>
         </footer>
     );
 };

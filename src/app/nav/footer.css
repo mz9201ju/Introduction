@@ -77,3 +77,49 @@
 .fas {
     font-size: 20px;
 }
+
+/* Center the Buy Me a Coffee button */
+.buy-coffee-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px;
+}
+
+/* Button image styling with rounded edges */
+.buy-coffee-btn img {
+    width: 150px;
+    /* Adjust size as needed */
+    height: auto;
+    border: none;
+    border-radius: 12px;
+    /* 👈 Adds rounded corners */
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover animation */
+.buy-coffee-btn img:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Optional fallback for custom button version */
+.buy-coffee-link button {
+    background-color: #ffdd00;
+    /* Coffee yellow */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 30px;
+    /* 👈 Makes pill-shaped edges */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.buy-coffee-link button:hover {
+    background-color: #e0c200;
+    transform: scale(1.05);
+}
