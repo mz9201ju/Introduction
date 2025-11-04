@@ -9,7 +9,7 @@ export const profile = {
     links: {
         linkedin: "https://linkedin.com/in/omer-zahid-developer",
         github: "https://github.com/mz9201ju    ",
-        email: "omer.zahid@mnsu.edu",
+        email: "info@omerzahid.com",
         facebook: "https://www.facebook.com/abuyousufdeveloper",
         youtube: "https://www.youtube.com/@AbuvYousuf"
     },
