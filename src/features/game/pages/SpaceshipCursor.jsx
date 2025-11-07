@@ -1,132 +1,108 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import spaceship from "/spaceship.png";
+import { Joystick } from "react-joystick-component";
 
 /**
  * 🚀 SpaceshipCursor
- * - Follows mouse/touch (mobile-friendly)
- * - Fires on movement
- * - Turns red after 4s of continuous firing
- * - Prevents zoom/pinch gestures on mobile
+ * - Desktop: follows mouse exactly like before
+ * - Mobile: shows a joystick on bottom-right to move the ship
+ * - Auto-fire on movement
  */
 export default function SpaceshipCursor() {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const posRef = useRef({ x: 0, y: 0 });
+  const [pos, setPos] = useState({
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  });
+  const posRef = useRef(pos);
   const firingStartRef = useRef(0);
   const lastFireRef = useRef(0);
   const [color, setColor] = useState("blue");
+  const [isMobile, setIsMobile] = useState(false);
 
-  const FIRE_INTERVAL = 200;       // ms between lasers
-  const RED_AFTER = 4000;          // 4s threshold
+  const FIRE_INTERVAL = 200;
+  const RED_AFTER = 4000;
+  const SPEED = 8;
 
   /* ==========================================================
-     ⚙️ Utility: update position + broadcast move
+     📱 Detect mobile once
+     ========================================================== */
+  useEffect(() => {
+    const mobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    setIsMobile(mobile);
+  }, []);
+
+  /* ==========================================================
+     ⚙️ Common position + event broadcast
      ========================================================== */
   const updatePosition = (x, y) => {
     const newPos = { x, y };
-    setPos(newPos);
     posRef.current = newPos;
-
-    // Broadcast movement to Engine
-    window.dispatchEvent(new CustomEvent("player-move", { detail: { x, y } }));
+    setPos(newPos);
+    window.dispatchEvent(new CustomEvent("player-move", { detail: newPos }));
   };
 
-  /* ==========================================================
-     🔫 Fire logic tied to movement
-     ========================================================== */
   const handleFire = (x, y) => {
     const now = performance.now();
-
-    // Initialize or reset continuous-firing timer
     if (!firingStartRef.current) firingStartRef.current = now;
     const elapsed = now - firingStartRef.current;
 
-    // Switch to red after threshold
     if (elapsed > RED_AFTER && color !== "red") setColor("red");
-
-    // Throttle fire rate
     if (now - lastFireRef.current < FIRE_INTERVAL) return;
     lastFireRef.current = now;
 
-    // Dispatch laser event to Engine
     window.dispatchEvent(
       new CustomEvent("player-fire", { detail: { x, y, color } })
     );
   };
 
   /* ==========================================================
-     🧭 Mouse + touch movement tracking
+     🖱️ Desktop: mouse movement (unchanged)
      ========================================================== */
   useEffect(() => {
-    const handleMove = (e) => {
-      let x, y;
-      if (e.touches && e.touches.length > 0) {
-        const t = e.touches[0];
-        x = t.clientX;
-        y = t.clientY;
-      } else {
-        x = e.clientX;
-        y = e.clientY;
-      }
+    if (isMobile) return; // skip on mobile
 
+    const handleMove = (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
       updatePosition(x, y);
       handleFire(x, y);
     };
 
     const handleEnd = () => {
-      // Stop continuous-fire timer after movement ends
       firingStartRef.current = 0;
       setColor("blue");
     };
 
     window.addEventListener("mousemove", handleMove, { passive: true });
-    window.addEventListener("touchmove", handleMove, { passive: true });
     window.addEventListener("mouseup", handleEnd);
-    window.addEventListener("touchend", handleEnd);
-
     return () => {
       window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("touchmove", handleMove);
       window.removeEventListener("mouseup", handleEnd);
-      window.removeEventListener("touchend", handleEnd);
     };
-  }, [color]);
+  }, [isMobile, color]);
 
   /* ==========================================================
-     📱 Prevent zoom/pinch/double-tap
+     🕹️ Mobile: joystick movement
      ========================================================== */
-  useEffect(() => {
-    const meta = document.querySelector("meta[name=viewport]");
-    const content =
-      "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
-    if (meta) meta.setAttribute("content", content);
-    else {
-      const newMeta = document.createElement("meta");
-      newMeta.name = "viewport";
-      newMeta.content = content;
-      document.head.appendChild(newMeta);
-    }
+  const handleMove = (e) => {
+    const dx = e.x * SPEED;
+    const dy = -e.y * SPEED; // invert Y to match natural joystick feel
+    const { x, y } = posRef.current;
+    const newX = Math.max(20, Math.min(window.innerWidth - 20, x + dx));
+    const newY = Math.max(20, Math.min(window.innerHeight - 20, y + dy));
 
-    const blockPinch = (e) => {
-      if (e.touches && e.touches.length > 1) e.preventDefault();
-    };
-    let lastTouchEnd = 0;
-    const preventDoubleTapZoom = (e) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
-    };
+    updatePosition(newX, newY);
+    handleFire(newX, newY);
+  };
 
-    document.addEventListener("touchstart", blockPinch, { passive: false });
-    document.addEventListener("touchend", preventDoubleTapZoom, { passive: false });
-    return () => {
-      document.removeEventListener("touchstart", blockPinch);
-      document.removeEventListener("touchend", preventDoubleTapZoom);
-    };
-  }, []);
+  const handleStop = () => {
+    firingStartRef.current = 0;
+    setColor("blue");
+  };
 
   /* ==========================================================
-     🔒 Resize handling (recenters cursor)
+     🔒 Resize: recenter spaceship
      ========================================================== */
   useEffect(() => {
     const handleResize = () => {
@@ -139,53 +115,53 @@ export default function SpaceshipCursor() {
   }, []);
 
   /* ==========================================================
-     📱 Mobile-only gentle lift logic
-     ========================================================== */
-  const [isTouching, setIsTouching] = useState(false);
-
-  useEffect(() => {
-    const handleTouchStart = () => {
-      if (window.innerWidth < 768) setIsTouching(true);
-    };
-    const handleTouchEnd = () => {
-      if (window.innerWidth < 768) setIsTouching(false);
-    };
-
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchend", handleTouchEnd);
-
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, []);
-
-  /* ==========================================================
-     🧩 Render spaceship cursor
+     🧩 Render
      ========================================================== */
   return createPortal(
-    <img
-      src={spaceship}
-      alt="Spaceship Cursor"
-      style={{
-        position: "fixed",
-        left: pos.x,
-        top: pos.y,
-        width: 40,
-        height: 40,
-        transform: `translate(-50%, calc(-50% ${isTouching ? "- 30px" : ""}))`,
-        pointerEvents: "none",
-        zIndex: 2147483647,
-        willChange: "transform",
-        userSelect: "none",
-        WebkitTouchCallout: "none",
-        transition: "transform 0.3s ease-out",
-        filter:
-          color === "red"
-            ? "drop-shadow(0 0 10px rgba(255,0,0,0.9)) saturate(150%)"
-            : "drop-shadow(0 0 6px rgba(0,150,255,0.8))",
-      }}
-    />,
+    <>
+      {/* 🚀 Spaceship cursor */}
+      <img
+        src={spaceship}
+        alt="Spaceship Cursor"
+        style={{
+          position: "fixed",
+          left: pos.x,
+          top: pos.y,
+          width: 42,
+          height: 42,
+          transform: "translate(-50%, -50%)",
+          pointerEvents: "none",
+          zIndex: 9999,
+          userSelect: "none",
+          willChange: "transform",
+          filter:
+            color === "red"
+              ? "drop-shadow(0 0 10px rgba(255,0,0,0.9)) saturate(150%)"
+              : "drop-shadow(0 0 6px rgba(0,150,255,0.8))",
+          transition: "filter 0.3s ease",
+        }}
+      />
+
+      {/* 🕹️ Mobile joystick */}
+      {isMobile && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "40px",
+            right: "40px",
+            zIndex: 10000,
+          }}
+        >
+          <Joystick
+            size={90}
+            baseColor="rgba(255,255,255,0.2)"
+            stickColor="#00bfff"
+            move={handleMove}
+            stop={handleStop}
+          />
+        </div>
+      )}
+    </>,
     document.body
   );
 }
