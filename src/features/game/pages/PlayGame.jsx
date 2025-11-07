@@ -77,8 +77,8 @@ export default function PlayGame() {
               fontSize: 20,
             }}
           >
-            <li>👉 Move your mouse or finger to aim the ship.</li>
-            <li>💥 Right click or second finger = fire laser.</li>
+            <li>👉 Move your mouse or joystick to aim the ship.</li>
+            <li>💥 Right click or left click = fire laser.</li>
             <li>⚡ Dodge enemy bullets and survive as long as you can.</li>
           </ul>
         </div>
