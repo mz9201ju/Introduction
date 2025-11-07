@@ -4,7 +4,11 @@ import spaceship from "/spaceship.png";
 const OFFSET_Y = -12; // adjust if the nose isn't aligned with the pointer
 
 export default function SimpleSpaceshipCursor() {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  // Start in the center of the screen, not top-left
+  const [pos, setPos] = useState({
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  });
   const [hidden, setHidden] = useState(false);
   const cursorRef = useRef(null);
 
@@ -12,7 +16,7 @@ export default function SimpleSpaceshipCursor() {
     const el = cursorRef.current;
     if (!el) return;
 
-    // Hide on touch devices
+    // Hide on touch devices (mobile/tablet)
     const isTouch = matchMedia("(pointer: coarse)").matches;
     if (isTouch) {
       el.style.display = "none";
@@ -26,31 +30,26 @@ export default function SimpleSpaceshipCursor() {
       });
     };
 
-    // ---- Force-hide logic ----
-    // Which elements should hide the spaceship while hovering/typing
-    const HIDE_SELECTORS = "textarea, input, [contenteditable='true'], .ql-editor, .cm-editor, .CodeMirror";
+    // Hide logic for text fields
+    const HIDE_SELECTORS =
+      "textarea, input, [contenteditable='true'], .ql-editor, .cm-editor, .CodeMirror";
 
-    // Helper: is the event target inside a field we care about?
     const isInTextField = (target) => {
       if (!(target instanceof Element)) return false;
       if (target.matches(HIDE_SELECTORS)) return true;
       return !!target.closest(HIDE_SELECTORS);
     };
 
-    // Mouse enter/leave handling
-    const onPointerMove = (e) => {
-      setHidden(isInTextField(e.target));
-    };
+    const onPointerMove = (e) => setHidden(isInTextField(e.target));
+    const onFocusIn = (e) => isInTextField(e.target) && setHidden(true);
+    const onFocusOut = (e) => setHidden(false);
 
-    // Focus handling (keyboard/tab)
-    const onFocusIn = (e) => {
-      if (isInTextField(e.target)) setHidden(true);
+    // Hover listeners for text fields
+    const hide = () => setHidden(true);
+    const showIfNotFocused = () => {
+      const active = document.activeElement;
+      if (!active || !isInTextField(active)) setHidden(false);
     };
-    const onFocusOut = (e) => {
-      if (isInTextField(e.target)) setHidden(false);
-    };
-
-    // If mouse enters/leaves a textarea specifically
     const addHoverListeners = () => {
       document.querySelectorAll(HIDE_SELECTORS).forEach((node) => {
         node.addEventListener("mouseenter", hide);
@@ -63,39 +62,39 @@ export default function SimpleSpaceshipCursor() {
         node.removeEventListener("mouseleave", showIfNotFocused);
       });
     };
-    const hide = () => setHidden(true);
-    const showIfNotFocused = () => {
-      const active = document.activeElement;
-      if (!active || !isInTextField(active)) setHidden(false);
-    };
 
-    // Global listeners
+    // Attach listeners
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("pointermove", onPointerMove, { passive: true });
     document.addEventListener("focusin", onFocusIn);
     document.addEventListener("focusout", onFocusOut);
-
-    // Attach direct hover on current text fields
     addHoverListeners();
 
-    // Also watch for dynamic fields being added
+    // Watch for dynamic fields being added
     const mo = new MutationObserver(() => {
       removeHoverListeners();
       addHoverListeners();
     });
     mo.observe(document.body, { childList: true, subtree: true });
 
+    // Handle window resize — keep centered reference correct
+    const onResize = () => {
+      setPos({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    };
+    window.addEventListener("resize", onResize);
+
     return () => {
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("focusout", onFocusOut);
+      window.removeEventListener("resize", onResize);
       removeHoverListeners();
       mo.disconnect();
     };
   }, []);
 
-  // Disable spaceship on these routes
+  // Disable spaceship on certain routes
   const isPlayGame =
     window.location.pathname.toLowerCase().includes("/playgame") ||
     window.location.pathname.toLowerCase().includes("/darthvader");
@@ -114,7 +113,7 @@ export default function SimpleSpaceshipCursor() {
         pointerEvents: "none",
         userSelect: "none",
         zIndex: 10000,
-        opacity: hidden ? 0 : 1, // ← hard toggle visibility
+        opacity: hidden ? 0 : 1,
       }}
     >
       <img
