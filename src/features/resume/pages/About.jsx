@@ -57,7 +57,7 @@ export default function About() {
                         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
                     >
                         <img
-                            src="https://iad.microlink.io/8O5GGQwFxbs-x8-2WihIiQNPmb2Ew_tIdWOBxUaVt9ANITv-Mi1vZ-4-raPcOTkjQLeU68J2CV8boU05uJauUA.png"
+                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/ELIA_BarberShop_WebSite/&screenshot=true&type=png&meta=false&embed=screenshot.url"
                             alt="ELIA Barber Shop Preview"
                             style={{
                                 width: "200px",
