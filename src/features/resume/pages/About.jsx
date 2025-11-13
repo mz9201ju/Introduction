@@ -24,7 +24,60 @@ export default function About() {
                         Every line of code I write is a reflection of gratitude to Allah, my greatest teacher and source of inspiration. 🤍
                     </p>
                 </div>
-                <h2>🚀 Featured Project</h2>
+                <h2>🚀 Featured Project For Local Business</h2>
+                <div
+                    style={{
+                        marginTop: "1rem",
+                        padding: "1rem",
+                        background: "rgba(0,0,0,0.6)",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 20px #00bfff55",
+                    }}
+                >
+                    <h3>🚘 NYC LUX (Premium Ride Service)</h3>
+                    <p>
+                        “Experience New York in Motion — Redefined.” White-glove chauffeurs. An immaculate fleet. Tailored hospitality.
+                        From Wall Street to Fifth Avenue, your journey begins the moment we open the door — and continues with every mile of effortless luxury.
+                    </p>
+
+                    {/* Static website preview */}
+                    <a
+                        href="https://mz9201ju.github.io/khuram-limo-service/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: "inline-block",
+                            borderRadius: "20px 20px 20px 20px",
+                            overflow: "auto",
+                            boxShadow: "0 0 100px #00bfff88",
+                            transition: "transform 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
+                    >
+                        <img
+                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/khuram-limo-service/&screenshot=true&type=png&meta=false&embed=screenshot.url"
+                            alt="Deeba's Day Care"
+                            style={{
+                                width: "200px",
+                                height: "100px",
+                            }}
+                        />
+                        <div
+                            style={{
+                                backgroundColor: "#00bfff",
+                                color: "#fff",
+                                padding: "10px 20px",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                            }}
+                        >
+                            🔗 Visit Site
+                        </div>
+                    </a>
+                    <h3>🧠 Tech Stack</h3>
+                    <p>React • Vite • Tailwind • Cloudflare</p>
+                </div>
                 <div
                     style={{
                         marginTop: "1rem",
@@ -192,61 +245,8 @@ export default function About() {
                     <h3>🧠 Tech Stack</h3>
                     <p>React • Vite • Tailwind • Cloudflare</p>
                 </div>
-                <div
-                    style={{
-                        marginTop: "1rem",
-                        padding: "1rem",
-                        background: "rgba(0,0,0,0.6)",
-                        borderRadius: "10px",
-                        boxShadow: "0 0 20px #00bfff55",
-                    }}
-                >
-                    <h3>🚘 NYC LUX (Premium Ride Service)</h3>
-                    <p>
-                        “Experience New York in Motion — Redefined.” White-glove chauffeurs. An immaculate fleet. Tailored hospitality. 
-                        From Wall Street to Fifth Avenue, your journey begins the moment we open the door — and continues with every mile of effortless luxury.
-                    </p>
-
-                    {/* Static website preview */}
-                    <a
-                        href="https://mz9201ju.github.io/khuram-limo-service/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                            display: "inline-block",
-                            borderRadius: "20px 20px 20px 20px",
-                            overflow: "auto",
-                            boxShadow: "0 0 100px #00bfff88",
-                            transition: "transform 0.3s ease",
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
-                    >
-                        <img
-                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/khuram-limo-service/&screenshot=true&type=png&meta=false&embed=screenshot.url"
-                            alt="Deeba's Day Care"
-                            style={{
-                                width: "200px",
-                                height: "100px",
-                            }}
-                        />
-                        <div
-                            style={{
-                                backgroundColor: "#00bfff",
-                                color: "#fff",
-                                padding: "10px 20px",
-                                fontWeight: 600,
-                                textDecoration: "none",
-                            }}
-                        >
-                            🔗 Visit Site
-                        </div>
-                    </a>
-                    <h3>🧠 Tech Stack</h3>
-                    <p>React • Vite • Tailwind • Cloudflare</p>
-                </div>
             </section>
-            <Footer profile={profile}/>
+            <Footer profile={profile} />
         </div>
     );
 }
