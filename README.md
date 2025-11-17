@@ -5,6 +5,7 @@ Welcome to the **Introduction Project**, a personal portfolio site and interacti
 
 - **Resume:** [https://www.omerzahid.com](https://www.omerzahid.com)
 - **Projects for Businesses:** [https://www.omerzahid.com/#/about](https://www.omerzahid.com/#/about)
+- **Resume Builder:** [https://www.omerzahid.com/#/about](https://www.omerzahid.com/#/resume-generator)
 - **AI Chat:** [https://www.omerzahid.com/#/ask-me](https://www.omerzahid.com/#/ask-me)
 - **PlayGame!** [https://www.omerzahid.com/#/darthVader](https://www.omerzahid.com/#/darthVader)
 

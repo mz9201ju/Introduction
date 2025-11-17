@@ -8,7 +8,7 @@ export default function About() {
             {/* Simple Space Cursor */}
             <SimpleSpaceshipCursor />
             <section style={{ marginTop: "3rem" }}>
-                <h2>About Me 🚀</h2>
+                <h2>About Me</h2>
                 <div
                     style={{
                         marginTop: "1rem",
@@ -24,7 +24,59 @@ export default function About() {
                         Every line of code I write is a reflection of gratitude to Allah, my greatest teacher and source of inspiration. 🤍
                     </p>
                 </div>
-                <h2>🚀 Featured Project For Local Business</h2>
+                <h2>🚀 Featured Project For Local Businesses</h2>
+                <div
+                    style={{
+                        marginTop: "1rem",
+                        padding: "1rem",
+                        background: "rgba(0,0,0,0.6)",
+                        borderRadius: "10px",
+                        boxShadow: "0 0 20px #00bfff55",
+                    }}
+                >
+                    <h3> OZ Studios (Premium and Enterprise Websites with full SEO)</h3>
+                    <p>
+                        From greenfield builds to complex refactors — architected, implemented, and shipped end-to-end.
+                    </p>
+
+                    {/* Static website preview */}
+                    <a
+                        href="https://mz9201ju.github.io/oz-studios/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: "inline-block",
+                            borderRadius: "20px 20px 20px 20px",
+                            overflow: "auto",
+                            boxShadow: "0 0 100px #00bfff88",
+                            transition: "transform 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
+                    >
+                        <img
+                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/oz-studios/&screenshot=true&type=png&meta=false&embed=screenshot.url"
+                            alt="limo-services"
+                            style={{
+                                width: "200px",
+                                height: "100px",
+                            }}
+                        />
+                        <div
+                            style={{
+                                backgroundColor: "#00bfff",
+                                color: "#fff",
+                                padding: "10px 20px",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                            }}
+                        >
+                            🔗 Visit Site
+                        </div>
+                    </a>
+                    <h3>🧠 Tech Stack</h3>
+                    <p>React • Vite • Cloudflare</p>
+                </div>
                 <div
                     style={{
                         marginTop: "1rem",

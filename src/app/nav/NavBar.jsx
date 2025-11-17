@@ -14,9 +14,9 @@ import { baseBtnStyle, activeBtnStyle } from "./navStyles";
 
 const links = [
     { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
+    { to: "/about", label: "Projects" },
     { to: "/ask-me", label: "Ask Me" },
-    { to: "/resume-generator", label: "Resume Generator" },
+    /* { to: "/resume-generator", label: "Resume Generator" }, */
     { to: "/darthVader", label: "PlayGame!" },
 ];
 
@@ -325,7 +325,7 @@ export default function NavBar() {
                 left: 0,
                 width: "100%",
                 zIndex: 1000,
-                padding: compactMode ? "6px 10px" : "12px 10px",
+                padding: "6px 10px",
                 transition: "all 0.3s ease-in-out",
                 marginTop: "27px",
             }}
