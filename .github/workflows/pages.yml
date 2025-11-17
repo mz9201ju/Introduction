@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: 🚀 Deploy OZ Studio to GitHub Pages
 
 on:
   push:
@@ -17,17 +17,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
+          cache: npm
 
-      - run: cp dist/index.html dist/404.html
+      - name: 📦 Install Dependencies
+        run: npm ci
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: 🏗️ Build Project
+        run: npm run build
+
+      - name: 🪄 Create SPA 404 Fallback
+        run: cp dist/index.html dist/404.html
+
+      - name: 🔥 Add No-Cache Headers (force fresh builds)
+        run: |
+          echo "/*" > dist/_headers
+          echo "  Cache-Control: no-cache, no-store, must-revalidate" >> dist/_headers
+          echo "  Pragma: no-cache" >> dist/_headers
+          echo "  Expires: 0" >> dist/_headers
+
+      - name: 📤 Upload Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
@@ -38,5 +54,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
