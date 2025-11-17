@@ -41,7 +41,7 @@ export default function About() {
 
                     {/* Static website preview */}
                     <a
-                        href="https://mz9201ju.github.io/oz-studios/"
+                        href="https://mz9201ju.github.io/oz-it-studios/"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -55,7 +55,7 @@ export default function About() {
                         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1.0)")}
                     >
                         <img
-                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/oz-studios/&screenshot=true&type=png&meta=false&embed=screenshot.url"
+                            src="https://api.microlink.io/?url=https://mz9201ju.github.io/oz-it-studios/&screenshot=true&type=png&meta=false&embed=screenshot.url"
                             alt="limo-services"
                             style={{
                                 width: "200px",
