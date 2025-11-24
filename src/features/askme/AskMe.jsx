@@ -302,18 +302,27 @@ export default function AskMe() {
 
   const askAI = async () => {
     if (!input.trim()) return;
+
     const userMsg = { role: "user", content: input };
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setIsTyping(true);
-    setIsMatrixActive(true); // 🔥 Start matrix when asking
+    setIsMatrixActive(true);
 
     try {
+      const payload = {
+        model: "microsoft/phi-4-mini-instruct",
+        messages: [
+          { role: "user", content: input }
+        ]
+      };
+
       const res = await fetch("https://gh-ai-proxy.omer-mnsu.workers.dev/AI/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: input }),
+        body: JSON.stringify(payload),
       });
+
       const data = await res.json();
       const text = data.choices?.[0]?.message?.content || "⚠️ No response from AI.";
       typeEffect(text);
@@ -380,7 +389,7 @@ export default function AskMe() {
               <button onClick={askAI}>Send</button>
             </div>
           </div>
-          <Footer profile={profile}/>
+          <Footer profile={profile} />
         </div>
       </div>
     </>
