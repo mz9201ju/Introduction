@@ -1,5 +1,5 @@
 // App.jsx (shell)
-import { HashRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import NavBar from "@app/nav/NavBar";
 import AppRoutes from "@app/routes/AppRoutes";
 import WarpDriveFX from "@app/routes/WarpDriveFX";
@@ -7,7 +7,7 @@ import WarpDriveFX from "@app/routes/WarpDriveFX";
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter basename="/">
       {/* Chrome */}
       <NavBar />
 
@@ -16,6 +16,6 @@ export default function App() {
 
       {/* Page outlet */}
       <AppRoutes />
-    </HashRouter>
+    </BrowserRouter>
   );
 }

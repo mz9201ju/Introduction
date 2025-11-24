@@ -41,10 +41,6 @@ export default defineConfig({
     },
   },
   server: {
-    historyApiFallback: false,
     fs: { strict: false },
-  },
-  preview: {
-    historyApiFallback: true, // ✅ Works for vite preview (SPA routing)
-  },
+  }
 });
