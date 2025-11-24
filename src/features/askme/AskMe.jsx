@@ -3,6 +3,9 @@ import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
 import Footer from "@app/nav/Footer"
 
+// 🆕 Markdown Renderer
+import { marked } from "marked";
+
 export default function AskMe() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
@@ -332,24 +335,35 @@ export default function AskMe() {
     }
   };
 
+  // 🆕 Markdown-capable typewriter effect
   const typeEffect = (text) => {
+    // Render markdown → HTML once
+    const html = marked.parse(text);
+
     let i = 0;
     let displayed = "";
     const aiMsg = { role: "assistant", content: "" };
     setMessages((m) => [...m, aiMsg]);
 
     const interval = setInterval(() => {
-      displayed += text[i];
+      // Typewriter effect on the RAW HTML string
+      displayed = html.slice(0, i);
       i++;
+
       setMessages((m) => {
         const updated = [...m];
-        updated[updated.length - 1] = { role: "assistant", content: displayed };
+        updated[updated.length - 1] = {
+          role: "assistant",
+          content: displayed,
+          isHTML: true, // flag for rendering
+        };
         return updated;
       });
-      if (i >= text.length) {
+
+      if (i > html.length) {
         clearInterval(interval);
         setIsTyping(false);
-        setIsMatrixActive(false); // 🛑 Stop matrix when AI done typing
+        setIsMatrixActive(false);
       }
     }, 15);
   };
@@ -371,7 +385,14 @@ export default function AskMe() {
                   <span className="opacity-70">
                     {msg.role === "user" ? "🧑 YOU" : "🤖 OMER-AI"}:
                   </span>{" "}
-                  <span className="whitespace-pre-wrap">{msg.content}</span>
+                  {msg.isHTML ? (
+                    <span
+                      className="whitespace-pre-wrap"
+                      dangerouslySetInnerHTML={{ __html: msg.content }}
+                    />
+                  ) : (
+                    <span className="whitespace-pre-wrap">{msg.content}</span>
+                  )}
                 </div>
               ))}
               {isTyping && <div className="text-green-500 animate-pulse">▌</div>}
