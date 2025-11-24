@@ -70,12 +70,14 @@ export default function AskMe() {
   .askme-wrapper {
     position: relative;
     z-index: 0;
-    height: 100vh;
-    overflow: hidden;
     background: transparent !important;
     font-family: monospace !important;
     color: #00ff99;
     cursor: none !important; /* 👈 restore default */
+    min-height: 100vh;     /* allow page to grow */
+    height: auto;          /* allow scroll */
+    overflow-x: hidden;
+    overflow-y: auto;      /* enables scrolling */
   }
 
   html,
@@ -151,7 +153,7 @@ export default function AskMe() {
     box-shadow: 0 0 25px rgba(0, 255, 150, 0.3);
     width: 90%;
     max-width: 700px;
-    padding: 1.25rem;
+    padding: 4rem 1rem 1rem 1rem;
   }
 
   .matrix-title {
@@ -221,7 +223,7 @@ export default function AskMe() {
 
   @media (max-width: 640px) {
     .terminal-card {
-      padding: 1rem;
+      padding: 4rem 1rem 1rem 1rem;
       max-width: 95%;
     }
     .chat-area {
@@ -374,7 +376,7 @@ export default function AskMe() {
       <div className="askme-wrapper">
         <div className="ask-omer-page">
           <div className="terminal-card">
-            <div className="matrix-title">OMER-AI TERMINAL v1.0</div>
+            <div className="matrix-title">OMER-AI TERMINAL v2.0</div>
 
             <div className="chat-area">
               {messages.map((msg, i) => (
