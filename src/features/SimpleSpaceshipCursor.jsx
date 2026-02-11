@@ -42,7 +42,7 @@ export default function SimpleSpaceshipCursor() {
 
     const onPointerMove = (e) => setHidden(isInTextField(e.target));
     const onFocusIn = (e) => isInTextField(e.target) && setHidden(true);
-    const onFocusOut = (e) => setHidden(false);
+    const onFocusOut = () => setHidden(false);
 
     // Hover listeners for text fields
     const hide = () => setHidden(true);

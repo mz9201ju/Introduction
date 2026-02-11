@@ -13,7 +13,7 @@ import bossImage3 from "../assets/star.png";
  * Refactored for DRY + clarity. All original behavior preserved.
  */
 export default class Engine {
-    constructor(canvas, { onKill, onReset } = {}) {
+    constructor(canvas, { onKill } = {}) {
         this.maxLevels = 3;
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
