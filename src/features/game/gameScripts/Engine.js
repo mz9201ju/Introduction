@@ -27,10 +27,10 @@ export default class Engine {
         this.justReset = false;
         this.playerHitCount = 100;
 
-        // 🎬 Level Transition Overlay
+        // Level Transition Overlay
         this.showLevelText = true;
         this.levelTextTimer = 0;
-        this.levelTextDuration = 2.0; // seconds to show level banner
+        this.levelTextDuration = 2.0;
 
 
         // iOS Safari fix for touch drag
@@ -44,10 +44,10 @@ export default class Engine {
         this.boss = null;
         this.nextEnemyAt = 0;
 
-        // 🆙 Level System
+        // Level System
         this.killsThisLevel = 0;
         this.level = 1;
-        this.maxLevels = 3; // after 3 levels → boss phase
+        this.maxLevels = 3;
 
         // Randomize boss image
         const bossImages = [bossImage1, bossImage2, bossImage3];
@@ -115,14 +115,16 @@ export default class Engine {
     }
 
     // ============================================================
-    // 🧩 Reusable Helpers
+    // Reusable Helpers
     // ============================================================
 
     _setCursor(x, y) { this.cursorX = x; this.cursorY = y; }
     _dist2(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return dx * dx + dy * dy; }
     _isHit(ax, ay, bx, by, radius) { return this._dist2(ax, ay, bx, by) <= radius * radius; }
 
-    /** 📈 Scales values based on current level (linear growth) */
+    /**
+     * Scales values based on current level (linear growth)
+     */
     _scaleByLevel(base, factor = 0.25) {
         return base * (1 + factor * (this.level - 1));
     }
@@ -248,10 +250,12 @@ export default class Engine {
     }
 
     // ============================================================
-    // 🧠 Enemy + Boss Logic
+    // Enemy + Boss Logic
     // ============================================================
 
-    /** 🚀 Spawn a single enemy at a random screen edge. */
+    /**
+     * Spawn a single enemy at a random screen edge.
+     */
     spawnEnemy() {
         const { W, H, CX, CY } = this.bg;
         const edge = Math.floor(Math.random() * 4);
@@ -347,18 +351,20 @@ export default class Engine {
         this.spawnBoss();
     }
 
-    /** 👾 Spawn Boss — faster movement + smarter firing */
+    /**
+     * Spawn Boss with faster movement and smarter firing
+     */
     spawnBoss() {
         this.boss = {
             x: this.bg.CX,
             y: this.bg.CY * 0.45,
-            vx: (Math.random() < 0.5 ? 1 : -1) * (this.bg.W * 0.25), // 👈 screen-relative X speed
-            vy: (Math.random() < 0.5 ? 1 : -1) * (this.bg.H * 0.20), // 👈 screen-relative Y speed
+            vx: (Math.random() < 0.5 ? 1 : -1) * (this.bg.W * 0.25),
+            vy: (Math.random() < 0.5 ? 1 : -1) * (this.bg.H * 0.20),
             angle: 0,
             hp: 12,
             alive: true,
             radius: 45,
-            fireEvery: 400,   // 👈 fires roughly twice per second
+            fireEvery: 400,
             fireT: 0
         };
     }
@@ -548,17 +554,17 @@ export default class Engine {
                         reset: this.justReset,
                     });
 
-                    // 🎯 Level Progression
+                    // Level Progression
                     this.killsThisLevel++;
 
                     if (this.killsThisLevel >= 10 && this.level < this.maxLevels) {
                         this.level++;
                         this.killsThisLevel = 0;
 
-                        // 🪩 Show level-up overlay
+                        // Show level-up overlay
                         this.showLevelText = true;
                         this.levelTextTimer = 0;
-                        console.log(`🆙 Level Up → ${this.level}`);
+                        console.log(`Level Up → ${this.level}`);
                     } else if (this.level === this.maxLevels && this.killsThisLevel >= 10) {
                         this.enterBossPhase();
                     }
@@ -573,7 +579,7 @@ export default class Engine {
     }
 
     // ============================================================
-    // 🚀 Main Loop
+    // Main Loop
     // ============================================================
 
     frame(tNow) {
