@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { profile } from "@features/resume/data/profile.js"
 import Footer from "@app/nav/Footer";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
+import { generateResumeAndCoverLetter } from "../../services/aiApi";
 import "./ResumeGenerator.css";
 
 export default function ResumeGenerator() {
@@ -22,20 +23,9 @@ export default function ResumeGenerator() {
         setCoverLetter("");
 
         try {
-            const res = await fetch("https://gh-ai-proxy.omer-mnsu.workers.dev/AI/generate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    resume: resume.trim(),
-                    jobDescription: jobDesc.trim(),
-                }),
-            });
-
-            if (!res.ok) throw new Error("Failed to generate custom resume.");
-
-            const data = await res.json();
-            setCustomResume(data.customResume || "⚠️ No resume returned.");
-            setCoverLetter(data.coverLetter || "⚠️ No cover letter returned.");
+            const result = await generateResumeAndCoverLetter(resume, jobDesc);
+            setCustomResume(result.customResume || "⚠️ No resume returned.");
+            setCoverLetter(result.coverLetter || "⚠️ No cover letter returned.");
         } catch (err) {
             console.error("Error:", err);
             alert("Something went wrong. Check console for details.");

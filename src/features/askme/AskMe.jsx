@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
-import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
+import { profile } from "@resume/data/profile";
 import Footer from "@app/nav/Footer"
-
-// 🆕 Markdown Renderer
 import { marked } from "marked";
+import { COLORS, ANIMATIONS } from "../../theme";
+import { sendChatMessage } from "../../services/aiApi";
 
 export default function AskMe() {
   const [input, setInput] = useState("");
@@ -62,17 +62,17 @@ export default function AskMe() {
   }, []);
 
 
-  // Inject full page CSS (kills overlays + makes interactive)
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
-  /* ====== AskMe Page Scoped Styles ====== */
+  ${ANIMATIONS.pulse}
+
   .askme-wrapper {
     position: relative;
     z-index: 0;
     background: transparent !important;
     font-family: monospace !important;
-    color: #00ff99;
+    color: ${COLORS.matrix};
     cursor: none !important; /* 👈 restore default */
     min-height: 100vh;     /* allow page to grow */
     height: auto;          /* allow scroll */
@@ -95,7 +95,7 @@ export default function AskMe() {
   button:hover,
   button:focus,
   [role="button"] {
-    cursor: none !important; /* 👈 clickable elements show pointer hand */
+    cursor: none !important;
   }
 
   canvas {
@@ -114,7 +114,7 @@ export default function AskMe() {
     inset: 0;
     pointer-events: none !important;
     z-index: 99999 !important;
-    cursor: none !important; /* 👈 keep normal cursor */
+    cursor: none !important;
   }
 
   .askme-wrapper nav,
@@ -124,10 +124,9 @@ export default function AskMe() {
   .askme-wrapper .send-button {
     position: relative !important;
     z-index: 2 !important;
-    cursor: none !important; /* 👈 normal button cursor */
+    cursor: none !important;
   }
 
-  /* === Terminal === */
   .ask-omer-page {
     min-height: 100vh;
     display: flex;
@@ -141,16 +140,16 @@ export default function AskMe() {
   }
 
   @keyframes matrixGlow {
-    0% { background-color: rgba(0,255,100,0.05); }
-    50% { background-color: rgba(0,255,100,0.15); }
-    100% { background-color: rgba(0,255,100,0.05); }
+    0% { background-color: ${COLORS.matrixRgbaFaint}; }
+    50% { background-color: ${COLORS.matrixRgbaMid}; }
+    100% { background-color: ${COLORS.matrixRgbaFaint}; }
   }
 
   .terminal-card {
-    border: 1px solid rgba(0, 255, 150, 0.3);
+    border: 1px solid ${COLORS.matrixRgba};
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.85);
-    box-shadow: 0 0 25px rgba(0, 255, 150, 0.3);
+    box-shadow: 0 0 25px ${COLORS.matrixRgba};
     width: 90%;
     max-width: 700px;
     padding: 4rem 1rem 1rem 1rem;
@@ -158,11 +157,11 @@ export default function AskMe() {
 
   .matrix-title {
     text-align: center;
-    color: #00ff99;
+    color: ${COLORS.matrix};
     font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 0.75rem;
-    text-shadow: 0 0 12px #00ff99;
+    text-shadow: 0 0 12px ${COLORS.matrix};
   }
 
   .chat-area {
@@ -170,7 +169,7 @@ export default function AskMe() {
     overflow-y: auto;
     max-height: 55vh;
     background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(0,255,150,0.3);
+    border: 1px solid ${COLORS.matrixRgba};
     border-radius: 10px;
     padding: 1rem;
     margin-bottom: 1rem;
@@ -185,8 +184,8 @@ export default function AskMe() {
   textarea {
     flex: 1;
     background: black;
-    color: #00ff99;
-    border: 1px solid rgba(0,255,150,0.3);
+    color: ${COLORS.matrix};
+    border: 1px solid ${COLORS.matrixRgba};
     border-radius: 10px;
     padding: 0.75rem;
     font-size: 1rem;
@@ -195,14 +194,14 @@ export default function AskMe() {
 
   textarea:focus {
     outline: none;
-    border-color: #00ff99;
-    box-shadow: 0 0 10px rgba(0,255,150,0.4);
+    border-color: ${COLORS.matrix};
+    box-shadow: 0 0 10px ${COLORS.matrixRgbaLight};
   }
 
   button {
-    background: #00ff99;
+    background: ${COLORS.matrix};
     border: none;
-    color: #000;
+    color: ${COLORS.dark};
     font-weight: bold;
     border-radius: 10px;
     padding: 0.75rem 1.25rem;
@@ -254,7 +253,7 @@ export default function AskMe() {
 
   // === 💻 Matrix Falling Code Background (controlled, smooth fade) ===
   useEffect(() => {
-    if (!isMatrixActive) return; // Only run when active
+    if (!isMatrixActive) return;
 
     const canvas = document.createElement("canvas");
     canvas.className = "matrix-bg";
@@ -271,7 +270,7 @@ export default function AskMe() {
     function draw() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
       ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = "#00ff99";
+      ctx.fillStyle = COLORS.matrix;
       ctx.font = `${fontSize}px monospace`;
       for (let i = 0; i < drops.length; i++) {
         const text = Math.random() > 0.5 ? "1" : "0";
@@ -290,18 +289,14 @@ export default function AskMe() {
     };
     window.addEventListener("resize", handleResize);
 
-    // 🪄 Fade-out animation on cleanup
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
-
-      // smooth fade instead of instant removal
       canvas.style.transition = "opacity 1s ease-out";
       canvas.style.opacity = "0";
-
       setTimeout(() => {
         canvas.remove();
-      }, 1000); // wait for fade to finish before removing
+      }, 1000);
     };
   }, [isMatrixActive]);
 
@@ -315,21 +310,7 @@ export default function AskMe() {
     setIsMatrixActive(true);
 
     try {
-      const payload = {
-        model: "microsoft/phi-4-mini-instruct",
-        messages: [
-          { role: "user", content: input }
-        ]
-      };
-
-      const res = await fetch("https://gh-ai-proxy.omer-mnsu.workers.dev/AI/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || "⚠️ No response from AI.";
+      const text = await sendChatMessage(input);
       typeEffect(text);
     } catch (err) {
       console.error(err);
@@ -337,9 +318,11 @@ export default function AskMe() {
     }
   };
 
-  // 🆕 Markdown-capable typewriter effect
+  /**
+   * Typewriter effect with markdown support
+   * @param {string} text - Raw text response from AI
+   */
   const typeEffect = (text) => {
-    // Render markdown → HTML once
     const html = marked.parse(text);
 
     let i = 0;
@@ -348,7 +331,6 @@ export default function AskMe() {
     setMessages((m) => [...m, aiMsg]);
 
     const interval = setInterval(() => {
-      // Typewriter effect on the RAW HTML string
       displayed = html.slice(0, i);
       i++;
 
@@ -357,7 +339,7 @@ export default function AskMe() {
         updated[updated.length - 1] = {
           role: "assistant",
           content: displayed,
-          isHTML: true, // flag for rendering
+          isHTML: true,
         };
         return updated;
       });
