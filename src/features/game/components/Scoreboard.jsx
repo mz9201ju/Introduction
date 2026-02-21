@@ -1,13 +1,6 @@
 export default function Scoreboard({ stats }) {
     const { kills, playerHP, victory, loss } = stats;
 
-    // Pick color theme by state
-    const bgColor = victory
-        ? "rgba(40,255,100,0.7)" // victory green
-        : loss
-            ? "rgba(255,60,60,0.7)"  // game-over red
-            : "rgba(0,0,0,0.55)";    // normal
-
     return (
         <div
             style={{

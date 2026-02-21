@@ -92,7 +92,9 @@ export default function NavBar() {
                 setTimeout(() => {
                     try {
                         window.googleTranslateElementInit && window.googleTranslateElementInit();
-                    } catch { }
+                    } catch (err) {
+                        console.error('Google Translate initialization failed:', err);
+                    }
                 }, 80);
             }
             return;
@@ -179,7 +181,9 @@ export default function NavBar() {
             setTimeout(() => {
                 try {
                     window.googleTranslateElementInit && window.googleTranslateElementInit();
-                } catch { }
+                } catch (err) {
+                    console.error('Google Translate initialization failed:', err);
+                }
             }, 120);
         }
 
@@ -208,7 +212,7 @@ export default function NavBar() {
                         // Give Google a moment to apply changes
                         setTimeout(() => resolve(true), 250);
                         return;
-                    } catch (err) {
+                    } catch {
                         // fall through to retry
                     }
                 }
@@ -238,7 +242,7 @@ export default function NavBar() {
                         }
                     }
                 }
-            } catch (err) {
+            } catch {
                 // cross-origin access will throw; silently ignore and fallback
             }
             return false;
@@ -274,32 +278,16 @@ export default function NavBar() {
                         const root = `.${hostParts.slice(-2).join(".")}`;
                         document.cookie = `googtrans=${cookieVal};path=/;domain=${root};max-age=31536000`;
                     }
-                } catch (_) { }
+                } catch {
+                    // Ignore cookie setting errors
+                }
             } catch (err) {
-                console.warn("Failed to set googtrans cookie:", err);
+                console.error('Failed to set language cookie:', err);
             } finally {
                 // reload so Google Translate picks up cookie and applies translation
                 window.location.reload();
             }
         })();
-    };
-
-    // ----------------------------
-    // Toggle panel helper
-    // - Stops propagation so outside-click handler doesn't immediately close it
-    // - Attempts to init the widget immediately if script is loaded but not initialized
-    // ----------------------------
-    const toggleTranslate = (e) => {
-        e && e.stopPropagation();
-
-        // If script loaded but init hasn't run, try to call init now
-        if (window.google && window.google.translate && !window.__google_translate_initialized) {
-            try {
-                window.googleTranslateElementInit && window.googleTranslateElementInit();
-            } catch { }
-        }
-
-        setShowTranslate((s) => !s);
     };
 
     // small merged style for translate globe/button to blend with your nav
@@ -390,7 +378,9 @@ export default function NavBar() {
                             if (window.google && window.google.translate && !window.__google_translate_initialized) {
                                 try {
                                     window.googleTranslateElementInit && window.googleTranslateElementInit();
-                                } catch { }
+                                } catch (err) {
+                                    console.error('Google Translate initialization failed:', err);
+                                }
                             }
                             setShowTranslate((s) => !s);
                         }}
@@ -398,7 +388,9 @@ export default function NavBar() {
                             // Prevent accidental gestures for touch devices
                             try {
                                 if (e.pointerType === "touch") e.preventDefault();
-                            } catch (_) { }
+                            } catch {
+                                // Ignore pointer errors
+                            }
                         }}
                         onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
@@ -447,7 +439,9 @@ export default function NavBar() {
                                         onPointerUp={(e) => {
                                             try {
                                                 e.preventDefault();
-                                            } catch (_) { }
+                                            } catch {
+                                                // Ignore pointer errors
+                                            }
                                             // setLanguage handles retries and fallback; show busy state
                                             setIsTranslating(true);
                                             setLanguage(code);

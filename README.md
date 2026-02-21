@@ -1,19 +1,24 @@
-# React + Vite
-
 # 🚀 Introduction — Omer Zahid
+
 Welcome to the **Introduction Project**, a personal portfolio site and interactive AI experience built by **Omer Zahid**.
 
-- **Resume:** [https://www.omerzahid.com](https://www.omerzahid.com)
-- **Projects for Businesses:** [https://www.omerzahid.com/about](https://www.omerzahid.com/about)
-- **Resume Builder:** [https://www.omerzahid.com/about](https://www.omerzahid.com/resume-generator)
+## 🔗 Quick Links
+
+- **Home/Resume:** [https://www.omerzahid.com](https://www.omerzahid.com)
+- **About/Projects:** [https://www.omerzahid.com/about](https://www.omerzahid.com/about)
+- **Resume Generator:** [https://www.omerzahid.com/resume-generator](https://www.omerzahid.com/resume-generator)
 - **AI Chat:** [https://www.omerzahid.com/ask-me](https://www.omerzahid.com/ask-me)
-- **PlayGame!** [https://www.omerzahid.com/darthVader](https://www.omerzahid.com/darthVader)
+- **Space Game:** [https://www.omerzahid.com/darthVader](https://www.omerzahid.com/darthVader)
 
 ## 🌌 Overview
 
-This project merges a **React + Vite + TailwindCSS** frontend hosted on **GitHub Pages** with a **Darth Vader–themed AI chatbot**, powered by a **custom Cloudflare Worker proxy**.
+This project combines a **React + Vite** frontend hosted on **GitHub Pages** with an **AI-powered chatbot** and an **interactive space-themed shooting game**. The site features:
 
-The goal is to create an immersive, space-inspired experience where visitors can interact with an AI assistant that speaks in Darth Vader’s tone — while learning about **Omer Zahid**, his work, and his vision.
+- 🎯 **Interactive Portfolio** - Showcase of projects and experience
+- 🤖 **AI Chatbot** - Matrix-themed terminal interface powered by Microsoft Phi-4 Mini
+- 🎮 **Space Game** - Darth Vader-themed shooting game with boss battles
+- 📝 **Resume Generator** - AI-powered tool to customize resumes for job applications
+- 🚀 **Custom Spaceship Cursor** - Immersive space-themed UI
 
 ---
 
@@ -21,43 +26,119 @@ The goal is to create an immersive, space-inspired experience where visitors can
 
 | Layer | Technology | Purpose |
 |-------|-------------|----------|
-| **Frontend** | React + Vite + TailwindCSS | Fast, responsive UI |
-| **Hosting** | GitHub Pages | Static hosting for the website |
-| **Backend (AI Proxy)** | Cloudflare Workers (`gh-ai-proxy`) | Secure bridge between frontend and OpenAI |
-| **AI Model** | GPT-compatible LLM | Handles chatbot responses |
-| **Design** | Space theme, custom assets, interactivity | Enhances the futuristic user experience |
+| **Frontend** | React 19 + Vite | Fast, modern UI framework |
+| **Routing** | React Router 7 | Client-side navigation |
+| **Styling** | TailwindCSS + Framer Motion | Responsive design & animations |
+| **Hosting** | GitHub Pages | Static site hosting |
+| **Backend (AI Proxy)** | Cloudflare Workers | Secure API proxy for AI requests |
+| **AI Model** | Microsoft Phi-4 Mini Instruct | Chat responses and content generation |
+| **Game Engine** | Canvas 2D API | Custom game loop and physics |
+| **Build Tool** | Vite with compression | Optimized production builds |
 
 ---
 
-## 🛰️ AI Chatbot Integration
+## 🛰️ Features
 
-The AI chatbot is powered through a **[proxy endpoint](https://gh-ai-proxy.omer-mnsu.workers.dev/AI/ask)** that securely connects to OpenAI.
+### AI Chatbot
+- Matrix-themed terminal interface with animated background
+- Markdown support for formatted responses
+- Typewriter effect for AI responses
+- Powered by Microsoft Phi-4 Mini through Cloudflare Workers proxy
+
+### Space Game
+- 2D shooting game with progressive difficulty
+- Multiple enemy types and boss battles
+- Mobile joystick support for touch devices
+- Custom spaceship cursor that doubles as the player
+
+### Resume Generator
+- AI-powered resume customization
+- Tailors resumes to specific job descriptions
+- Generates matching cover letters
+- Uses the same AI proxy infrastructure
+
+---
 
 ## ⚙️ Local Development
 
-### 1️⃣ Clone the Repository
+### Prerequisites
+- Node.js 18+ and npm
+- Modern web browser
+
+### Setup Instructions
+
+#### 1️⃣ Clone the Repository
+```bash
 git clone https://github.com/mz9201ju/Introduction.git
 cd Introduction
-### 2️⃣ Install Dependencies
-npm install
-### 3️⃣ Run Locally
-npm run dev
-### 4️⃣ Test the Proxy Endpoint
-curl -X POST "https://gh-ai-proxy.omer-mnsu.workers.dev/AI/ask" \
-  -H "Content-Type: application/json" \
-  -d '{"messages":[{"role":"user","content":"Hello from local dev!"}]}'
+```
 
-👤 User: What is the Milky Way?
-🤖 Vader: The Milky Way… a vast empire of stars, bound by gravity and silence. You merely orbit within it.
+#### 2️⃣ Install Dependencies
+```bash
+npm install
+```
+
+#### 3️⃣ Run Development Server
+```bash
+npm run dev
+```
+
+The site will be available at `http://localhost:5173`
+
+#### 4️⃣ Build for Production
+```bash
+npm run build
+npm run preview
+```
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build optimized production bundle
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint code quality checks
+
+---
+
+## 🚀 Deployment
+
+The site is automatically deployed to GitHub Pages when changes are pushed to the main branch. The build process:
+
+1. Vite builds optimized bundles with code splitting
+2. Assets are compressed using Brotli and Gzip
+3. Static files are deployed to `gh-pages` branch
+4. Available at `https://www.omerzahid.com`
+
+---
+
+## ⚡ Performance Optimizations
+
+This project has been optimized for performance:
+
+- **Code Organization**: Centralized theme constants and API utilities to reduce duplication
+- **Bundle Optimization**: Vite's automatic code splitting and tree shaking
+- **Asset Compression**: Brotli and Gzip compression for smaller file sizes
+- **Lazy Loading**: Route-based code splitting with React Router
+- **Canvas Optimization**: Efficient rendering with requestAnimationFrame
+- **Memory Management**: Proper cleanup of event listeners and intervals
+
+---
 
 ## 📬 Author
-Omer Zahid
-📧 omer.zahid@mnsu.edu
-“Through the Force — and some React hooks — all things are possible.” ✨
+
+**Omer Zahid**  
+📧 omer.zahid@mnsu.edu  
+🌐 [www.omerzahid.com](https://www.omerzahid.com)
+
+---
 
 ## 🎨 Assets & Credits
+
 - **Spaceship Cursor Icon:** [Freepik - Flaticon](https://www.flaticon.com/free-icons/ufo)
 - Used under [Flaticon Free License](https://www.flaticon.com/license)
 
+---
+
 ## 🛡️ License
+
 This project is open source and available under the MIT License.
