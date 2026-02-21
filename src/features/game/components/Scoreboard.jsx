@@ -3,6 +3,7 @@ export default function Scoreboard({ stats }) {
     const maxLevels = 5;
     const killsPerLevel = 10;
     const isBossLevel = level === maxLevels;
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
 
     const hpPct = Math.max(0, Math.min(100, playerHP));
     const hpColor = hpPct > 60 ? "#4ade80" : hpPct > 30 ? "#facc15" : "#f87171";
@@ -11,19 +12,20 @@ export default function Scoreboard({ stats }) {
         <div
             style={{
                 position: "fixed",
-                top: 18,
-                right: 100,
+                top: isMobile ? "calc(env(safe-area-inset-top, 0px) + 72px)" : 18,
+                right: isMobile ? 10 : 100,
                 zIndex: 20,
-                padding: "10px 14px",
+                padding: isMobile ? "8px 10px" : "10px 14px",
                 color: "#e8f0ff",
                 fontWeight: 700,
-                fontSize: 14,
+                fontSize: isMobile ? 12 : 14,
                 textShadow: "0 1px 2px rgba(0,0,0,0.8)",
                 background: "rgba(0,0,0,0.45)",
                 backdropFilter: "blur(6px)",
                 borderRadius: 10,
-                minWidth: 160,
-                lineHeight: 1.7,
+                minWidth: isMobile ? 145 : 160,
+                maxWidth: isMobile ? "58vw" : "none",
+                lineHeight: isMobile ? 1.55 : 1.7,
             }}
         >
             <div>⚔️ Kills: {kills}</div>

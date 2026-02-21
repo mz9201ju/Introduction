@@ -437,7 +437,7 @@ export default class Engine {
         for (const pb of this.myBullets) {
             if (pb.life <= 0) continue;
             for (const e of this.enemies) {
-                if (!e.alive) continue;
+                if (!e || !e.alive) continue;
                 if (this._isHit(e.x, e.y, pb.x, pb.y, GAME.HIT_RADIUS)) {
                     e.alive = false; pb.life = 0; this.triggerExplosion(e.x, e.y);
                     break;
@@ -546,9 +546,10 @@ export default class Engine {
         const { W, H } = this.bg;
         // Enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) {
-            if (!this.enemies[i].alive) {
+            const enemy = this.enemies[i];
+            if (!enemy || !enemy.alive) {
                 this.enemies.splice(i, 1);
-                if (!this.inBossPhase && !this.justReset) {
+                if (enemy && !this.inBossPhase && !this.justReset) {
                     this.killCount++;
                     // ✅ Emit all key stats on each update
                     this.onKill?.({
@@ -608,7 +609,7 @@ export default class Engine {
             this.doSpawning(dt);
             const now = performance.now();
             this.updateEnemies?.(dt, now);
-            for (const e of this.enemies) if (e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
+            for (const e of this.enemies) if (e && e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
         }
 
         this.drawLevelText(ctx, dt);
@@ -658,7 +659,7 @@ export default class Engine {
         const PAD = 24;
 
         for (const e of this.enemies) {
-            if (!e.alive) continue;
+            if (!e || !e.alive) continue;
 
             // Smoothly steer toward player
             const dx = this.cursorX - e.x;
