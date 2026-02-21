@@ -32,6 +32,21 @@ Prefer alias imports over deep relative imports when possible.
 - Avoid introducing one-letter variables.
 - Do not add inline comments unless requested.
 
+## Separation of Concerns
+- Prefer **one responsibility per file**:
+  - UI component markup/state wiring in component files
+  - Feature styling in colocated CSS files
+  - Reusable side-effect logic in custom hooks under the feature folder
+  - Shared helpers/constants in dedicated utility files
+- For responsive feature work, keep **desktop and cellphone configuration in separate files** (for example `Feature.desktop.css` and `Feature.mobile.css`), and import both from the feature entry component.
+- For responsive logic/configuration, keep desktop and cellphone variants in separate modules where practical (for example `utils/desktopConfig.js` and `utils/mobileConfig.js`) to avoid mixed conditional blocks in a single file.
+- Avoid long monolithic feature files when logic can be safely extracted without changing behavior.
+- For feature work, favor colocated structure such as:
+  - `Feature.jsx`
+  - `Feature.css`
+  - `hooks/` and/or `utils/` within the same feature directory
+- Keep performance-sensitive effects isolated and reusable (timers, animation frames, resize/fullscreen listeners).
+
 ## Styling Rules
 - Reuse theme constants from `src/theme.js` (`COLORS`, `SHADOWS`, `BORDERS`, `ANIMATIONS`, `API_CONFIG`) instead of hardcoding repeated values.
 - Keep existing mixed styling approach intact:

@@ -7,6 +7,8 @@
 ## Delegation Rules
 - If task path is under `src/features/game`, apply rules from:
   - `src/features/game/agent.md`
+- If task path is under `src/features/askme`, apply rules from:
+  - `src/features/askme/agent.md`
 - For game tasks, execution is mandatory via the game agent protocol:
   - pick work from `### Feature Backlog` by highest-priority `todo`,
   - follow `Feature Type Rotation`,
