@@ -2,6 +2,14 @@ import { useEffect } from "react";
 
 export function useAskMePageSetup() {
   useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  useEffect(() => {
     document.title = "Ask Me | Omer Zahid";
 
     const descriptionContent = "Chat directly with Omer AI — learn about Omer Zahid, his projects, and website.";
