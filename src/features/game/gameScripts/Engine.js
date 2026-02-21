@@ -14,7 +14,6 @@ import bossImage3 from "../assets/star.png";
  */
 export default class Engine {
     constructor(canvas, { onKill } = {}) {
-        this.maxLevels = 3;
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
@@ -47,7 +46,7 @@ export default class Engine {
         // Level System
         this.killsThisLevel = 0;
         this.level = 1;
-        this.maxLevels = 3;
+        this.maxLevels = 5;
 
         // Randomize boss image
         const bossImages = [bossImage1, bossImage2, bossImage3];
@@ -163,6 +162,8 @@ export default class Engine {
             victory: this.victory,
             loss: this.gameOver,
             reset: this.justReset,
+            level: this.level,
+            killsThisLevel: this.killsThisLevel,
         });
 
         cancelAnimationFrame(this.raf); // 🧹 stop old loop if any
@@ -339,7 +340,9 @@ export default class Engine {
         if (this.spawnTimer >= scaledSpawn) {
             this.spawnTimer = 0;
             this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
-            this.spawnEnemy();
+            // 🔺 Spawn extra enemies at higher levels (level 3-4: 2 enemies, level 5: 3 enemies)
+            const spawnCount = 1 + Math.floor((this.level - 1) / 2);
+            for (let i = 0; i < spawnCount; i++) this.spawnEnemy();
         }
     }
 
@@ -361,7 +364,7 @@ export default class Engine {
             vx: (Math.random() < 0.5 ? 1 : -1) * (this.bg.W * 0.25),
             vy: (Math.random() < 0.5 ? 1 : -1) * (this.bg.H * 0.20),
             angle: 0,
-            hp: 12,
+            hp: 12 + (this.maxLevels - 3) * 4,
             alive: true,
             radius: 45,
             fireEvery: 400,
@@ -457,6 +460,8 @@ export default class Engine {
                     playerHP: this.playerHitCount,
                     victory: this.victory,
                     loss: this.gameOver,
+                    level: this.level,
+                    killsThisLevel: this.killsThisLevel,
                 });
 
             }
@@ -552,6 +557,8 @@ export default class Engine {
                         victory: this.victory,
                         loss: this.gameOver,
                         reset: this.justReset,
+                        level: this.level,
+                        killsThisLevel: this.killsThisLevel,
                     });
 
                     // Level Progression

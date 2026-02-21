@@ -10,13 +10,15 @@ export default function PlayGame() {
     playerHP: 100,
     victory: false,
     loss: false,
+    level: 1,
+    killsThisLevel: 0,
   });
 
   const handleKill = useCallback((payload = {}) => {
-    const { reset, kills, playerHP, victory, loss } = payload;
+    const { reset, kills, playerHP, victory, loss, level, killsThisLevel } = payload;
 
     if (reset) {
-      setStats({ kills: 0, playerHP: 100, victory: false, loss: false });
+      setStats({ kills: 0, playerHP: 100, victory: false, loss: false, level: 1, killsThisLevel: 0 });
       return;
     }
 
@@ -25,6 +27,8 @@ export default function PlayGame() {
       playerHP: typeof playerHP === "number" ? playerHP : prev.playerHP,
       victory: victory ?? prev.victory,
       loss: loss ?? prev.loss,
+      level: typeof level === "number" ? level : prev.level,
+      killsThisLevel: typeof killsThisLevel === "number" ? killsThisLevel : prev.killsThisLevel,
     }));
   }, []);
 
