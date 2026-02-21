@@ -1,5 +1,5 @@
 export default function Scoreboard({ stats }) {
-    const { kills, playerHP, victory, loss, level = 1, killsThisLevel = 0 } = stats;
+    const { kills, playerHP, victory, loss, level = 1, killsThisLevel = 0, bossHP = null, bossMaxHp = null } = stats;
     const maxLevels = 5;
     const killsPerLevel = 10;
     const isBossLevel = level === maxLevels;
@@ -7,6 +7,9 @@ export default function Scoreboard({ stats }) {
 
     const hpPct = Math.max(0, Math.min(100, playerHP));
     const hpColor = hpPct > 60 ? "#4ade80" : hpPct > 30 ? "#facc15" : "#f87171";
+
+    const bossHpPct = bossMaxHp > 0 ? Math.max(0, Math.min(100, (bossHP / bossMaxHp) * 100)) : 0;
+    const bossHpColor = bossHpPct > 60 ? "#f87171" : bossHpPct > 30 ? "#fb923c" : "#dc2626";
 
     return (
         <div
@@ -32,6 +35,31 @@ export default function Scoreboard({ stats }) {
             <div style={{ marginBottom: 2 }}>
                 {isBossLevel ? "⚡ BOSS PHASE" : `📶 Level ${level} / ${maxLevels} (${killsThisLevel}/${killsPerLevel})`}
             </div>
+            {isBossLevel && bossMaxHp > 0 && (
+                <div style={{ marginBottom: 4 }}>
+                    👾 Boss HP:
+                    <span style={{ marginLeft: 6, color: bossHpColor }}>{Math.max(0, bossHP)}</span>
+                    <div
+                        style={{
+                            marginTop: 3,
+                            height: 6,
+                            borderRadius: 4,
+                            background: "rgba(255,255,255,0.15)",
+                            overflow: "hidden",
+                        }}
+                    >
+                        <div
+                            style={{
+                                height: "100%",
+                                width: `${bossHpPct}%`,
+                                background: bossHpColor,
+                                borderRadius: 4,
+                                transition: "width 0.2s ease, background 0.3s ease",
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
             <div style={{ marginBottom: 4 }}>
                 ❤️ HP:
                 <span style={{ marginLeft: 6, color: hpColor }}>{hpPct}</span>

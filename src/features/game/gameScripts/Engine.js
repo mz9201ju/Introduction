@@ -360,19 +360,31 @@ export default class Engine {
         this.inBossPhase = true;
         this.clearWorld();
         this.spawnBoss();
+        this.onKill?.({
+            kills: this.killCount,
+            playerHP: this.playerHitCount,
+            victory: this.victory,
+            loss: this.gameOver,
+            level: this.level,
+            killsThisLevel: this.killsThisLevel,
+            bossHP: this.boss.hp,
+            bossMaxHp: this.bossMaxHp,
+        });
     }
 
     /**
      * Spawn Boss with faster movement and smarter firing
      */
     spawnBoss() {
+        const totalHp = 12 + (this.maxLevels - 3) * 4;
+        this.bossMaxHp = totalHp;
         this.boss = {
             x: this.bg.CX,
             y: this.bg.CY * 0.45,
             vx: (Math.random() < 0.5 ? 1 : -1) * (this.bg.W * 0.25),
             vy: (Math.random() < 0.5 ? 1 : -1) * (this.bg.H * 0.20),
             angle: 0,
-            hp: 12 + (this.maxLevels - 3) * 4,
+            hp: totalHp,
             alive: true,
             radius: 45,
             fireEvery: 400,
@@ -395,7 +407,7 @@ export default class Engine {
         // Smooth rotation
         b.angle += 1.5 * dt;
 
-        // 💣 Boss fires 3-shot bursts of ultra-fast lasers (no setTimeout — avoids post-destroy callbacks)
+        // 💣 Boss fires 3-shot bursts — 25% chance heavy laser, 75% normal (no setTimeout — avoids post-destroy callbacks)
         b.fireT += dt * 1000;
         if (b.fireT >= b.fireEvery) {
             b.fireT = 0;
@@ -405,14 +417,18 @@ export default class Engine {
             const speed = GAME.BOSS_BULLET_SPEED || GAME.BULLET_SPEED * 2.2;
 
             for (let i = 0; i < 3; i++) {
+                const isHeavy = Math.random() < GAME.BOSS_HEAVY_CHANCE;
                 const spread = (Math.random() - 0.5) * 0.25;
+                const bulletSpeed = isHeavy ? speed * GAME.BOSS_HEAVY_SPEED_MULT : speed;
+                const bulletLife = isHeavy ? GAME.BULLET_LIFE * GAME.BOSS_HEAVY_LIFE_MULT : GAME.BULLET_LIFE;
                 this.enemyBullets.push({
                     x: b.x,
                     y: b.y,
-                    vx: (dx / d) * speed + spread,
-                    vy: (dy / d) * speed + spread,
-                    life: GAME.BULLET_LIFE,
+                    vx: (dx / d) * bulletSpeed + spread,
+                    vy: (dy / d) * bulletSpeed + spread,
+                    life: bulletLife,
                     color: i % 2 === 0 ? "red" : "blue",
+                    heavy: isHeavy,
                 });
             }
         }
@@ -424,6 +440,16 @@ export default class Engine {
                 pb.life = 0;
                 b.hp -= 1;
                 this.triggerExplosion(b.x, b.y);
+                this.onKill?.({
+                    kills: this.killCount,
+                    playerHP: this.playerHitCount,
+                    victory: this.victory,
+                    loss: this.gameOver,
+                    level: this.level,
+                    killsThisLevel: this.killsThisLevel,
+                    bossHP: b.hp,
+                    bossMaxHp: this.bossMaxHp,
+                });
                 if (b.hp <= 0) {
                     b.alive = false;
                     this.victory = true;

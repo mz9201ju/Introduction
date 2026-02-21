@@ -66,9 +66,15 @@ export default class Renderer {
         b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
 
         ctx.save();
-        ctx.strokeStyle = b.color === "red" ? "rgba(255,60,60,0.95)" : "rgba(40,160,255,0.95)";
-        ctx.lineWidth = 2.5;
-        const trail = 14, len = Math.hypot(b.vx, b.vy) || 1;
+        if (b.heavy) {
+            ctx.strokeStyle = b.color === "red" ? "rgba(255,120,0,0.95)" : "rgba(180,60,255,0.95)";
+            ctx.lineWidth = 5;
+        } else {
+            ctx.strokeStyle = b.color === "red" ? "rgba(255,60,60,0.95)" : "rgba(40,160,255,0.95)";
+            ctx.lineWidth = 2.5;
+        }
+        const trail = b.heavy ? 28 : 14;
+        const len = Math.hypot(b.vx, b.vy) || 1;
         const tx = (b.vx / len) * trail, ty = (b.vy / len) * trail;
         ctx.beginPath();
         ctx.moveTo(b.x - tx, b.y - ty);

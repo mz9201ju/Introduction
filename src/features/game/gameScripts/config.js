@@ -30,4 +30,9 @@ export const GAME = {
 
     // Player-hit flash
     HIT_FLASH_DURATION: 0.4,
+
+    // Boss laser variants
+    BOSS_HEAVY_CHANCE: 0.25,
+    BOSS_HEAVY_LIFE_MULT: 2.2,
+    BOSS_HEAVY_SPEED_MULT: 0.7,
 };
