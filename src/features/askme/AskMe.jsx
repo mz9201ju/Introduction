@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 import { profile } from "@resume/data/profile";
-import Footer from "@app/nav/Footer"
+import Footer from "@app/nav/Footer";
 import { marked } from "marked";
-import { COLORS, ANIMATIONS } from "../../theme";
+import { COLORS } from "../../theme";
 import { sendChatMessage } from "../../services/aiApi";
 
 export default function AskMe() {
@@ -11,41 +11,42 @@ export default function AskMe() {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const endRef = useRef(null);
+  const chatAreaRef = useRef(null);
+  const autoScrollPausedRef = useRef(false);
+  const autoScrollTimeoutRef = useRef(null);
+  const typingIntervalRef = useRef(null);
   const [isMatrixActive, setIsMatrixActive] = useState(false);
 
   useEffect(() => {
-    const chatArea = endRef.current?.parentElement;
+    const chatArea = chatAreaRef.current;
     if (!chatArea) return;
 
-    let isUserScrolling = false;
-    let frame;
-
     const handleUserScroll = () => {
-      isUserScrolling = true;
-      // after a few seconds of no activity, re-enable auto scroll
-      clearTimeout(chatArea._scrollTimeout);
-      chatArea._scrollTimeout = setTimeout(() => {
-        isUserScrolling = false;
-      }, 2500);
+      const distanceFromBottom = chatArea.scrollHeight - chatArea.clientHeight - chatArea.scrollTop;
+      autoScrollPausedRef.current = distanceFromBottom > 80;
+
+      clearTimeout(autoScrollTimeoutRef.current);
+      autoScrollTimeoutRef.current = setTimeout(() => {
+        autoScrollPausedRef.current = false;
+      }, 1800);
     };
 
-    const smoothFollow = () => {
-      if (!isUserScrolling) {
-        const target = chatArea.scrollHeight - chatArea.clientHeight;
-        const delta = target - chatArea.scrollTop;
-        chatArea.scrollTop += delta * 0.2; // smooth ease
-      }
-      frame = requestAnimationFrame(smoothFollow);
-    };
-
-    chatArea.addEventListener("scroll", handleUserScroll);
-    frame = requestAnimationFrame(smoothFollow);
+    chatArea.addEventListener("scroll", handleUserScroll, { passive: true });
 
     return () => {
-      cancelAnimationFrame(frame);
       chatArea.removeEventListener("scroll", handleUserScroll);
-      clearTimeout(chatArea._scrollTimeout);
+      clearTimeout(autoScrollTimeoutRef.current);
     };
+  }, []);
+
+  useEffect(() => {
+    const chatArea = chatAreaRef.current;
+    if (!chatArea || autoScrollPausedRef.current) return;
+
+    chatArea.scrollTo({
+      top: chatArea.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, isTyping]);
 
   useEffect(() => {
@@ -61,50 +62,73 @@ export default function AskMe() {
     }
   }, []);
 
+  useEffect(() => {
+    const updateViewportVars = () => {
+      document.documentElement.style.setProperty("--askme-vh", `${window.innerHeight * 0.01}px`);
+      document.documentElement.style.setProperty("--askme-vw", `${window.innerWidth * 0.01}px`);
+    };
+
+    updateViewportVars();
+    window.addEventListener("resize", updateViewportVars, { passive: true });
+    window.addEventListener("orientationchange", updateViewportVars, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", updateViewportVars);
+      window.removeEventListener("orientationchange", updateViewportVars);
+      document.documentElement.style.removeProperty("--askme-vh");
+      document.documentElement.style.removeProperty("--askme-vw");
+    };
+  }, []);
+
+  useEffect(() => {
+    let viewportMeta = document.querySelector('meta[name="viewport"]');
+    let createdViewport = false;
+
+    if (!viewportMeta) {
+      viewportMeta = document.createElement("meta");
+      viewportMeta.name = "viewport";
+      document.head.appendChild(viewportMeta);
+      createdViewport = true;
+    }
+
+    const previousViewportContent = viewportMeta.getAttribute("content");
+    viewportMeta.setAttribute(
+      "content",
+      "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    );
+
+    return () => {
+      if (previousViewportContent) {
+        viewportMeta.setAttribute("content", previousViewportContent);
+      } else if (createdViewport) {
+        viewportMeta.remove();
+      }
+    };
+  }, []);
+
 
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
-  ${ANIMATIONS.pulse}
-
   .askme-wrapper {
     position: relative;
     z-index: 0;
     background: transparent !important;
     font-family: monospace !important;
     color: ${COLORS.matrix};
-    cursor: none !important; /* 👈 restore default */
-    min-height: 100vh;     /* allow page to grow */
-    height: auto;          /* allow scroll */
-    overflow-x: hidden;
-    overflow-y: auto;      /* enables scrolling */
-  }
-
-  html,
-  body,
-  :root,
-  #root,
-  * {
-    cursor: none !important; /* 👈 restore normal cursor globally */
-  }
-
-  a,
-  a:hover,
-  a:focus,
-  button,
-  button:hover,
-  button:focus,
-  [role="button"] {
     cursor: none !important;
+    height: calc(var(--askme-vh, 1vh) * 100);
+    width: calc(var(--askme-vw, 1vw) * 100);
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    box-sizing: border-box;
   }
 
-  canvas {
-    cursor: auto !important;
-    touch-action: none;
-    display: block;
-    position: relative;
-    z-index: 9999 !important;
-    pointer-events: auto;
+  .askme-wrapper,
+  .askme-wrapper * {
+    cursor: none !important;
+    box-sizing: border-box;
   }
 
   .askme-wrapper canvas,
@@ -128,15 +152,18 @@ export default function AskMe() {
   }
 
   .ask-omer-page {
-    min-height: 100vh;
+    height: calc(var(--askme-vh, 1vh) * 100);
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 1rem;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 5rem 1rem 0.75rem;
     animation: matrixGlow 6s infinite ease-in-out;
     position: relative;
     z-index: 10;
+    overflow: hidden;
   }
 
   @keyframes matrixGlow {
@@ -150,9 +177,13 @@ export default function AskMe() {
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.85);
     box-shadow: 0 0 25px ${COLORS.matrixRgba};
-    width: 90%;
-    max-width: 700px;
-    padding: 4rem 1rem 1rem 1rem;
+    width: min(100%, 720px);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    max-height: calc(var(--askme-vh, 1vh) * 100 - 8.5rem);
   }
 
   .matrix-title {
@@ -165,31 +196,44 @@ export default function AskMe() {
   }
 
   .chat-area {
-    flex: 1;
+    flex: 1 1 auto;
     overflow-y: auto;
-    max-height: 55vh;
+    min-height: 0;
     background: rgba(0,0,0,0.6);
     border: 1px solid ${COLORS.matrixRgba};
     border-radius: 10px;
     padding: 1rem;
     margin-bottom: 1rem;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   .input-section {
     display: flex;
     gap: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .message-row {
+    margin-bottom: 0.6rem;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   textarea {
     flex: 1;
-    background: black;
+    background: rgba(0,0,0,0.9);
     color: ${COLORS.matrix};
     border: 1px solid ${COLORS.matrixRgba};
     border-radius: 10px;
     padding: 0.75rem;
-    font-size: 1rem;
-    resize: none;
+    font-size: 16px;
+    line-height: 1.35;
+    resize: vertical;
+    min-height: 52px;
+    max-height: 160px;
   }
 
   textarea:focus {
@@ -199,53 +243,74 @@ export default function AskMe() {
   }
 
   button {
-    background: ${COLORS.matrix};
-    border: none;
-    color: ${COLORS.dark};
+    background: ${COLORS.matrixRgbaFaint};
+    border: 1px solid ${COLORS.matrix};
+    color: ${COLORS.matrix};
     font-weight: bold;
     border-radius: 10px;
     padding: 0.75rem 1.25rem;
     min-width: 90px;
-    font-size: 1rem;
-    transition: background 0.2s, transform 0.2s;
+    height: 52px;
+    font-size: 16px;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   }
 
   button:hover {
-    background: #00ffaa;
+    background: ${COLORS.matrixRgbaMid};
+    box-shadow: 0 0 10px ${COLORS.matrixRgbaLight};
     transform: scale(1.02);
   }
 
   button:active {
-    background: #00cc77;
+    background: ${COLORS.matrixRgbaLight};
     transform: scale(0.97);
   }
 
   @media (max-width: 640px) {
+    .ask-omer-page {
+      padding: 4.5rem 0.6rem 0.6rem;
+      gap: 0.5rem;
+    }
+
     .terminal-card {
-      padding: 4rem 1rem 1rem 1rem;
-      max-width: 95%;
+      width: 100%;
+      padding: 0.85rem;
+      max-height: calc(var(--askme-vh, 1vh) * 100 - 7.4rem);
     }
+
     .chat-area {
-      max-height: 45vh;
+      min-height: 0;
     }
-    textarea {
-      font-size: 0.9rem;
+
+    .input-section {
+      flex-direction: column;
+      align-items: stretch;
     }
+
     button {
-      font-size: 0.9rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    textarea {
+      width: 100%;
     }
   }
-      /* === Matrix Falling Code Background === */
-    .matrix-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1 !important;  /* 👈 Move it behind everything */
-    width: 100%;
-    height: 100%;
-    background: black;
-    pointer-events: none !important;
+
+  .askme-wrapper .footer {
+    width: min(100%, 720px);
   }
+
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1 !important;
+      width: 100%;
+      height: 100%;
+      background: black;
+      pointer-events: none !important;
+    }
   `;
     document.head.appendChild(style);
     return () => style.remove();
@@ -300,17 +365,27 @@ export default function AskMe() {
     };
   }, [isMatrixActive]);
 
-  const askAI = async () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    return () => {
+      clearTimeout(autoScrollTimeoutRef.current);
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+    };
+  }, []);
 
-    const userMsg = { role: "user", content: input };
+  const askAI = async () => {
+    const trimmedInput = input.trim();
+    if (!trimmedInput || isTyping) return;
+
+    const userMsg = { role: "user", content: trimmedInput };
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setIsTyping(true);
     setIsMatrixActive(true);
 
     try {
-      const text = await sendChatMessage(input);
+      const text = await sendChatMessage(trimmedInput);
       typeEffect(text);
     } catch (err) {
       console.error(err);
@@ -325,18 +400,22 @@ export default function AskMe() {
   const typeEffect = (text) => {
     const html = marked.parse(text);
 
+    if (typingIntervalRef.current) {
+      clearInterval(typingIntervalRef.current);
+    }
+
     let i = 0;
-    let displayed = "";
     const aiMsg = { role: "assistant", content: "" };
     setMessages((m) => [...m, aiMsg]);
 
-    const interval = setInterval(() => {
-      displayed = html.slice(0, i);
-      i++;
+    typingIntervalRef.current = setInterval(() => {
+      i = Math.min(i + 3, html.length);
+      const displayed = html.slice(0, i);
 
       setMessages((m) => {
         const updated = [...m];
         updated[updated.length - 1] = {
+          ...updated[updated.length - 1],
           role: "assistant",
           content: displayed,
           isHTML: true,
@@ -344,12 +423,13 @@ export default function AskMe() {
         return updated;
       });
 
-      if (i > html.length) {
-        clearInterval(interval);
+      if (i >= html.length) {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
         setIsTyping(false);
         setIsMatrixActive(false);
       }
-    }, 15);
+    }, 16);
   };
 
   return (
@@ -360,11 +440,11 @@ export default function AskMe() {
           <div className="terminal-card">
             <div className="matrix-title">OMER-AI TERMINAL v2.0</div>
 
-            <div className="chat-area">
+            <div className="chat-area" ref={chatAreaRef}>
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`mb-2 ${msg.role === "user" ? "text-blue-400" : "text-green-400"}`}
+                  className={`message-row ${msg.role === "user" ? "text-blue-400" : "text-green-400"}`}
                 >
                   <span className="opacity-70">
                     {msg.role === "user" ? "🧑 YOU" : "🤖 OMER-AI"}:
