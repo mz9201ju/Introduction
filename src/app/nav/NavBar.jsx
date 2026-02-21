@@ -350,9 +350,9 @@ export default function NavBar() {
                 padding: isMobile || compactMode ? "8px 12px" : "10px 16px",
                 transition: "all 0.3s ease-in-out",
                 marginTop: isMobile || compactMode ? "8px" : "18px",
-                background: "rgba(0, 0, 0, 0.35)",
-                backdropFilter: "blur(6px)",
-                boxShadow: SHADOWS.standard,
+                background: "transparent",
+                backdropFilter: "none",
+                boxShadow: "none",
             }}
         >
             {/* ---------------------------------------------------------------------
