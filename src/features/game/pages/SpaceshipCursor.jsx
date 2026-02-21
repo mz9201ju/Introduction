@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import spaceship from "/spaceship.png";
 import { Joystick } from "react-joystick-component";
@@ -35,14 +35,14 @@ export default function SpaceshipCursor() {
   /* ==========================================================
      ⚙️ Common position + event broadcast
      ========================================================== */
-  const updatePosition = (x, y) => {
+  const updatePosition = useCallback((x, y) => {
     const newPos = { x, y };
     posRef.current = newPos;
     setPos(newPos);
     window.dispatchEvent(new CustomEvent("player-move", { detail: newPos }));
-  };
+  }, []);
 
-  const handleFire = (x, y) => {
+  const handleFire = useCallback((x, y) => {
     const now = performance.now();
     if (!firingStartRef.current) firingStartRef.current = now;
     const elapsed = now - firingStartRef.current;
@@ -54,7 +54,7 @@ export default function SpaceshipCursor() {
     window.dispatchEvent(
       new CustomEvent("player-fire", { detail: { x, y, color } })
     );
-  };
+  }, [color]);
 
   /* ==========================================================
      🖱️ Desktop: mouse movement (unchanged)
@@ -80,12 +80,12 @@ export default function SpaceshipCursor() {
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseup", handleEnd);
     };
-  }, [isMobile, color]);
+  }, [isMobile, handleFire, updatePosition]);
 
   /* ==========================================================
      🕹️ Mobile: joystick movement
      ========================================================== */
-  const handleMove = (e) => {
+  const handleMove = useCallback((e) => {
     const dx = e.x * SPEED;
     const dy = -e.y * SPEED; // invert Y to match natural joystick feel
     const { x, y } = posRef.current;
@@ -94,12 +94,12 @@ export default function SpaceshipCursor() {
 
     updatePosition(newX, newY);
     handleFire(newX, newY);
-  };
+  }, [handleFire, updatePosition]);
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
     firingStartRef.current = 0;
     setColor("blue");
-  };
+  }, []);
 
   /* ==========================================================
      🔒 Resize: recenter spaceship
@@ -112,7 +112,7 @@ export default function SpaceshipCursor() {
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [updatePosition]);
 
   /* ==========================================================
      🧩 Render
