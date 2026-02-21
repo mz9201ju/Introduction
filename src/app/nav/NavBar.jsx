@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { baseBtnStyle, activeBtnStyle } from "./navStyles";
+import { COLORS, SHADOWS } from "../../theme";
 
 /*
   NavBar.jsx
@@ -19,6 +20,8 @@ const links = [
     /* { to: "/resume-generator", label: "Resume Generator" }, */
     { to: "/darthVader", label: "PlayGame!" },
 ];
+
+const COMPACT_ROUTES = new Set(["/darthVader", "/resume-generator", "/about", "/ask-me"]);
 
 export default function NavBar() {
     // UI state
@@ -62,12 +65,7 @@ export default function NavBar() {
     useEffect(() => {
         const handleScroll = () => {
             const scrollY = window.scrollY;
-            if (scrollY > 300 
-                || location.pathname === "/darthVader" 
-                || location.pathname === "/resume-generator"
-                || location.pathname === "/about"
-                || location.pathname === "/ask-me"
-            ) {
+            if (scrollY > 300 || COMPACT_ROUTES.has(location.pathname)) {
                 setCompactMode(true);
             } else {
                 setCompactMode(false);
@@ -77,6 +75,42 @@ export default function NavBar() {
         handleScroll(); // initial
         return () => window.removeEventListener("scroll", handleScroll);
     }, [location.pathname]);
+
+    // ----------------------------
+    // Route change: close open UI panels
+    // ----------------------------
+    useEffect(() => {
+        setIsOpen(false);
+        setShowTranslate(false);
+    }, [location.pathname]);
+
+    // ----------------------------
+    // Accessibility: ESC closes panels
+    // ----------------------------
+    useEffect(() => {
+        const handleEsc = (e) => {
+            if (e.key === "Escape") {
+                setIsOpen(false);
+                setShowTranslate(false);
+            }
+        };
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, []);
+
+    // ----------------------------
+    // Mobile UX: lock body scroll when menu is open
+    // ----------------------------
+    useEffect(() => {
+        if (isMobile && isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isMobile, isOpen]);
 
     // ----------------------------
     // Google Translate script init (run once)
@@ -313,9 +347,12 @@ export default function NavBar() {
                 left: 0,
                 width: "100%",
                 zIndex: 1000,
-                padding: "6px 10px",
+                padding: isMobile || compactMode ? "8px 12px" : "10px 16px",
                 transition: "all 0.3s ease-in-out",
-                marginTop: "27px",
+                marginTop: isMobile || compactMode ? "8px" : "18px",
+                background: "rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(6px)",
+                boxShadow: SHADOWS.standard,
             }}
         >
             {/* ---------------------------------------------------------------------
@@ -345,9 +382,11 @@ export default function NavBar() {
                 {/* Mobile burger (only shown on mobile/compact) */}
                 {(isMobile || compactMode) && (
                     <button
+                        type="button"
                         onClick={() => setIsOpen(!isOpen)}
                         aria-label="Toggle menu"
                         aria-expanded={isOpen}
+                        aria-controls="main-nav-links"
                         style={{
                             width: 36,
                             height: 36,
@@ -372,6 +411,7 @@ export default function NavBar() {
                 <div style={{ position: "absolute", right: 12, top: 8, zIndex: 1500, pointerEvents: "auto" }}>
                     {/* Globe toggle button */}
                     <button
+                        type="button"
                         onClick={(e) => {
                             e.stopPropagation();
                             // init widget if script already loaded but init hasn't run
@@ -478,13 +518,21 @@ export default function NavBar() {
             {/* Links (desktop or expanded mobile) */}
             {((!isMobile && !compactMode) || isOpen) ? (
                 <div
+                    id="main-nav-links"
                     style={{
                         display: "flex",
                         flexDirection: isMobile || compactMode ? "column" : "row",
                         justifyContent: "center",
                         alignItems: "center",
                         marginTop: isMobile || compactMode ? "10px" : "0",
-                        gap: isMobile || compactMode ? "8px" : "24px",
+                        gap: isMobile || compactMode ? "10px" : "24px",
+                        width: isMobile || compactMode ? "min(92vw, 360px)" : "100%",
+                        marginInline: "auto",
+                        padding: isMobile || compactMode ? "12px" : "0",
+                        borderRadius: isMobile || compactMode ? "14px" : "0",
+                        background: isMobile || compactMode ? "rgba(5, 10, 30, 0.85)" : "transparent",
+                        border: isMobile || compactMode ? `1px solid ${COLORS.spaceBlueFaint}` : "none",
+                        boxShadow: isMobile || compactMode ? SHADOWS.spaceGlowMedium : "none",
                     }}
                 >
                     {links.map((item) => (
@@ -492,7 +540,13 @@ export default function NavBar() {
                             key={item.to}
                             to={item.to}
                             onClick={() => setIsOpen(false)}
-                            style={({ isActive }) => ({ ...baseBtnStyle, ...(isActive ? activeBtnStyle : null) })}
+                            style={({ isActive }) => ({
+                                ...baseBtnStyle,
+                                ...(isActive ? activeBtnStyle : null),
+                                width: isMobile || compactMode ? "100%" : "auto",
+                                textAlign: "center",
+                                padding: isMobile || compactMode ? "12px 16px" : baseBtnStyle.padding,
+                            })}
                         >
                             {item.label}
                         </NavLink>
