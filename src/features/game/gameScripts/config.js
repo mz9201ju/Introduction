@@ -21,4 +21,13 @@ export const GAME = {
 
     HIT_RADIUS: 24,
     EXPLOSION_TIME: 0.4,
+
+    // Elite enemy constants
+    ELITE_SPAWN_EVERY: 5,
+    ELITE_HP: 3,
+    ELITE_SPEED_MULT: 1.45,
+    ELITE_SIZE: 40,
+
+    // Player-hit flash
+    HIT_FLASH_DURATION: 0.4,
 };

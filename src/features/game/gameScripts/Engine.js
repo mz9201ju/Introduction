@@ -25,6 +25,7 @@ export default class Engine {
         this.victoryT = 0;
         this.justReset = false;
         this.playerHitCount = 100;
+        this.playerHitFlash = 0;
 
         // Level Transition Overlay
         this.showLevelText = true;
@@ -78,6 +79,7 @@ export default class Engine {
         // --- Spawning ---
         this.spawnTimer = 0;
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
+        this._nextEliteAt = GAME.ELITE_SPAWN_EVERY;
 
         // --- Timing ---
         this.lastT = performance.now();
@@ -154,6 +156,8 @@ export default class Engine {
         this.nextSpawnIn = randBetween(GAME.ENEMY_MIN_SPAWN_MS, GAME.ENEMY_MAX_SPAWN_MS);
         this.lastT = performance.now();
         this.justReset = true;
+        this.playerHitFlash = 0;
+        this._nextEliteAt = GAME.ELITE_SPAWN_EVERY;
 
         // ✅ Emit all key stats on each update
         this.onKill?.({
@@ -257,7 +261,7 @@ export default class Engine {
     /**
      * Spawn a single enemy at a random screen edge.
      */
-    spawnEnemy() {
+    spawnEnemy(forceElite = false) {
         const { W, H, CX, CY } = this.bg;
         const edge = Math.floor(Math.random() * 4);
         const m = 40;
@@ -274,18 +278,20 @@ export default class Engine {
         const toCY = CY - y;
         const len = Math.hypot(toCX, toCY) || 1;
 
-        // ✅ Define speed BEFORE using it
-        const spd = this._scaleByLevel(GAME.ENEMY_SPEED);
+        // Elite enemy: tougher, faster, fires more frequently
+        const isElite = forceElite || (this.killCount > 0 && this.killCount >= this._nextEliteAt);
+        if (isElite) this._nextEliteAt = this.killCount + GAME.ELITE_SPAWN_EVERY;
+
+        const spd = this._scaleByLevel(GAME.ENEMY_SPEED) * (isElite ? GAME.ELITE_SPEED_MULT : 1);
         const vx = (toCX / len) * spd;
         const vy = (toCY / len) * spd;
 
         // 🔥 Faster fire at higher levels
-        const fireMin = this._scaleByLevel(GAME.ENEMY_FIRE_MIN, -0.2);
-        const fireMax = this._scaleByLevel(GAME.ENEMY_FIRE_MAX, -0.2);
+        const fireMin = this._scaleByLevel(GAME.ENEMY_FIRE_MIN, -0.2) * (isElite ? 0.65 : 1);
+        const fireMax = this._scaleByLevel(GAME.ENEMY_FIRE_MAX, -0.2) * (isElite ? 0.65 : 1);
 
         const now = performance.now();
 
-        // ✅ Create full enemy object
         const enemy = makeEnemy({
             x,
             y,
@@ -297,6 +303,8 @@ export default class Engine {
             wobblePhase: 0,
             fireEvery: randBetween(fireMin, fireMax),
             nextFire: now + randBetween(200, 900),
+            isElite,
+            hp: isElite ? GAME.ELITE_HP : 1,
         });
 
         // 👇 Entry boost to avoid idle spawn delay
@@ -387,7 +395,7 @@ export default class Engine {
         // Smooth rotation
         b.angle += 1.5 * dt;
 
-        // 💣 Boss fires 3-shot bursts of ultra-fast lasers
+        // 💣 Boss fires 3-shot bursts of ultra-fast lasers (no setTimeout — avoids post-destroy callbacks)
         b.fireT += dt * 1000;
         if (b.fireT >= b.fireEvery) {
             b.fireT = 0;
@@ -398,17 +406,14 @@ export default class Engine {
 
             for (let i = 0; i < 3; i++) {
                 const spread = (Math.random() - 0.5) * 0.25;
-                const delay = i * 80; // 80ms between each laser
-                setTimeout(() => {
-                    this.enemyBullets.push({
-                        x: b.x,
-                        y: b.y,
-                        vx: (dx / d) * speed + spread,
-                        vy: (dy / d) * speed + spread,
-                        life: GAME.BULLET_LIFE,
-                        color: i % 2 === 0 ? "red" : "blue",
-                    });
-                }, delay);
+                this.enemyBullets.push({
+                    x: b.x,
+                    y: b.y,
+                    vx: (dx / d) * speed + spread,
+                    vy: (dy / d) * speed + spread,
+                    life: GAME.BULLET_LIFE,
+                    color: i % 2 === 0 ? "red" : "blue",
+                });
             }
         }
 
@@ -439,7 +444,10 @@ export default class Engine {
             for (const e of this.enemies) {
                 if (!e || !e.alive) continue;
                 if (this._isHit(e.x, e.y, pb.x, pb.y, GAME.HIT_RADIUS)) {
-                    e.alive = false; pb.life = 0; this.triggerExplosion(e.x, e.y);
+                    pb.life = 0;
+                    e.hp -= 1;
+                    this.triggerExplosion(e.x, e.y);
+                    if (e.hp <= 0) e.alive = false;
                     break;
                 }
             }
@@ -453,7 +461,8 @@ export default class Engine {
             if (b.life <= 0) continue;
             if (this._isHit(this.cursorX, this.cursorY, b.x, b.y, R)) {
                 b.life = 0; this.triggerExplosion(this.cursorX, this.cursorY);
-                if (this.playerHitCount == 0) { this.gameOver = true; break; }
+                this.playerHitFlash = GAME.HIT_FLASH_DURATION;
+                if (this.playerHitCount === 0) { this.gameOver = true; break; }
                 this.playerHitCount--;
                 this.onKill?.({
                     kills: this.killCount,
@@ -613,6 +622,16 @@ export default class Engine {
         }
 
         this.drawLevelText(ctx, dt);
+        // Player-hit screen flash
+        if (this.playerHitFlash > 0) {
+            this.playerHitFlash -= dt;
+            const alpha = Math.max(0, this.playerHitFlash / GAME.HIT_FLASH_DURATION) * 0.35;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = "#ff2020";
+            ctx.fillRect(0, 0, this.bg.W, this.bg.H);
+            ctx.restore();
+        }
         // Overlays + rendering
         if (this.victory) this.drawVictory(ctx, dt);
         for (const b of this.enemyBullets) this.renderer.drawEnemyBullet(ctx, b, dt);

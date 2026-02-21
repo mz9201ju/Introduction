@@ -38,16 +38,26 @@ export default class Renderer {
             this.enemySprite.set(e, idx);
         }
         const slot = this.enemyImgs[idx];
+        const SIZE = e.isElite ? GAME.ELITE_SIZE : 28;
 
         ctx.save();
         ctx.translate(e.x, e.y);
         ctx.rotate(e.angle);
-        const SIZE = 28;
         if (slot?.ready) {
             ctx.imageSmoothingEnabled = true;
-            ctx.shadowColor = "rgba(255,255,255,0.6)";
-            ctx.shadowBlur = 8;
+            ctx.shadowColor = e.isElite ? "rgba(255,200,0,0.9)" : "rgba(255,255,255,0.6)";
+            ctx.shadowBlur = e.isElite ? 18 : 8;
             ctx.drawImage(slot.img, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
+        }
+        // Elite HP indicator (small pips below the sprite)
+        if (e.isElite && e.hp > 0) {
+            ctx.shadowBlur = 0;
+            for (let i = 0; i < e.hp; i++) {
+                ctx.fillStyle = "rgba(255,200,0,0.9)";
+                ctx.beginPath();
+                ctx.arc(-4 + i * 5, SIZE / 2 + 5, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         ctx.restore();
     }
