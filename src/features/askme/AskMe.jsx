@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 import { profile } from "@resume/data/profile";
 import Footer from "@app/nav/Footer";
@@ -26,12 +26,13 @@ export default function AskMe() {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isMatrixActive, setIsMatrixActive] = useState(false);
+  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
 
   const endRef = useRef(null);
   const wrapperRef = useRef(null);
   const chatAreaRef = useRef(null);
   useAskMePageSetup();
-  useAskMeResponsive();
+  const { isMobile } = useAskMeResponsive();
   useAskMeAutoScroll({ chatAreaRef, messages, isTyping });
   useAskMeMatrixBackground({
     isMatrixActive,
@@ -45,6 +46,42 @@ export default function AskMe() {
     setIsTyping,
     setIsMatrixActive,
   });
+
+  useEffect(() => {
+    if (!isMobile) {
+      setIsKeyboardActive(false);
+      return;
+    }
+
+    const detectKeyboard = () => {
+      const viewportHeight = window.visualViewport?.height;
+      if (!viewportHeight) return;
+      const keyboardThreshold = 120;
+      const viewportDelta = (window.innerHeight || 0) - viewportHeight;
+      setIsKeyboardActive(viewportDelta > keyboardThreshold);
+    };
+
+    detectKeyboard();
+    window.visualViewport?.addEventListener("resize", detectKeyboard, { passive: true });
+    window.visualViewport?.addEventListener("scroll", detectKeyboard, { passive: true });
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", detectKeyboard);
+      window.visualViewport?.removeEventListener("scroll", detectKeyboard);
+    };
+  }, [isMobile]);
+
+  const handleInputFocus = () => {
+    if (isMobile) {
+      setIsKeyboardActive(true);
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (isMobile) {
+      setIsKeyboardActive(false);
+    }
+  };
 
   const askAI = async () => {
     const trimmedInput = input.trim();
@@ -70,7 +107,7 @@ export default function AskMe() {
       <SimpleSpaceshipCursor />
       <div
         ref={wrapperRef}
-        className={`askme-wrapper ${isFullscreen ? "is-fullscreen" : ""}`}
+        className={`askme-wrapper ${isFullscreen ? "is-fullscreen" : ""} ${isKeyboardActive ? "is-keyboard-active" : ""}`}
         style={ASKME_THEME_VARS}
       >
         <div className="ask-omer-page">
@@ -118,6 +155,8 @@ export default function AskMe() {
                 placeholder="Type your question..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), askAI())}
               />
               <button className="askme-button" onClick={askAI}>Send</button>

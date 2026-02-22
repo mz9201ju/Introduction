@@ -24,11 +24,22 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  .terminal-card,
+  .chat-area,
+  .input-section,
+  .ask-omer-page > footer {
+    transition: min-height 0.14s ease-out, max-height 0.14s ease-out, opacity 0.14s ease-out, margin-top 0.14s ease-out;
+  }
+
   .askme-wrapper.is-fullscreen .ask-omer-page {
     padding: calc(env(safe-area-inset-top, 0px) + 0.5rem)
       max(0.6rem, env(safe-area-inset-right, 0px))
       calc(env(safe-area-inset-bottom, 0px) + 0.5rem)
       max(0.6rem, env(safe-area-inset-left, 0px));
+  }
+
+  .askme-wrapper.is-keyboard-active .ask-omer-page {
+    overflow-y: hidden;
   }
 
   .terminal-card {
@@ -43,6 +54,12 @@
   .askme-wrapper.is-fullscreen .terminal-card {
     min-height: calc(100vh - 2rem);
     max-height: calc(100vh - 2rem);
+    overflow: hidden;
+  }
+
+  .askme-wrapper.is-keyboard-active .terminal-card {
+    min-height: calc(var(--askme-vh, 1vh) * 100 - 6rem);
+    max-height: calc(var(--askme-vh, 1vh) * 100 - 6rem);
     overflow: hidden;
   }
 
@@ -88,6 +105,12 @@
     max-height: none;
   }
 
+  .askme-wrapper.is-keyboard-active .chat-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
   .input-section {
     flex: 0 0 auto;
     flex-direction: column;
@@ -106,10 +129,20 @@
   }
 
   .ask-omer-page > footer {
+    max-height: 260px;
+    opacity: 1;
+    overflow: hidden;
     margin-top: 1.5rem;
   }
 
   .askme-wrapper.is-fullscreen .ask-omer-page > footer {
     display: none;
+  }
+
+  .askme-wrapper.is-keyboard-active .ask-omer-page > footer {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    pointer-events: none;
   }
 }

@@ -1,7 +1,50 @@
 import { useCallback, useEffect, useState } from "react";
 
 function isIOSDevice() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const touchMac = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent) || touchMac;
+}
+
+function getFullscreenElement() {
+  return (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement ||
+    null
+  );
+}
+
+async function requestNativeFullscreen(element) {
+  if (element.requestFullscreen) {
+    await element.requestFullscreen();
+    return true;
+  }
+  if (element.webkitRequestFullscreen) {
+    await element.webkitRequestFullscreen();
+    return true;
+  }
+  if (element.msRequestFullscreen) {
+    await element.msRequestFullscreen();
+    return true;
+  }
+  return false;
+}
+
+async function exitNativeFullscreen() {
+  if (document.exitFullscreen) {
+    await document.exitFullscreen();
+    return true;
+  }
+  if (document.webkitExitFullscreen) {
+    await document.webkitExitFullscreen();
+    return true;
+  }
+  if (document.msExitFullscreen) {
+    await document.msExitFullscreen();
+    return true;
+  }
+  return false;
 }
 
 export function useAskMeFullscreen(wrapperRef) {
@@ -10,13 +53,17 @@ export function useAskMeFullscreen(wrapperRef) {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      setIsFullscreen(Boolean(getFullscreenElement()));
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
     };
   }, []);
 
@@ -24,23 +71,37 @@ export function useAskMeFullscreen(wrapperRef) {
     const element = wrapperRef.current;
     if (!element) return;
 
-    if (isIOS) {
-      const newFullscreenState = !isFullscreen;
-      setIsFullscreen(newFullscreenState);
-      if (newFullscreenState) {
-        window.scrollTo(0, 1);
+    const nativeFullscreenElement = getFullscreenElement();
+
+    if (nativeFullscreenElement) {
+      try {
+        const didExit = await exitNativeFullscreen();
+        if (!didExit) {
+          setIsFullscreen(false);
+        }
+      } catch (error) {
+        console.error("Fullscreen exit failed", error);
+        setIsFullscreen(false);
       }
       return;
     }
 
-    try {
-      if (!document.fullscreenElement) {
-        await element.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
+    if (!isIOS) {
+      try {
+        const didEnter = await requestNativeFullscreen(element);
+        if (didEnter) {
+          return;
+        }
+      } catch (error) {
+        console.error("Fullscreen enter failed", error);
       }
-    } catch (error) {
-      console.error("Fullscreen toggle failed", error);
+    }
+
+    const newFullscreenState = !isFullscreen;
+    setIsFullscreen(newFullscreenState);
+
+    if (newFullscreenState) {
+      window.scrollTo(0, 1);
     }
   }, [wrapperRef, isIOS, isFullscreen]);
 
