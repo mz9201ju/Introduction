@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 
+function isIOSDevice() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 export function useAskMeFullscreen(wrapperRef) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isIOS = isIOSDevice();
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -19,6 +24,14 @@ export function useAskMeFullscreen(wrapperRef) {
     const element = wrapperRef.current;
     if (!element) return;
 
+    if (isIOS) {
+      setIsFullscreen((prev) => !prev);
+      if (!isFullscreen) {
+        window.scrollTo(0, 1);
+      }
+      return;
+    }
+
     try {
       if (!document.fullscreenElement) {
         await element.requestFullscreen();
@@ -28,7 +41,7 @@ export function useAskMeFullscreen(wrapperRef) {
     } catch (error) {
       console.error("Fullscreen toggle failed", error);
     }
-  }, [wrapperRef]);
+  }, [wrapperRef, isIOS, isFullscreen]);
 
   return { isFullscreen, toggleFullscreen };
 }
