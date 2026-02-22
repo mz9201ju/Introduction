@@ -32,11 +32,11 @@
 
 .askme-wrapper.is-fullscreen,
 .askme-wrapper.is-fullscreen * {
-  cursor: auto;
+  cursor: auto !important;
 }
 
 .askme-wrapper.is-fullscreen canvas {
-  cursor: auto;
+  cursor: auto !important;
 }
 
 .askme-wrapper canvas:not(.matrix-bg),
@@ -258,7 +258,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 1 !important;
   width: 100%;
   height: 100%;
   background: black;
