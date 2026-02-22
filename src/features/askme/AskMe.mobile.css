@@ -26,8 +26,7 @@
 
   .terminal-card,
   .chat-area,
-  .input-section,
-  .ask-omer-page > footer {
+  .input-section {
     transition: min-height 0.14s ease-out, max-height 0.14s ease-out, opacity 0.14s ease-out, margin-top 0.14s ease-out;
   }
 
