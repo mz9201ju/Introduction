@@ -36,10 +36,30 @@ jobs:
         if: ${{ env.PLAYWRIGHT_BASE_URL == '' }}
         run: npm run build
 
+      - name: 🚀 Start Local Preview Server
+        if: ${{ env.PLAYWRIGHT_BASE_URL == '' }}
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > preview.log 2>&1 &
+          echo "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4173" >> "$GITHUB_ENV"
+
+      - name: ⏳ Wait for Local Server
+        if: ${{ env.PLAYWRIGHT_BASE_URL == '' }}
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then
+              echo "Local preview server is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Local preview server failed to start"
+          cat preview.log || true
+          exit 1
+
       - name: 🌐 Show Playwright Target
         run: |
           if [ -z "$PLAYWRIGHT_BASE_URL" ]; then
-            echo "Running Playwright against local preview server managed by Playwright webServer"
+            echo "Running Playwright against local preview server"
           else
             echo "Running Playwright against live URL: $PLAYWRIGHT_BASE_URL"
           fi
@@ -63,4 +83,5 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            preview.log
           retention-days: 7
