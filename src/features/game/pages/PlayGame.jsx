@@ -12,13 +12,15 @@ export default function PlayGame() {
     loss: false,
     level: 1,
     killsThisLevel: 0,
+    bossHP: null,
+    bossMaxHp: null,
   });
 
   const handleKill = useCallback((payload = {}) => {
-    const { reset, kills, playerHP, victory, loss, level, killsThisLevel } = payload;
+    const { reset, kills, playerHP, victory, loss, level, killsThisLevel, bossHP, bossMaxHp } = payload;
 
     if (reset) {
-      setStats({ kills: 0, playerHP: 100, victory: false, loss: false, level: 1, killsThisLevel: 0 });
+      setStats({ kills: 0, playerHP: 100, victory: false, loss: false, level: 1, killsThisLevel: 0, bossHP: null, bossMaxHp: null });
       return;
     }
 
@@ -29,6 +31,8 @@ export default function PlayGame() {
       loss: loss ?? prev.loss,
       level: typeof level === "number" ? level : prev.level,
       killsThisLevel: typeof killsThisLevel === "number" ? killsThisLevel : prev.killsThisLevel,
+      bossHP: typeof bossHP === "number" ? bossHP : prev.bossHP,
+      bossMaxHp: typeof bossMaxHp === "number" ? bossMaxHp : prev.bossMaxHp,
     }));
   }, []);
 

@@ -1,6 +1,6 @@
 // Simple POJOs for clarity + autocomplete-friendly shapes.
 
-export function makeEnemy({ x, y, vx, vy, fireEvery, nextFire, spd }) {
+export function makeEnemy({ x, y, vx, vy, fireEvery, nextFire, spd, isElite = false, hp = 1 }) {
     return {
         x, y, vx, vy,
         angle: 0,
@@ -9,6 +9,8 @@ export function makeEnemy({ x, y, vx, vy, fireEvery, nextFire, spd }) {
         nextFire,
         alive: true,
         wobblePhase: Math.random() * Math.PI * 2,
+        isElite,
+        hp,
     };
 }
 

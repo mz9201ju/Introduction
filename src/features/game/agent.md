@@ -102,6 +102,8 @@
 - Document non-obvious decisions in PR notes or commit message summary (not inline code comments unless requested).
 
 ### Feature Backlog
-- id: G-001 | title: Add elite enemy pattern | type: enemy | priority: high | status: todo | created: 2026-02-21 | completed:
+- id: G-001 | title: Add elite enemy pattern | type: enemy | priority: high | status: done | created: 2026-02-21 | completed: 2026-02-21
 - id: G-002 | title: Add temporary shield power-up | type: player-ability | priority: high | status: todo | created: 2026-02-21 | completed:
 - id: G-003 | title: Tune wave scaling curve | type: progression | priority: medium | status: todo | created: 2026-02-21 | completed:
+- id: G-004 | title: Boss burst fire stagger (delay-free multi-bullet) | type: stability | priority: medium | status: done | created: 2026-02-21 | completed: 2026-02-21
+- id: G-005 | title: Player-hit screen flash UX | type: ux-polish | priority: medium | status: done | created: 2026-02-21 | completed: 2026-02-21

@@ -38,16 +38,26 @@ export default class Renderer {
             this.enemySprite.set(e, idx);
         }
         const slot = this.enemyImgs[idx];
+        const SIZE = e.isElite ? GAME.ELITE_SIZE : 28;
 
         ctx.save();
         ctx.translate(e.x, e.y);
         ctx.rotate(e.angle);
-        const SIZE = 28;
         if (slot?.ready) {
             ctx.imageSmoothingEnabled = true;
-            ctx.shadowColor = "rgba(255,255,255,0.6)";
-            ctx.shadowBlur = 8;
+            ctx.shadowColor = e.isElite ? "rgba(255,200,0,0.9)" : "rgba(255,255,255,0.6)";
+            ctx.shadowBlur = e.isElite ? 18 : 8;
             ctx.drawImage(slot.img, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
+        }
+        // Elite HP indicator (small pips below the sprite)
+        if (e.isElite && e.hp > 0) {
+            ctx.shadowBlur = 0;
+            for (let i = 0; i < e.hp; i++) {
+                ctx.fillStyle = "rgba(255,200,0,0.9)";
+                ctx.beginPath();
+                ctx.arc(-4 + i * 5, SIZE / 2 + 5, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         ctx.restore();
     }
@@ -56,9 +66,15 @@ export default class Renderer {
         b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
 
         ctx.save();
-        ctx.strokeStyle = b.color === "red" ? "rgba(255,60,60,0.95)" : "rgba(40,160,255,0.95)";
-        ctx.lineWidth = 2.5;
-        const trail = 14, len = Math.hypot(b.vx, b.vy) || 1;
+        if (b.heavy) {
+            ctx.strokeStyle = b.color === "red" ? "rgba(255,120,0,0.95)" : "rgba(180,60,255,0.95)";
+            ctx.lineWidth = 5;
+        } else {
+            ctx.strokeStyle = b.color === "red" ? "rgba(255,60,60,0.95)" : "rgba(40,160,255,0.95)";
+            ctx.lineWidth = 2.5;
+        }
+        const trail = b.heavy ? 28 : 14;
+        const len = Math.hypot(b.vx, b.vy) || 1;
         const tx = (b.vx / len) * trail, ty = (b.vy / len) * trail;
         ctx.beginPath();
         ctx.moveTo(b.x - tx, b.y - ty);
