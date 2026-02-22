@@ -7,11 +7,11 @@ test("ask-me page renders chat UI", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
 });
 
-test("ask-me handles iPhone keyboard opening without CSS breakage", async ({ page }) => {
+test("ask-me handles mobile keyboard opening without CSS breakage", async ({ page }) => {
   await page.goto("/ask-me");
 
   // Capture initial state before keyboard
-  await page.screenshot({ path: "test-results/iphone-ask-me-before-keyboard.png" });
+  await page.screenshot({ path: "test-results/mobile-ask-me-before-keyboard.png" });
 
   const terminal = page.locator(".terminal-card");
   const chatArea = page.locator(".chat-area");
@@ -22,7 +22,7 @@ test("ask-me handles iPhone keyboard opening without CSS breakage", async ({ pag
   await expect(chatArea).toBeVisible();
   await expect(inputSection).toBeVisible();
 
-  // Focus on textarea (simulates keyboard opening on real iPhone)
+  // Focus on textarea (simulates keyboard opening on mobile)
   const input = page.getByLabel("Ask Omer AI chat input");
   await input.focus();
 
@@ -46,7 +46,7 @@ test("ask-me handles iPhone keyboard opening without CSS breakage", async ({ pag
   await page.waitForTimeout(500);
 
   // Capture state with keyboard "open"
-  await page.screenshot({ path: "test-results/iphone-ask-me-with-keyboard.png" });
+  await page.screenshot({ path: "test-results/mobile-ask-me-with-keyboard.png" });
 
   // Verify critical UI elements still exist and are positioned correctly
   await expect(terminal).toBeVisible();
@@ -57,11 +57,11 @@ test("ask-me handles iPhone keyboard opening without CSS breakage", async ({ pag
   await expect(input).toBeFocused();
 
   // Type some text to verify input still works
-  await input.type("iPhone keyboard test");
+  await input.type("mobile keyboard test");
   
   // Verify text was entered
   const inputValue = await input.inputValue();
-  expect(inputValue).toContain("iPhone keyboard test");
+  expect(inputValue).toContain("mobile keyboard test");
 
   // Verify chat area is still scrollable
   const scrollHeight = await chatArea.evaluate((el) => el.scrollHeight);

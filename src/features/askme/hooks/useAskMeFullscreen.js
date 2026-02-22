@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 
-function isIOSDevice() {
-  const touchMac = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent) || touchMac;
-}
-
 function getFullscreenElement() {
   return (
     document.fullscreenElement ||
@@ -49,7 +44,6 @@ async function exitNativeFullscreen() {
 
 export function useAskMeFullscreen(wrapperRef) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const isIOS = isIOSDevice();
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -86,20 +80,17 @@ export function useAskMeFullscreen(wrapperRef) {
       return;
     }
 
-    if (!isIOS) {
-      try {
-        const didEnter = await requestNativeFullscreen(element);
-        if (didEnter) {
-          return;
-        }
-      } catch (error) {
-        console.error("Fullscreen enter failed", error);
+    try {
+      const didEnter = await requestNativeFullscreen(element);
+      if (didEnter) {
+        return;
       }
+    } catch (error) {
+      console.error("Fullscreen enter failed", error);
     }
 
-    const newFullscreenState = !isFullscreen;
-    setIsFullscreen(newFullscreenState);
-  }, [wrapperRef, isIOS, isFullscreen]);
+    setIsFullscreen((prev) => !prev);
+  }, [wrapperRef]);
 
   return { isFullscreen, toggleFullscreen };
 }

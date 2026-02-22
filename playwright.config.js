@@ -31,15 +31,15 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
-      name: "iphone-16-pro",
+      name: "mobile",
       use: {
         browserName: "chromium",
         viewport: { width: 402, height: 874 },
-        deviceScaleFactor: 3,
+        deviceScaleFactor: 2,
         hasTouch: true,
         isMobile: true,
         userAgent:
-          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1",
+          "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
       },
     },
   ],
