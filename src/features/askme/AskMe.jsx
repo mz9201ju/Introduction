@@ -77,12 +77,6 @@ export default function AskMe() {
     }
   };
 
-  const handleInputBlur = () => {
-    if (isMobile) {
-      setIsKeyboardActive(false);
-    }
-  };
-
   const askAI = async () => {
     const trimmedInput = input.trim();
     if (!trimmedInput || isTyping) return;
@@ -156,7 +150,6 @@ export default function AskMe() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), askAI())}
               />
               <button className="askme-button" onClick={askAI}>Send</button>
