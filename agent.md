@@ -35,6 +35,12 @@
   3. `npm.cmd run test:e2e`
 - If unrelated failures exist, report them without broad unrelated fixes.
 
+## Testing & E2E Principles
+- **Never add test-specific code to source files** (no `__E2E_TEST__` flags, test modes, hardcoded logic)
+- Tests must work against unmodified application code using Playwright capabilities
+- Use network mocking, route interception, and page evaluation for test isolation
+- Test failures should drive feature improvements, not source code workarounds
+
 ## CI Agent E2E Entry Points
 - GitHub Actions workflow: `.github/workflows/playwright-live.yml`
 - Supports `workflow_dispatch` with optional `target_url` input for live-site testing.

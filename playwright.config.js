@@ -30,5 +30,17 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "iphone-16-pro",
+      use: {
+        browserName: "chromium",
+        viewport: { width: 402, height: 874 },
+        deviceScaleFactor: 3,
+        hasTouch: true,
+        isMobile: true,
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1",
+      },
+    },
   ],
 });

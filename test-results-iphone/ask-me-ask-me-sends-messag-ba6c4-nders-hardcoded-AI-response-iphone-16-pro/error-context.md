@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - link:
+                - /url: "#"
+                - text: Select Language▼
+      - generic [ref=e4]:
+        - button "Toggle menu" [ref=e5]
+        - button "Open language options" [ref=e10]:
+          - img [ref=e11]
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]: OMER-AI TERMINAL v2.0
+          - button "Enter fullscreen" [ref=e20]:
+            - generic [ref=e21]: ⛶
+        - generic [ref=e23]:
+          - textbox "Ask Omer AI chat input" [ref=e24]:
+            - /placeholder: Type your question...
+            - text: Hello from Playwright
+          - button "Send" [active] [ref=e25]
+      - contentinfo [ref=e26]:
+        - generic [ref=e27]: © 2026 Omer Zahid — Senior Software Engineer
+        - generic [ref=e28]:
+          - link "" [ref=e29]:
+            - /url: "https://github.com/mz9201ju    "
+            - generic [ref=e30]: 
+          - link "" [ref=e31]:
+            - /url: https://linkedin.com/in/omer-zahid-developer
+            - generic [ref=e32]: 
+          - link "" [ref=e33]:
+            - /url: https://www.youtube.com/@AbuvYousuf
+            - generic [ref=e34]: 
+          - link "" [ref=e35]:
+            - /url: https://www.facebook.com/abuyousufdeveloper
+            - generic [ref=e36]: 
+          - link "" [ref=e37]:
+            - /url: mailto:info@omerzahid.com
+            - generic [ref=e38]: 
+          - link " Instagram" [ref=e39]:
+            - /url: https://www.instagram.com/abuyousufdeveloper
+            - generic [ref=e40]: 
+            - generic [ref=e41]: Instagram
+        - link "Buy Me a Coffee" [ref=e43]:
+          - /url: https://www.buymeacoffee.com/omerzahid
+          - img "Buy Me a Coffee" [ref=e44]
+  - img [ref=e47]
+```

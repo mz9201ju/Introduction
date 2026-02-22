@@ -83,6 +83,12 @@ When changing code, run the smallest relevant checks first:
 
 If failures are unrelated, report them without broad unrelated fixes.
 
+## Testing Principles
+- **Never hardcode test-specific logic in source code** (no `__E2E_TEST__` flags, test modes, or mock conditions in production code)
+- Tests must work against the actual application code without modifications
+- Use Playwright's native capabilities (network mocking, route interception, etc.) for test isolation
+- If a feature cannot be tested without modifying production code, the test design needs rethinking
+
 ## Output Expectations for Copilot
 - Provide concise, implementation-ready changes.
 - Reference exact files being changed.
