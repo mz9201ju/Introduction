@@ -39,14 +39,18 @@ jobs:
       - name: 🌐 Show Playwright Target
         run: |
           if [ -z "$PLAYWRIGHT_BASE_URL" ]; then
-            echo "PLAYWRIGHT_BASE_URL=http://127.0.0.1:4173" >> "$GITHUB_ENV"
-            echo "Running Playwright against local preview server"
+            echo "Running Playwright against local preview server managed by Playwright webServer"
           else
             echo "Running Playwright against live URL: $PLAYWRIGHT_BASE_URL"
           fi
 
       - name: 🎭 Install Playwright Browsers
         run: npx playwright install --with-deps chromium
+
+      - name: 🔎 Debug Playwright Context
+        run: |
+          echo "PLAYWRIGHT_BASE_URL=${PLAYWRIGHT_BASE_URL:-<local-webServer-mode>}"
+          npx playwright --version
 
       - name: ✅ Run Playwright Tests
         run: npm run test:e2e
