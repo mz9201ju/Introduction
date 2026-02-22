@@ -135,7 +135,7 @@
 }
 
 .matrix-title {
-  text-align: left;
+  text-align: center;
   color: var(--askme-matrix);
   font-size: 1.2rem;
   font-weight: bold;

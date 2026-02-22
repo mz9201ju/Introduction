@@ -19,11 +19,16 @@
       calc(env(safe-area-inset-bottom, 0px) + 0.5rem)
       max(0.6rem, env(safe-area-inset-left, 0px));
     gap: 0.5rem;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .askme-wrapper.is-fullscreen .ask-omer-page {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+    padding: calc(env(safe-area-inset-top, 0px) + 0.5rem)
+      max(0.6rem, env(safe-area-inset-right, 0px))
+      calc(env(safe-area-inset-bottom, 0px) + 0.5rem)
+      max(0.6rem, env(safe-area-inset-left, 0px));
   }
 
   .terminal-card {
@@ -31,7 +36,13 @@
     padding: 0.85rem;
     display: flex;
     flex-direction: column;
-    max-height: 100%;
+    min-height: min-content;
+    overflow: visible;
+  }
+
+  .askme-wrapper.is-fullscreen .terminal-card {
+    min-height: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
     overflow: hidden;
   }
 
@@ -44,7 +55,7 @@
   }
 
   .matrix-title {
-    text-align: left;
+    text-align: center;
     font-size: 1rem;
     line-height: 1.2;
     flex: 1;
@@ -64,10 +75,17 @@
   }
 
   .chat-area {
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 0 1 auto;
+    min-height: 200px;
+    max-height: 50vh;
     overflow-y: auto;
     overflow-x: hidden;
+  }
+
+  .askme-wrapper.is-fullscreen .chat-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
   }
 
   .input-section {
@@ -85,5 +103,13 @@
   .askme-input {
     width: 100%;
     font-size: 16px;
+  }
+
+  .ask-omer-page > footer {
+    margin-top: 1.5rem;
+  }
+
+  .askme-wrapper.is-fullscreen .ask-omer-page > footer {
+    display: none;
   }
 }

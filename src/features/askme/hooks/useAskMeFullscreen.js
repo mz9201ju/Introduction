@@ -25,8 +25,9 @@ export function useAskMeFullscreen(wrapperRef) {
     if (!element) return;
 
     if (isIOS) {
-      setIsFullscreen((prev) => !prev);
-      if (!isFullscreen) {
+      const newFullscreenState = !isFullscreen;
+      setIsFullscreen(newFullscreenState);
+      if (newFullscreenState) {
         window.scrollTo(0, 1);
       }
       return;
