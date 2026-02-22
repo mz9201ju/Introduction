@@ -162,7 +162,7 @@ export default function AskMe() {
               <button className="askme-button" onClick={askAI}>Send</button>
             </div>
           </div>
-          <Footer profile={profile} />
+          {!(isMobile && isKeyboardActive) && <Footer profile={profile} />}
         </div>
       </div>
     </>
