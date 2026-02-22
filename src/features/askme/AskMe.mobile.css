@@ -5,7 +5,7 @@
     left: 0;
     right: 0;
     height: calc(var(--askme-vh, 1vh) * 100);
-    transform: translateY(var(--askme-keyboard-offset, 0px));
+    min-height: 0;
     overflow: hidden;
   }
 
