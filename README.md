@@ -97,6 +97,24 @@ npm run preview
 - `npm run build` - Build optimized production bundle
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint code quality checks
+- `npm run test:e2e` - Run Playwright browser smoke tests
+- `npm run test:e2e:headed` - Run Playwright tests in headed mode
+- `npm run test:e2e:report` - Open Playwright HTML report
+
+### Playwright E2E
+
+Install browser runtime once after dependencies are installed:
+
+```bash
+npx playwright install --with-deps chromium
+```
+
+GitHub workflow for agent/CI live tests:
+- Workflow file: `.github/workflows/playwright-live.yml`
+- Trigger manually with `workflow_dispatch`
+- Optional input `target_url`:
+	- empty => tests run against local build preview
+	- set URL => tests run against that live deployment
 
 ---
 

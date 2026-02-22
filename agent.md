@@ -31,7 +31,14 @@
 - Run:
   1. `npm.cmd run lint`
   2. `npm.cmd run build` (for production-impacting changes)
+- For browser end-to-end coverage when requested, run:
+  3. `npm.cmd run test:e2e`
 - If unrelated failures exist, report them without broad unrelated fixes.
+
+## CI Agent E2E Entry Points
+- GitHub Actions workflow: `.github/workflows/playwright-live.yml`
+- Supports `workflow_dispatch` with optional `target_url` input for live-site testing.
+- If `target_url` is empty, workflow runs Playwright against local Vite preview.
 
 ## SEO + Identity Consistency
 - Keep personal/site identity consistent as **Omer Zahid** across metadata and profile references unless explicitly asked otherwise.

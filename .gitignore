@@ -25,3 +25,8 @@ dist-ssr
 
 # Ignore bundle analysis report
 stats.html
+
+# Playwright artifacts
+playwright-report
+test-results
+blob-report
