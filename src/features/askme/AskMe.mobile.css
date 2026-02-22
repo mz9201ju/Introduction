@@ -14,14 +14,14 @@
   .terminal-card {
     width: 100%;
     padding: 0.85rem;
-    max-height: min(
+    height: min(
       620px,
-      calc(var(--askme-vh, 1vh) * 100 - 11.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))
+      calc(var(--askme-vh, 1vh) * 100 - 15rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))
     );
   }
 
   .askme-wrapper.is-fullscreen .terminal-card {
-    max-height: calc(var(--askme-vh, 1vh) * 100 - 0.8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    height: calc(var(--askme-vh, 1vh) * 100 - 0.8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   }
 
   .terminal-header {
@@ -53,8 +53,6 @@
 
   .chat-area {
     min-height: 0;
-    height: min(26vh, 260px);
-    max-height: min(26vh, 260px);
   }
 
   .input-section {

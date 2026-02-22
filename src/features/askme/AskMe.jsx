@@ -9,6 +9,7 @@ import { useAskMeFullscreen } from "./hooks/useAskMeFullscreen";
 import { useAskMeMatrixBackground } from "./hooks/useAskMeMatrixBackground";
 import { useAskMePageSetup } from "./hooks/useAskMePageSetup";
 import { useAskMeTypewriter } from "./hooks/useAskMeTypewriter";
+import { useAskMeResponsive } from "./hooks/useAskMeResponsive";
 import "./AskMe.desktop.css";
 import "./AskMe.mobile.css";
 
@@ -30,6 +31,7 @@ export default function AskMe() {
   const wrapperRef = useRef(null);
   const chatAreaRef = useRef(null);
   useAskMePageSetup();
+  useAskMeResponsive();
   useAskMeAutoScroll({ chatAreaRef, messages, isTyping });
   useAskMeMatrixBackground({
     isMatrixActive,
