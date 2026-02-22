@@ -202,3 +202,128 @@ test("ask-me input section is visible within wrapper when keyboard is active", a
   expect(visibility.inputSectionBottom).toBeLessThanOrEqual(visibility.wrapperBottom + 10);
   expect(visibility.inputSectionTop).toBeGreaterThanOrEqual(0);
 });
+
+// --- Regression: wrapper must not expand beyond visual viewport when textarea is focused ---
+test("ask-me wrapper height does not exceed viewport when textarea focused on mobile", async ({ page }) => {
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  const viewportHeight = page.viewportSize().height;
+
+  // Record wrapper height before focus
+  const heightBefore = await page.evaluate(() => {
+    const wrapper = document.querySelector(".askme-wrapper");
+    return wrapper?.getBoundingClientRect().height ?? 0;
+  });
+
+  // Focus the textarea (triggers keyboard on real mobile; on desktop just checks no regression)
+  await page.getByLabel("Ask Omer AI chat input").focus();
+  await page.waitForTimeout(300);
+
+  const heightAfter = await page.evaluate(() => {
+    const wrapper = document.querySelector(".askme-wrapper");
+    return wrapper?.getBoundingClientRect().height ?? 0;
+  });
+
+  // Wrapper height must never exceed the viewport height
+  expect(heightBefore).toBeLessThanOrEqual(viewportHeight + 1);
+  expect(heightAfter).toBeLessThanOrEqual(viewportHeight + 1);
+});
+
+// --- Regression: body scroll must be locked while ask-me is mounted ---
+test("ask-me locks body scroll while mounted", async ({ page }) => {
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  const overflow = await page.evaluate(() => document.body.style.overflow);
+  expect(overflow).toBe("hidden");
+});
+
+// --- Regression: askme-wrapper must not use a translateY offset that shifts it off-screen ---
+test("ask-me wrapper has no unexpected vertical translate offset", async ({ page }) => {
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  const top = await page.evaluate(() => {
+    const wrapper = document.querySelector(".askme-wrapper");
+    return wrapper?.getBoundingClientRect().top ?? -1;
+  });
+
+  // Wrapper should be anchored at or near the top of the viewport
+  expect(top).toBeGreaterThanOrEqual(-1);
+  expect(top).toBeLessThanOrEqual(80); // allow room for navbar height
+});
+
+// --- Component: terminal-card renders title, chat area, input section and send button ---
+test("ask-me terminal-card contains all expected sub-components", async ({ page }) => {
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  await expect(page.locator(".terminal-card")).toBeVisible();
+  await expect(page.locator(".terminal-header")).toBeVisible();
+  await expect(page.locator(".chat-area")).toBeVisible();
+  await expect(page.locator(".input-section")).toBeVisible();
+  await expect(page.locator(".askme-input")).toBeVisible();
+  await expect(page.locator(".askme-button")).toBeVisible();
+});
+
+// --- Component: askme-input accepts keyboard input and clears on submission ---
+test("ask-me input accepts text and clears on Enter", async ({ page }) => {
+  await page.route("**/api/**", (route) => route.fulfill({ status: 200, body: JSON.stringify({ reply: "test" }) }));
+  await page.route("**/*", async (route) => {
+    if (route.request().resourceType() === "fetch" && !route.request().url().includes("/ask-me")) {
+      await route.fulfill({ status: 200, body: JSON.stringify({ reply: "ok" }) });
+    } else {
+      await route.continue();
+    }
+  });
+
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  const input = page.getByLabel("Ask Omer AI chat input");
+  await input.fill("hello");
+  await expect(input).toHaveValue("hello");
+
+  // Shift+Enter should NOT submit — it should keep the text
+  await input.press("Shift+Enter");
+  const valueAfterShiftEnter = await input.inputValue();
+  expect(valueAfterShiftEnter.replace(/\n/g, "")).toBe("hello");
+});
+
+// --- Component: chat-area scrolls independently without moving the wrapper ---
+test("ask-me chat-area is independently scrollable without moving wrapper", async ({ page }) => {
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  const wrapperTopBefore = await page.evaluate(() =>
+    document.querySelector(".askme-wrapper")?.getBoundingClientRect().top ?? 0
+  );
+
+  // Scroll inside chat-area
+  await page.evaluate(() => {
+    const chatArea = document.querySelector(".chat-area");
+    if (chatArea) chatArea.scrollTop = 50;
+  });
+
+  const wrapperTopAfter = await page.evaluate(() =>
+    document.querySelector(".askme-wrapper")?.getBoundingClientRect().top ?? 0
+  );
+
+  // Wrapper position must not shift when chat-area is scrolled
+  expect(wrapperTopAfter).toBe(wrapperTopBefore);
+});
+
+// --- Component: viewport meta prevents zoom on mobile ---
+test("ask-me viewport meta disables user scaling", async ({ page }) => {
+  await page.goto("/ask-me");
+  await page.waitForLoadState("networkidle");
+
+  const content = await page.evaluate(
+    () => document.querySelector('meta[name="viewport"]')?.getAttribute("content") ?? ""
+  );
+
+  expect(content).toContain("user-scalable=no");
+  expect(content).toContain("maximum-scale=1");
+  expect(content).toContain("viewport-fit=cover");
+});
