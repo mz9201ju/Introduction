@@ -30,9 +30,11 @@ export function useAskMePageSetup() {
     const updateViewportVars = () => {
       const viewportWidth = window.visualViewport?.width || window.innerWidth || window.screen.width;
       const viewportHeight = window.visualViewport?.height || window.innerHeight || window.screen.height;
+      const keyboardOffset = window.visualViewport?.offsetTop || 0;
 
       document.documentElement.style.setProperty("--askme-vh", `${viewportHeight * 0.01}px`);
       document.documentElement.style.setProperty("--askme-vw", `${viewportWidth * 0.01}px`);
+      document.documentElement.style.setProperty("--askme-keyboard-offset", `${keyboardOffset}px`);
     };
 
     updateViewportVars();
@@ -41,14 +43,17 @@ export function useAskMePageSetup() {
     window.addEventListener("orientationchange", updateViewportVars, { passive: true });
     document.addEventListener("fullscreenchange", updateViewportVars);
     window.visualViewport?.addEventListener("resize", updateViewportVars, { passive: true });
+    window.visualViewport?.addEventListener("scroll", updateViewportVars, { passive: true });
 
     return () => {
       window.removeEventListener("resize", updateViewportVars);
       window.removeEventListener("orientationchange", updateViewportVars);
       document.removeEventListener("fullscreenchange", updateViewportVars);
       window.visualViewport?.removeEventListener("resize", updateViewportVars);
+      window.visualViewport?.removeEventListener("scroll", updateViewportVars);
       document.documentElement.style.removeProperty("--askme-vh");
       document.documentElement.style.removeProperty("--askme-vw");
+      document.documentElement.style.removeProperty("--askme-keyboard-offset");
     };
   }, []);
 

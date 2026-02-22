@@ -31,6 +31,7 @@ export default function AskMe() {
   const endRef = useRef(null);
   const wrapperRef = useRef(null);
   const chatAreaRef = useRef(null);
+  const inputRef = useRef(null);
   useAskMePageSetup();
   const { isMobile } = useAskMeResponsive();
   useAskMeAutoScroll({ chatAreaRef, messages, isTyping });
@@ -74,6 +75,9 @@ export default function AskMe() {
   const handleInputFocus = () => {
     if (isMobile) {
       setIsKeyboardActive(true);
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 300);
     }
   };
 
@@ -144,6 +148,7 @@ export default function AskMe() {
 
             <div className="input-section">
               <textarea
+                ref={inputRef}
                 className="askme-input"
                 aria-label="Ask Omer AI chat input"
                 placeholder="Type your question..."
