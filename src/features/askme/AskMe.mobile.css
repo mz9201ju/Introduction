@@ -21,14 +21,6 @@
     gap: 0.5rem;
     overflow-y: auto;
     overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .terminal-card,
-  .chat-area,
-  .input-section,
-  .ask-omer-page > footer {
-    transition: min-height 0.14s ease-out, max-height 0.14s ease-out, opacity 0.14s ease-out, margin-top 0.14s ease-out;
   }
 
   .askme-wrapper.is-fullscreen .ask-omer-page {
@@ -40,8 +32,6 @@
 
   .askme-wrapper.is-keyboard-active .ask-omer-page {
     overflow-y: hidden;
-    bottom: auto;
-    height: calc(var(--askme-vh, 1vh) * 100);
   }
 
   .terminal-card {
@@ -49,19 +39,9 @@
     padding: 0.85rem;
     display: flex;
     flex-direction: column;
-    min-height: min-content;
-    overflow: visible;
-  }
-
-  .askme-wrapper.is-fullscreen .terminal-card {
-    min-height: calc(var(--askme-vh, 1vh) * 100 - 2rem);
-    max-height: calc(var(--askme-vh, 1vh) * 100 - 2rem);
-    overflow: hidden;
-  }
-
-  .askme-wrapper.is-keyboard-active .terminal-card {
-    min-height: calc(var(--askme-vh, 1vh) * 100 - 6rem);
-    max-height: calc(var(--askme-vh, 1vh) * 100 - 6rem);
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -87,6 +67,7 @@
     height: 34px;
     padding: 0.35rem 0.5rem;
     border-radius: 9px;
+    touch-action: manipulation;
   }
 
   .fullscreen-label {
@@ -94,35 +75,25 @@
   }
 
   .chat-area {
-    flex: 0 1 auto;
-    min-height: 200px;
-    max-height: 50vh;
+    flex: 1 1 auto;
+    min-height: 150px;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  .askme-wrapper.is-fullscreen .chat-area {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: none;
-  }
-
-  .askme-wrapper.is-keyboard-active .chat-area {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: none;
-  }
-
   .input-section {
+    display: flex;
     flex: 0 0 auto;
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
     margin-top: 0.6rem;
   }
 
   .askme-button {
     width: 100%;
     min-width: 0;
+    touch-action: manipulation;
   }
 
   .askme-input {
@@ -131,10 +102,9 @@
   }
 
   .ask-omer-page > footer {
-    max-height: 260px;
-    opacity: 1;
+    flex: 0 0 auto;
     overflow: hidden;
-    margin-top: 1.5rem;
+    padding-top: 0.5rem;
   }
 
   .askme-wrapper.is-fullscreen .ask-omer-page > footer {
@@ -142,9 +112,6 @@
   }
 
   .askme-wrapper.is-keyboard-active .ask-omer-page > footer {
-    max-height: 0;
-    opacity: 0;
-    margin-top: 0;
-    pointer-events: none;
+    display: none;
   }
 }

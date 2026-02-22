@@ -29,4 +29,6 @@ stats.html
 # Playwright artifacts
 playwright-report
 test-results
+test-results-iphone
 blob-report
+pw-iphone-report.json
