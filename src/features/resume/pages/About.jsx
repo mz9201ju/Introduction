@@ -1,3 +1,4 @@
+import { useState } from "react";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 import { profile } from "@resume/data/profile";   // if you moved profile.js under resume/data
 import Footer from "@app/nav/Footer"
@@ -94,6 +95,8 @@ const PROJECTS = [
 ];
 
 function ProjectCard({ title, description, href, imgSrc, imgAlt, tech }) {
+    const [hasError, setHasError] = useState(false);
+
     return (
         <div style={CARD_STYLE}>
             <h3>{title}</h3>
@@ -104,7 +107,19 @@ function ProjectCard({ title, description, href, imgSrc, imgAlt, tech }) {
                 rel="noopener noreferrer"
                 className="about-preview-link"
             >
-                <img src={imgSrc} alt={imgAlt} style={PREVIEW_IMAGE_STYLE} />
+                {hasError ? (
+                    <div className="about-preview-fallback">Preview unavailable</div>
+                ) : (
+                    <img
+                        src={imgSrc}
+                        alt={imgAlt}
+                        className="about-preview-image"
+                        style={PREVIEW_IMAGE_STYLE}
+                        loading="lazy"
+                        decoding="async"
+                        onError={() => setHasError(true)}
+                    />
+                )}
                 <div style={PREVIEW_CTA_STYLE}>🔗 Visit Site</div>
             </a>
             <h3>🧠 Tech Stack</h3>

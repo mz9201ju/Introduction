@@ -12,3 +12,20 @@
 .about-preview-link:focus-visible {
   transform: scale(1.05);
 }
+
+.about-preview-image {
+  display: block;
+}
+
+.about-preview-fallback {
+  width: 200px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(0, 191, 255, 0.12);
+  border: 1px solid rgba(0, 191, 255, 0.4);
+  color: #b7e7ff;
+  font-size: 0.85rem;
+}
