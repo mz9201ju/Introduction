@@ -488,7 +488,7 @@ export default class Engine {
             if (this._isHit(this.cursorX, this.cursorY, b.x, b.y, R)) {
                 b.life = 0; this.triggerExplosion(this.cursorX, this.cursorY);
                 this.playerHitFlash = GAME.HIT_FLASH_DURATION;
-                if (this.playerHitCount === 0) { this.gameOver = true; break; }
+                if (this.playerHitCount <= 0) { this.gameOver = true; break; }
                 this.playerHitCount--;
                 this.onKill?.({
                     kills: this.killCount,
