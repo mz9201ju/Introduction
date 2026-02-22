@@ -408,7 +408,7 @@ export default function NavBar() {
             - Click globe to open panel (keyboard accessible)
             - The panel contains language buttons; each triggers setLanguage(...)
            --------------------------- */}
-                <div style={{ position: "absolute", right: 12, top: 8, zIndex: 1500, pointerEvents: "auto" }}>
+                <div style={{ position: "absolute", right: 50, top: 8, zIndex: 1500, pointerEvents: "auto" }}>
                     {/* Globe toggle button */}
                     <button
                         type="button"
