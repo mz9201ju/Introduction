@@ -1,10 +1,25 @@
 @media (max-width: 640px) {
+  .askme-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+
   .ask-omer-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     padding: calc(env(safe-area-inset-top, 0px) + 4.25rem)
       max(0.6rem, env(safe-area-inset-right, 0px))
       calc(env(safe-area-inset-bottom, 0px) + 0.5rem)
       max(0.6rem, env(safe-area-inset-left, 0px));
     gap: 0.5rem;
+    overflow: hidden;
   }
 
   .askme-wrapper.is-fullscreen .ask-omer-page {
@@ -14,17 +29,14 @@
   .terminal-card {
     width: 100%;
     padding: 0.85rem;
-    height: min(
-      620px,
-      calc(var(--askme-vh, 1vh) * 100 - 15rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))
-    );
-  }
-
-  .askme-wrapper.is-fullscreen .terminal-card {
-    height: calc(var(--askme-vh, 1vh) * 100 - 0.8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    overflow: hidden;
   }
 
   .terminal-header {
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
     margin-bottom: 0.6rem;
@@ -52,12 +64,17 @@
   }
 
   .chat-area {
+    flex: 1 1 auto;
     min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .input-section {
+    flex: 0 0 auto;
     flex-direction: column;
     align-items: stretch;
+    margin-top: 0.6rem;
   }
 
   .askme-button {
@@ -67,5 +84,6 @@
 
   .askme-input {
     width: 100%;
+    font-size: 16px;
   }
 }
