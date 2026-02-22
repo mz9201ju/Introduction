@@ -40,6 +40,8 @@
 
   .askme-wrapper.is-keyboard-active .ask-omer-page {
     overflow-y: hidden;
+    bottom: auto;
+    height: calc(var(--askme-vh, 1vh) * 100);
   }
 
   .terminal-card {
@@ -52,8 +54,8 @@
   }
 
   .askme-wrapper.is-fullscreen .terminal-card {
-    min-height: calc(100vh - 2rem);
-    max-height: calc(100vh - 2rem);
+    min-height: calc(var(--askme-vh, 1vh) * 100 - 2rem);
+    max-height: calc(var(--askme-vh, 1vh) * 100 - 2rem);
     overflow: hidden;
   }
 

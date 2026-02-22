@@ -99,10 +99,6 @@ export function useAskMeFullscreen(wrapperRef) {
 
     const newFullscreenState = !isFullscreen;
     setIsFullscreen(newFullscreenState);
-
-    if (newFullscreenState) {
-      window.scrollTo(0, 1);
-    }
   }, [wrapperRef, isIOS, isFullscreen]);
 
   return { isFullscreen, toggleFullscreen };
