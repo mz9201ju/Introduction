@@ -41,14 +41,12 @@ export function useAskMePageSetup() {
     window.addEventListener("orientationchange", updateViewportVars, { passive: true });
     document.addEventListener("fullscreenchange", updateViewportVars);
     window.visualViewport?.addEventListener("resize", updateViewportVars, { passive: true });
-    window.visualViewport?.addEventListener("scroll", updateViewportVars, { passive: true });
 
     return () => {
       window.removeEventListener("resize", updateViewportVars);
       window.removeEventListener("orientationchange", updateViewportVars);
       document.removeEventListener("fullscreenchange", updateViewportVars);
       window.visualViewport?.removeEventListener("resize", updateViewportVars);
-      window.visualViewport?.removeEventListener("scroll", updateViewportVars);
       document.documentElement.style.removeProperty("--askme-vh");
       document.documentElement.style.removeProperty("--askme-vw");
     };

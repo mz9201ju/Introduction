@@ -62,15 +62,6 @@
   }
 
   .fullscreen-toggle {
-    width: auto;
-    min-width: 0;
-    height: 34px;
-    padding: 0.35rem 0.5rem;
-    border-radius: 9px;
-    touch-action: manipulation;
-  }
-
-  .fullscreen-label {
     display: none;
   }
 
