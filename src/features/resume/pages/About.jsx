@@ -85,10 +85,20 @@ const PROJECTS = [
     {
         title: "👶 Deeba's Day Care",
         description:
-            "It can be not easy adjusting your work schedule around the school hours of your children.At Deeba's Daycare, we offer exceptional home day care services, so the little ones are properly taken care of during your busy day.Our extended hours accommodate any situation, allowing parents with early morning shifts to commute faster or those with long nights to finish paperwork related to work.",
+            "At our childcare center, we believe in creating a nurturing and enriching environment where every child is valued, respected, and supported in their journey of growth and development. Our philosophy is rooted in the understanding that each child is unique, with their own set of strengths, interests, and learning styles.",
         href: "https://mz9201ju.github.io/deebasDayCare/",
         imgSrc:
             "https://api.microlink.io/?url=https://mz9201ju.github.io/deebasDayCare/&screenshot=true&type=png&meta=false&embed=screenshot.url",
+        imgAlt: "Deeba's Day Care preview",
+        tech: "React • Vite • Tailwind • Cloudflare",
+    },
+    {
+        title: "👶 Rashida Little Champs DayCare",
+        description:
+            "Little Champs DayCare is a Day Care Center & Head Start Center located in Bellevue, WA that services all of Bellevue & the surrounding areas. We offer Child Care, Toddler Care, Home Day Care, Day Care Services, Child Care Services, Child Education, Child Care Development, Well Mannered Services, Family Day Care, Home Child Care, 24/7 Day Care Service & more. Our staff are highly trained to care for and help develop your kids' creative, physical, and analytical skills. If you are looking for a Fun Play Day Care, Preschool or After School Program, then Little Champs DayCare is the smart choice. We will treat your children as if they are our own. Call us today to inquire about our programs and to schedule a tour of our facility.",
+        href: "https://mz9201ju.github.io/RashidaLittleChampsDayCare/",
+        imgSrc:
+            "https://api.microlink.io/?url=https://mz9201ju.github.io/RashidaLittleChampsDayCare/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Deeba's Day Care preview",
         tech: "React • Vite • Tailwind • Cloudflare",
     },
