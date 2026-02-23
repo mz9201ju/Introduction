@@ -66,14 +66,19 @@ export default class Renderer {
         b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
 
         ctx.save();
-        if (b.heavy) {
+        if (b.laser) {
+            ctx.strokeStyle = "rgba(255, 30, 0, 0.97)";
+            ctx.lineWidth = 14;
+            ctx.shadowColor = "rgba(255,80,0,1)";
+            ctx.shadowBlur = 28;
+        } else if (b.heavy) {
             ctx.strokeStyle = b.color === "red" ? "rgba(255,120,0,0.95)" : "rgba(180,60,255,0.95)";
             ctx.lineWidth = 5;
         } else {
             ctx.strokeStyle = b.color === "red" ? "rgba(255,60,60,0.95)" : "rgba(40,160,255,0.95)";
             ctx.lineWidth = 2.5;
         }
-        const trail = b.heavy ? 28 : 14;
+        const trail = b.laser ? 52 : b.heavy ? 28 : 14;
         const len = Math.hypot(b.vx, b.vy) || 1;
         const tx = (b.vx / len) * trail, ty = (b.vy / len) * trail;
         ctx.beginPath();
@@ -114,6 +119,50 @@ export default class Renderer {
         grad.addColorStop(1, "rgba(160,20,0,0)");
         ctx.fillStyle = grad;
         ctx.beginPath(); ctx.arc(ex.x, ex.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+
+    drawHealthPickup(ctx, p) {
+        const pulse = 1 + 0.18 * Math.sin(p.t * 4.5);
+        const fade = Math.min(1, p.life / 1.5);
+        const radius = GAME.HEALTH_PICKUP_RADIUS * pulse;
+        ctx.save();
+        ctx.globalAlpha = fade * 0.92;
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
+        grad.addColorStop(0, "rgba(180,255,220,1)");
+        grad.addColorStop(0.5, "rgba(0,220,120,0.85)");
+        grad.addColorStop(1, "rgba(0,180,80,0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        // Cross symbol
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        const arm = radius * 0.45;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y - arm); ctx.lineTo(p.x, p.y + arm); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(p.x - arm, p.y); ctx.lineTo(p.x + arm, p.y); ctx.stroke();
+        ctx.restore();
+    }
+
+    drawForceField(ctx, x, y, timer, maxTimer) {
+        const frac = Math.max(0, timer / maxTimer);
+        const pulse = 1 + 0.08 * Math.sin(timer * 8);
+        const radius = 36 * pulse;
+        ctx.save();
+        ctx.globalAlpha = 0.35 + 0.2 * frac;
+        const grad = ctx.createRadialGradient(x, y, radius * 0.3, x, y, radius);
+        grad.addColorStop(0, "rgba(80,200,255,0)");
+        grad.addColorStop(0.6, "rgba(80,200,255,0.5)");
+        grad.addColorStop(1, "rgba(40,120,255,0.9)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = `rgba(120,220,255,${0.7 + 0.3 * frac})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
         ctx.restore();
     }
 }

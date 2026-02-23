@@ -1,5 +1,5 @@
 export default function Scoreboard({ stats }) {
-    const { kills, playerHP, victory, loss, level = 1, killsThisLevel = 0, bossHP = null, bossMaxHp = null } = stats;
+    const { kills, playerHP, victory, loss, level = 1, killsThisLevel = 0, bossHP = null, bossMaxHp = null, forceField = false } = stats;
     const maxLevels = 5;
     const killsPerLevel = 10;
     const isBossLevel = level === maxLevels;
@@ -35,6 +35,9 @@ export default function Scoreboard({ stats }) {
             <div style={{ marginBottom: 2 }}>
                 {isBossLevel ? "⚡ BOSS PHASE" : `📶 Level ${level} / ${maxLevels} (${killsThisLevel}/${killsPerLevel})`}
             </div>
+            {forceField && (
+                <div style={{ marginBottom: 2, color: "#7dd3fc" }}>🛡️ Force Field Active</div>
+            )}
             {isBossLevel && bossMaxHp > 0 && (
                 <div style={{ marginBottom: 4 }}>
                     👾 Boss HP:
