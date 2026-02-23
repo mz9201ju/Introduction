@@ -2,7 +2,7 @@ import StarfieldBackground from "./StarfieldBackground";
 import Renderer from "./Renderer";
 import { GAME } from "./config";
 import { randBetween } from "./utils";
-import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion } from "./entities";
+import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion, makeHealthPickup } from "./entities";
 import bossImage1 from "../assets/alien-head.png";
 import bossImage2 from "../assets/angry.png";
 import bossImage3 from "../assets/star.png";
@@ -26,6 +26,8 @@ export default class Engine {
         this.justReset = false;
         this.playerHitCount = 100;
         this.playerHitFlash = 0;
+        this.forceFieldTimer = 0;
+        this.bossAttackCycle = 0;
 
         // Level Transition Overlay
         this.showLevelText = true;
@@ -71,6 +73,7 @@ export default class Engine {
         this.enemyBullets = [];
         this.myBullets = [];
         this.explosions = [];
+        this.healthPickups = [];
 
         // --- Cursor (player pos) ---
         this.cursorX = 0;
@@ -143,6 +146,8 @@ export default class Engine {
         this.victoryT = 0;
         this.gameOver = false;
         this.playerHitCount = 100;
+        this.forceFieldTimer = 0;
+        this.bossAttackCycle = 0;
         this.inBossPhase = false;
         this.boss = null;
         this.killCount = 0;
@@ -229,6 +234,7 @@ export default class Engine {
         this.enemyBullets.length = 0;
         this.myBullets.length = 0;
         this.explosions.length = 0;
+        this.healthPickups.length = 0;
         this.nextEnemyAt = Infinity;
     }
 
@@ -376,8 +382,9 @@ export default class Engine {
      * Spawn Boss with faster movement and smarter firing
      */
     spawnBoss() {
-        const totalHp = 12 + (this.maxLevels - 3) * 4;
+        const totalHp = GAME.BOSS_HP;
         this.bossMaxHp = totalHp;
+        this.bossAttackCycle = 0;
         this.boss = {
             x: this.bg.CX,
             y: this.bg.CY * 0.45,
@@ -407,7 +414,7 @@ export default class Engine {
         // Smooth rotation
         b.angle += 1.5 * dt;
 
-        // 💣 Boss fires 3-shot bursts — 25% chance heavy laser, 75% normal (no setTimeout — avoids post-destroy callbacks)
+        // 💣 Boss fires in 3 rotating attack modes
         b.fireT += dt * 1000;
         if (b.fireT >= b.fireEvery) {
             b.fireT = 0;
@@ -415,20 +422,53 @@ export default class Engine {
             const dy = this.cursorY - b.y;
             const d = Math.hypot(dx, dy) || 1;
             const speed = GAME.BOSS_BULLET_SPEED || GAME.BULLET_SPEED * 2.2;
+            const mode = this.bossAttackCycle % 3;
+            this.bossAttackCycle++;
 
-            for (let i = 0; i < 3; i++) {
-                const isHeavy = Math.random() < GAME.BOSS_HEAVY_CHANCE;
-                const spread = (Math.random() - 0.5) * 0.25;
-                const bulletSpeed = isHeavy ? speed * GAME.BOSS_HEAVY_SPEED_MULT : speed;
-                const bulletLife = isHeavy ? GAME.BULLET_LIFE * GAME.BOSS_HEAVY_LIFE_MULT : GAME.BULLET_LIFE;
+            if (mode === 0) {
+                // Mode 0: 3-shot burst — 25% chance heavy, 75% normal
+                for (let i = 0; i < 3; i++) {
+                    const isHeavy = Math.random() < GAME.BOSS_HEAVY_CHANCE;
+                    const spread = (Math.random() - 0.5) * 0.25;
+                    const bulletSpeed = isHeavy ? speed * GAME.BOSS_HEAVY_SPEED_MULT : speed;
+                    const bulletLife = isHeavy ? GAME.BULLET_LIFE * GAME.BOSS_HEAVY_LIFE_MULT : GAME.BULLET_LIFE;
+                    this.enemyBullets.push({
+                        x: b.x, y: b.y,
+                        vx: (dx / d) * bulletSpeed + spread,
+                        vy: (dy / d) * bulletSpeed + spread,
+                        life: bulletLife,
+                        color: i % 2 === 0 ? "red" : "blue",
+                        heavy: isHeavy,
+                        damage: 1,
+                    });
+                }
+            } else if (mode === 1) {
+                // Mode 1: 5-shot spread fan
+                const baseAngle = Math.atan2(dy, dx);
+                for (let i = 0; i < 5; i++) {
+                    const angle = baseAngle + (i - 2) * 0.22;
+                    const spreadSpeed = speed * 0.85;
+                    this.enemyBullets.push({
+                        x: b.x, y: b.y,
+                        vx: Math.cos(angle) * spreadSpeed,
+                        vy: Math.sin(angle) * spreadSpeed,
+                        life: GAME.BULLET_LIFE * 1.4,
+                        color: i % 2 === 0 ? "red" : "blue",
+                        heavy: false,
+                        damage: 1,
+                    });
+                }
+            } else {
+                // Mode 2: Big laser — slow, wide, deals 5 HP damage
                 this.enemyBullets.push({
-                    x: b.x,
-                    y: b.y,
-                    vx: (dx / d) * bulletSpeed + spread,
-                    vy: (dy / d) * bulletSpeed + spread,
-                    life: bulletLife,
-                    color: i % 2 === 0 ? "red" : "blue",
-                    heavy: isHeavy,
+                    x: b.x, y: b.y,
+                    vx: (dx / d) * speed * 0.45,
+                    vy: (dy / d) * speed * 0.45,
+                    life: GAME.BULLET_LIFE * 2.8,
+                    color: "red",
+                    heavy: true,
+                    laser: true,
+                    damage: GAME.BOSS_LASER_DAMAGE,
                 });
             }
         }
@@ -486,10 +526,14 @@ export default class Engine {
         for (const b of this.enemyBullets) {
             if (b.life <= 0) continue;
             if (this._isHit(this.cursorX, this.cursorY, b.x, b.y, R)) {
-                b.life = 0; this.triggerExplosion(this.cursorX, this.cursorY);
+                b.life = 0;
+                this.triggerExplosion(this.cursorX, this.cursorY);
+                // Force field blocks all damage
+                if (this.forceFieldTimer > 0) continue;
                 this.playerHitFlash = GAME.HIT_FLASH_DURATION;
+                const dmg = b.damage || 1;
+                this.playerHitCount = Math.max(0, this.playerHitCount - dmg);
                 if (this.playerHitCount <= 0) { this.gameOver = true; break; }
-                this.playerHitCount--;
                 this.onKill?.({
                     kills: this.killCount,
                     playerHP: this.playerHitCount,
@@ -498,7 +542,33 @@ export default class Engine {
                     level: this.level,
                     killsThisLevel: this.killsThisLevel,
                 });
+            }
+        }
+    }
 
+    // ============================================================
+    // 💊 Health Pickup Collection
+    // ============================================================
+
+    checkPickups(dt) {
+        for (let i = this.healthPickups.length - 1; i >= 0; i--) {
+            const p = this.healthPickups[i];
+            p.life -= dt;
+            p.t += dt;
+            if (p.life <= 0) { this.healthPickups.splice(i, 1); continue; }
+            if (this._isHit(this.cursorX, this.cursorY, p.x, p.y, GAME.HEALTH_PICKUP_RADIUS + 15)) {
+                this.healthPickups.splice(i, 1);
+                this.playerHitCount = Math.min(GAME.MAX_PLAYER_HP, this.playerHitCount + GAME.HEALTH_PICKUP_HP);
+                this.forceFieldTimer = GAME.FORCE_FIELD_DURATION;
+                this.onKill?.({
+                    kills: this.killCount,
+                    playerHP: this.playerHitCount,
+                    victory: this.victory,
+                    loss: this.gameOver,
+                    level: this.level,
+                    killsThisLevel: this.killsThisLevel,
+                    forceField: true,
+                });
             }
         }
     }
@@ -597,6 +667,13 @@ export default class Engine {
                         killsThisLevel: this.killsThisLevel,
                     });
 
+                    // Drop health pickup
+                    if (Math.random() < GAME.HEALTH_DROP_CHANCE) {
+                        const pickup = makeHealthPickup({ x: enemy.x, y: enemy.y });
+                        pickup.life = GAME.HEALTH_PICKUP_LIFE;
+                        this.healthPickups.push(pickup);
+                    }
+
                     // Level Progression
                     this.killsThisLevel++;
 
@@ -645,6 +722,26 @@ export default class Engine {
             const now = performance.now();
             this.updateEnemies?.(dt, now);
             for (const e of this.enemies) if (e && e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
+        }
+
+        // Health pickups + force field
+        this.checkPickups(dt);
+        for (const p of this.healthPickups) this.renderer.drawHealthPickup(ctx, p);
+        if (this.forceFieldTimer > 0) {
+            this.forceFieldTimer -= dt;
+            this.renderer.drawForceField(ctx, this.cursorX, this.cursorY, this.forceFieldTimer, GAME.FORCE_FIELD_DURATION);
+            if (this.forceFieldTimer <= 0) {
+                this.forceFieldTimer = 0;
+                this.onKill?.({
+                    kills: this.killCount,
+                    playerHP: this.playerHitCount,
+                    victory: this.victory,
+                    loss: this.gameOver,
+                    level: this.level,
+                    killsThisLevel: this.killsThisLevel,
+                    forceField: false,
+                });
+            }
         }
 
         this.drawLevelText(ctx, dt);

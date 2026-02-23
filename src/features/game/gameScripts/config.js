@@ -31,8 +31,23 @@ export const GAME = {
     // Player-hit flash
     HIT_FLASH_DURATION: 0.4,
 
+    MAX_PLAYER_HP: 100,
+
     // Boss laser variants
     BOSS_HEAVY_CHANCE: 0.25,
     BOSS_HEAVY_LIFE_MULT: 2.2,
     BOSS_HEAVY_SPEED_MULT: 0.7,
+
+    // Boss stats
+    BOSS_HP: 100,
+    BOSS_LASER_DAMAGE: 5,
+
+    // Health pickup drops
+    HEALTH_DROP_CHANCE: 0.4,
+    HEALTH_PICKUP_RADIUS: 22,
+    HEALTH_PICKUP_LIFE: 8,
+    HEALTH_PICKUP_HP: 15,
+
+    // Force field
+    FORCE_FIELD_DURATION: 6,
 };

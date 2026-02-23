@@ -25,3 +25,7 @@ export function makePlayerBullet({ x, y, vx, vy, life, color }) {
 export function makeExplosion({ x, y }) {
     return { x, y, t: 0 };
 }
+
+export function makeHealthPickup({ x, y }) {
+    return { x, y, life: 0, t: 0 };
+}
