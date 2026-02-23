@@ -50,7 +50,7 @@ export async function sendChatMessage(message, model = 'microsoft/phi-4-mini-ins
  */
 export async function generateResumeAndCoverLetter(resume, jobDescription) {
   try {
-    const response = await fetch('https://gh-ai-proxy.omer-mnsu.workers.dev/AI/generate', {
+    const response = await fetch(API_CONFIG.resumeGenerateEndpoint, {
       method: 'POST',
       headers: API_CONFIG.defaultHeaders,
       body: JSON.stringify({

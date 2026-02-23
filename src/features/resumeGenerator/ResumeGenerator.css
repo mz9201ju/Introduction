@@ -39,6 +39,17 @@
     text-shadow: 0 0 6px rgba(138, 180, 255, 0.3);
 }
 
+.file-input {
+    margin-bottom: 8px;
+    color: var(--ink, #e6ecff);
+}
+
+.helper-text {
+    margin: 0 0 10px;
+    color: var(--muted, #9db2ff);
+    font-size: 13px;
+}
+
 textarea {
     width: 100%;
     min-height: 180px;
@@ -82,6 +93,45 @@ textarea:focus {
     background: linear-gradient(90deg, #8ab4ff, #6d8cff, #a8c7ff);
 }
 
+.generate-btn:disabled {
+    opacity: 0.75;
+    transform: none;
+}
+
+.download-controls {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.download-controls label {
+    color: var(--muted, #9db2ff);
+    font-size: 14px;
+}
+
+.download-controls select {
+    background: rgba(18, 25, 54, 0.9);
+    color: var(--ink, #e6ecff);
+    border: 1px solid rgba(138, 180, 255, 0.3);
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.status-message,
+.error-message {
+    margin: 10px 0 0;
+    font-size: 14px;
+}
+
+.status-message {
+    color: #9fffcf;
+}
+
+.error-message {
+    color: #ff9ea6;
+}
+
 .output-section {
     margin-top: 50px;
     display: grid;
@@ -106,6 +156,20 @@ textarea:focus {
     margin-bottom: 12px;
     color: var(--accent, #8ab4ff);
     text-shadow: 0 0 8px rgba(138, 180, 255, 0.4);
+}
+
+.download-btn {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border: 1px solid rgba(138, 180, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(18, 25, 54, 0.95);
+    color: var(--ink, #e6ecff);
+    cursor: pointer;
+}
+
+.download-btn:hover {
+    box-shadow: 0 0 16px rgba(138, 180, 255, 0.3);
 }
 
 pre {

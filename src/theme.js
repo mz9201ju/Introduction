@@ -102,6 +102,7 @@ export const ANIMATIONS = {
  */
 export const API_CONFIG = {
   aiProxyEndpoint: 'https://gh-ai-proxy.omer-mnsu.workers.dev/AI/ask',
+  resumeGenerateEndpoint: 'https://gh-ai-proxy.omer-mnsu.workers.dev/AI/generate',
   defaultHeaders: {
     'Content-Type': 'application/json',
   },
