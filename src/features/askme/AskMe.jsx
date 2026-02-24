@@ -75,9 +75,12 @@ export default function AskMe() {
   const handleInputFocus = () => {
     if (isMobile) {
       setIsKeyboardActive(true);
-      setTimeout(() => {
-        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 300);
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (isMobile) {
+      setIsKeyboardActive(false);
     }
   };
 
@@ -155,6 +158,7 @@ export default function AskMe() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), askAI())}
               />
               <button className="askme-button" onClick={askAI}>Send</button>

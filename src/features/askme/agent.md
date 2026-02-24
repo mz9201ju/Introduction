@@ -21,6 +21,27 @@
 - Keep AI request flow centralized through `src/services/aiApi.js`.
 
 ## Known Bugs Fixed
+### iPhone keyboard hides input + pushes top UI after manual scroll (fixed, Feb 2026)
+- **What you were facing**:
+  - On cellphone, tapping the AskMe textarea often required manual upward page scroll to see input/send.
+  - After scrolling, the upper AskMe area became partially hidden/pushed out of frame.
+- **Root cause**:
+  - `handleInputFocus` used `scrollIntoView(...)`, which can trigger unstable iOS viewport shifts when the keyboard opens.
+  - Mobile layout had rigid space pressure (`.terminal-card` not fully constrained + `.chat-area` `min-height`), so keyboard-open state could crowd the input section.
+  - Wrapper anchoring did not explicitly track `visualViewport.offsetTop`, making iOS visual viewport movement harder to stabilize.
+- **Fix applied**:
+  - Removed textarea `scrollIntoView` behavior from `AskMe.jsx` and kept keyboard state purely class/viewport-driven.
+  - Added `--askme-vv-top` in `useAskMePageSetup.js` from `visualViewport.offsetTop` and applied it to `.askme-wrapper { top: var(--askme-vv-top, 0px) }` in mobile CSS.
+  - Tightened mobile sizing rules:
+    - `.terminal-card` uses `height: 100%` on cellphone.
+    - `.chat-area` uses `min-height: 0` on cellphone.
+    - `.askme-wrapper.is-keyboard-active .ask-omer-page` reduces top/bottom padding and keeps overflow locked.
+  - Added `onBlur` keyboard cleanup (`setIsKeyboardActive(false)`) in `AskMe.jsx`.
+- **Hard rule to preserve**:
+  - Do **not** reintroduce `scrollIntoView` on AskMe input focus for cellphone.
+  - Do **not** remove `--askme-vv-top` plumbing (`useAskMePageSetup.js` + mobile `.askme-wrapper top`).
+  - Do **not** raise mobile `.chat-area` minimum height above flexible constraints.
+
 ### Mobile wrapper expansion on textarea focus (fixed)
 - **Root cause**: `AskMe.desktop.css` set `min-height: 100svh` on `.askme-wrapper`. The mobile override
   (`AskMe.mobile.css`) used `height: calc(var(--askme-vh, 1vh) * 100)` but never reset `min-height`.
@@ -41,13 +62,23 @@
 - **Rule to preserve**: Do not re-add a `translateY` based on `visualViewport.offsetTop` to a
   `position: fixed` element.
 
+## Non-Negotiable Cellphone CSS Guardrails
+- `AskMe.mobile.css` must continue to define `.askme-wrapper` as fixed, viewport-bound, and overflow-hidden.
+- `.askme-wrapper` on cellphone must keep:
+  - `min-height: 0`,
+  - `height: calc(var(--askme-vh, 1vh) * 100)`,
+  - `top: var(--askme-vv-top, 0px)`.
+- `.terminal-card` on cellphone must remain height-constrained (`height: 100%`, `min-height: 0`).
+- `.chat-area` on cellphone must remain shrinkable (`min-height: 0`) so input/send stay visible.
+- Keyboard-active state must keep footer hidden and outer scrolling locked.
+
 ## Desktop + Cellphone Verification (Required)
 For every AskMe change, verify both desktop and cellphone layouts before PR:
 
 1. **Desktop run check**
    - Validate terminal card alignment, chat area scroll, input + send alignment, and fullscreen behavior.
 2. **Cellphone run check**
-   - Validate viewport fit, safe-area behavior, chat-area fixed height, and no clipping or overflow.
+  - Validate viewport fit, safe-area behavior, chat-area bounded/flexible height, and no clipping or overflow.
    - Tap the textarea and confirm the wrapper does **not** grow or push content off-screen.
    - Confirm the page is **not** scrollable outside the chat-area.
 3. **Interaction check**
@@ -75,8 +106,10 @@ For every AskMe change, verify both desktop and cellphone layouts before PR:
 ### Symptom: input area not visible after keyboard opens
 1. The `is-keyboard-active` class should be added to `.askme-wrapper` immediately on `onFocus`.
    Check `AskMe.jsx` `handleInputFocus` — it calls `setIsKeyboardActive(true)`.
-2. Inspect whether the `visualViewport` resize listener updates `--askme-vh` quickly enough (within ~300 ms).
-3. Ensure `useAskMePageSetup` listens on both `window.visualViewport.resize` and `window.resize`.
+2. Confirm `AskMe.jsx` does **not** call `scrollIntoView` for textarea focus.
+3. Inspect whether the `visualViewport` resize listener updates `--askme-vh` quickly enough (within ~300 ms).
+4. Ensure `useAskMePageSetup` listens on both `window.visualViewport.resize` and `window.resize`.
+5. Confirm `--askme-vv-top` is set from `visualViewport.offsetTop` and applied as wrapper `top` on mobile.
 
 ### Symptom: fullscreen toggle has no effect on iOS Safari
 - iOS Safari does not support the Fullscreen API on non-video elements. `useAskMeFullscreen` falls back
@@ -93,7 +126,7 @@ For every AskMe change, verify both desktop and cellphone layouts before PR:
 | `ask-me input section is visible within wrapper when keyboard is active` | Input stays on-screen |
 | `ask-me wrapper height does not exceed viewport when textarea focused on mobile` | **Regression** – wrapper must not expand beyond viewport on focus |
 | `ask-me locks body scroll while mounted` | **Regression** – `body.style.overflow` is `hidden` |
-| `ask-me wrapper has no unexpected vertical translate offset` | **Regression** – wrapper top is near 0 (no translateY mis-alignment) |
+| `ask-me wrapper has no unexpected vertical translate offset` | **Regression** – wrapper top stays stable during keyboard resize (no vertical drift) |
 | `ask-me terminal-card contains all expected sub-components` | Component structure is intact |
 | `ask-me input accepts text and clears on Enter` | Input field accepts text; Shift+Enter does not submit |
 | `ask-me chat-area is independently scrollable without moving wrapper` | Chat scroll does not shift wrapper |

@@ -8,64 +8,75 @@ test("ask-me page renders chat UI", async ({ page }) => {
 });
 
 test("ask-me handles mobile keyboard opening without CSS breakage", async ({ page }) => {
+  test.skip(test.info().project.name !== "mobile", "Mobile-only keyboard regression");
+
   await page.goto("/ask-me");
-
-  // Capture initial state before keyboard
-  await page.screenshot({ path: "test-results/mobile-ask-me-before-keyboard.png" });
-
   const terminal = page.locator(".terminal-card");
-  const chatArea = page.locator(".chat-area");
   const inputSection = page.locator(".input-section");
+  const wrapper = page.locator(".askme-wrapper");
+  const input = page.getByLabel("Ask Omer AI chat input");
 
-  // Verify layout is intact before interaction
   await expect(terminal).toBeVisible();
-  await expect(chatArea).toBeVisible();
   await expect(inputSection).toBeVisible();
 
-  // Focus on textarea (simulates keyboard opening on mobile)
-  const input = page.getByLabel("Ask Omer AI chat input");
-  await input.focus();
-
-  // Simulate keyboard appearing by injecting visualViewport height change
-  await page.evaluate(() => {
-    if (window.visualViewport) {
-      // Simulate mobile keyboard reducing viewport height
-      const originalHeight = window.visualViewport.height;
-      const keyboardHeight = originalHeight * 0.4; // 40% keyboard reduction
-      Object.defineProperty(window.visualViewport, "height", {
-        value: Math.max(300, originalHeight - keyboardHeight),
-        configurable: true,
-      });
-      // Trigger resize event to notify listeners
-      window.dispatchEvent(new Event("resize"));
-      window.visualViewport?.dispatchEvent(new Event("resize"));
-    }
+  const before = await page.evaluate(() => {
+    const wrapperNode = document.querySelector(".askme-wrapper");
+    const inputSectionNode = document.querySelector(".input-section");
+    const wrapperRect = wrapperNode?.getBoundingClientRect();
+    const inputRect = inputSectionNode?.getBoundingClientRect();
+    const visualTop = window.visualViewport?.offsetTop || 0;
+    const visualHeight = window.visualViewport?.height || window.innerHeight;
+    return {
+      wrapperTop: wrapperRect?.top ?? 0,
+      inputBottom: inputRect?.bottom ?? 0,
+      visualBottom: visualTop + visualHeight,
+      pageScrollY: window.scrollY,
+    };
   });
 
-  // Wait for any layout shift from keyboard opening
+  await input.focus();
+
+  await page.evaluate(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const nextHeight = Math.max(280, Math.floor(vv.height * 0.62));
+    Object.defineProperty(vv, "height", { value: nextHeight, configurable: true });
+    Object.defineProperty(vv, "offsetTop", { value: 0, configurable: true });
+    vv.dispatchEvent(new Event("resize"));
+    vv.dispatchEvent(new Event("scroll"));
+    window.dispatchEvent(new Event("resize"));
+  });
+
   await page.waitForTimeout(500);
 
-  // Capture state with keyboard "open"
-  await page.screenshot({ path: "test-results/mobile-ask-me-with-keyboard.png" });
-
-  // Verify critical UI elements still exist and are positioned correctly
   await expect(terminal).toBeVisible();
   await expect(input).toBeVisible();
   await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
-
-  // Verify input is still focused and accessible
   await expect(input).toBeFocused();
 
-  // Type some text to verify input still works
   await input.type("mobile keyboard test");
-  
-  // Verify text was entered
   const inputValue = await input.inputValue();
   expect(inputValue).toContain("mobile keyboard test");
 
-  // Verify chat area is still scrollable
-  const scrollHeight = await chatArea.evaluate((el) => el.scrollHeight);
-  expect(scrollHeight).toBeGreaterThan(0);
+  const after = await page.evaluate(() => {
+    const wrapperNode = document.querySelector(".askme-wrapper");
+    const inputSectionNode = document.querySelector(".input-section");
+    const wrapperRect = wrapperNode?.getBoundingClientRect();
+    const inputRect = inputSectionNode?.getBoundingClientRect();
+    const visualTop = window.visualViewport?.offsetTop || 0;
+    const visualHeight = window.visualViewport?.height || window.innerHeight;
+    return {
+      wrapperTop: wrapperRect?.top ?? 0,
+      inputBottom: inputRect?.bottom ?? 0,
+      visualBottom: visualTop + visualHeight,
+      pageScrollY: window.scrollY,
+    };
+  });
+
+  expect(Math.abs(after.wrapperTop - before.wrapperTop)).toBeLessThanOrEqual(6);
+  expect(after.inputBottom).toBeLessThanOrEqual(after.visualBottom + 8);
+  expect(after.pageScrollY).toBeLessThanOrEqual(before.pageScrollY + 4);
+  await expect(wrapper).toHaveClass(/is-keyboard-active/);
 });
 
 test("ask-me viewport meta locks zoom and scroll", async ({ page }) => {
@@ -241,17 +252,35 @@ test("ask-me locks body scroll while mounted", async ({ page }) => {
 
 // --- Regression: askme-wrapper must not use a translateY offset that shifts it off-screen ---
 test("ask-me wrapper has no unexpected vertical translate offset", async ({ page }) => {
+  test.skip(test.info().project.name !== "mobile", "Mobile-only viewport anchoring regression");
+
   await page.goto("/ask-me");
   await page.waitForLoadState("networkidle");
 
-  const top = await page.evaluate(() => {
-    const wrapper = document.querySelector(".askme-wrapper");
-    return wrapper?.getBoundingClientRect().top ?? -1;
+  const baseline = await page.evaluate(() => {
+    const wrapperNode = document.querySelector(".askme-wrapper");
+    return wrapperNode?.getBoundingClientRect().top ?? 0;
   });
 
-  // Wrapper should be anchored at or near the top of the viewport
-  expect(top).toBeGreaterThanOrEqual(-1);
-  expect(top).toBeLessThanOrEqual(80); // allow room for navbar height
+  await page.getByLabel("Ask Omer AI chat input").focus();
+
+  const afterKeyboardResize = await page.evaluate(() => {
+    const vv = window.visualViewport;
+    if (vv) {
+      const nextHeight = Math.max(280, Math.floor(vv.height * 0.62));
+      Object.defineProperty(vv, "height", { value: nextHeight, configurable: true });
+      vv.dispatchEvent(new Event("resize"));
+      vv.dispatchEvent(new Event("scroll"));
+      window.dispatchEvent(new Event("resize"));
+    }
+
+    const wrapperNode = document.querySelector(".askme-wrapper");
+    return wrapperNode?.getBoundingClientRect().top ?? -1;
+  });
+
+  expect(baseline).toBeGreaterThanOrEqual(-1);
+  expect(afterKeyboardResize).toBeGreaterThanOrEqual(-1);
+  expect(Math.abs(afterKeyboardResize - baseline)).toBeLessThanOrEqual(6);
 });
 
 // --- Component: terminal-card renders title, chat area, input section and send button ---

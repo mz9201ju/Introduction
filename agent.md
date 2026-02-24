@@ -9,6 +9,10 @@
   - `src/features/game/agent.md`
 - If task path is under `src/features/askme`, apply rules from:
   - `src/features/askme/agent.md`
+- For AskMe tasks, treat the cellphone keyboard/layout rules in `src/features/askme/agent.md` as **non-negotiable regressions**:
+  - keep input visible when keyboard opens,
+  - prevent wrapper/top-area vertical drift,
+  - preserve mobile viewport anchoring + guardrail E2E assertions.
 - For game tasks, execution is mandatory via the game agent protocol:
   - pick work from `### Feature Backlog` by highest-priority `todo`,
   - follow `Feature Type Rotation`,

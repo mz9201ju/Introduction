@@ -30,9 +30,11 @@ export function useAskMePageSetup() {
     const updateViewportVars = () => {
       const viewportWidth = window.visualViewport?.width || window.innerWidth || window.screen.width;
       const viewportHeight = window.visualViewport?.height || window.innerHeight || window.screen.height;
+      const viewportTop = window.visualViewport?.offsetTop || 0;
 
       document.documentElement.style.setProperty("--askme-vh", `${viewportHeight * 0.01}px`);
       document.documentElement.style.setProperty("--askme-vw", `${viewportWidth * 0.01}px`);
+      document.documentElement.style.setProperty("--askme-vv-top", `${viewportTop}px`);
     };
 
     updateViewportVars();
@@ -51,6 +53,7 @@ export function useAskMePageSetup() {
       window.visualViewport?.removeEventListener("scroll", updateViewportVars);
       document.documentElement.style.removeProperty("--askme-vh");
       document.documentElement.style.removeProperty("--askme-vw");
+      document.documentElement.style.removeProperty("--askme-vv-top");
     };
   }, []);
 
