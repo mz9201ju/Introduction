@@ -1,13 +1,14 @@
 @media (max-width: 640px) {
   .askme-wrapper {
     position: fixed;
-    top: var(--askme-vv-top, 0px);
+    top: 0;
     left: 0;
     right: 0;
-    bottom: auto;
-    height: calc(var(--askme-vh, 1vh) * 100);
+    bottom: 0;
+    height: 100svh;
     min-height: 0;
     overflow: hidden;
+    overscroll-behavior: none;
   }
 
   .ask-omer-page {
@@ -19,8 +20,8 @@
       calc(env(safe-area-inset-bottom, 0px) + 0.5rem)
       max(0.6rem, env(safe-area-inset-left, 0px));
     gap: 0.5rem;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   .askme-wrapper.is-fullscreen .ask-omer-page {
@@ -31,9 +32,8 @@
   }
 
   .askme-wrapper.is-keyboard-active .ask-omer-page {
-    overflow-y: hidden;
     padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
-    padding-bottom: max(0.35rem, env(safe-area-inset-bottom, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   }
 
   .terminal-card {
@@ -81,6 +81,12 @@
     align-items: stretch;
     gap: 0.5rem;
     margin-top: 0.6rem;
+    transform: translateY(0);
+    transition: transform 0.2s ease;
+  }
+
+  .askme-wrapper.is-keyboard-active .input-section {
+    transform: translateY(calc(-1 * var(--askme-keyboard-inset, 0px)));
   }
 
   .askme-button {

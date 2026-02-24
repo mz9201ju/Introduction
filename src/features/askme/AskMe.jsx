@@ -59,7 +59,8 @@ export default function AskMe() {
       if (!viewportHeight) return;
       const keyboardThreshold = 120;
       const viewportDelta = (window.innerHeight || 0) - viewportHeight;
-      setIsKeyboardActive(viewportDelta > keyboardThreshold);
+      const isInputFocused = document.activeElement === inputRef.current;
+      setIsKeyboardActive(isInputFocused || viewportDelta > keyboardThreshold);
     };
 
     detectKeyboard();

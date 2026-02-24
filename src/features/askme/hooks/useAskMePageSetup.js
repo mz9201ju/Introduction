@@ -31,10 +31,12 @@ export function useAskMePageSetup() {
       const viewportWidth = window.visualViewport?.width || window.innerWidth || window.screen.width;
       const viewportHeight = window.visualViewport?.height || window.innerHeight || window.screen.height;
       const viewportTop = window.visualViewport?.offsetTop || 0;
+      const keyboardInset = Math.max(0, (window.innerHeight || viewportHeight) - (viewportHeight + viewportTop));
 
       document.documentElement.style.setProperty("--askme-vh", `${viewportHeight * 0.01}px`);
       document.documentElement.style.setProperty("--askme-vw", `${viewportWidth * 0.01}px`);
       document.documentElement.style.setProperty("--askme-vv-top", `${viewportTop}px`);
+      document.documentElement.style.setProperty("--askme-keyboard-inset", `${keyboardInset}px`);
     };
 
     updateViewportVars();
@@ -54,6 +56,7 @@ export function useAskMePageSetup() {
       document.documentElement.style.removeProperty("--askme-vh");
       document.documentElement.style.removeProperty("--askme-vw");
       document.documentElement.style.removeProperty("--askme-vv-top");
+      document.documentElement.style.removeProperty("--askme-keyboard-inset");
     };
   }, []);
 
