@@ -49,6 +49,12 @@
     align-items: center;
 }
 
+.social-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
 /* Social Button Hover Effects */
 .social-button:hover {
     transform: translateY(-4px);
@@ -98,12 +104,6 @@
 .social-button.instagram {
     background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
     /* Instagram */
-}
-
-/* Font Awesome icon size adjustment */
-.fab,
-.fas {
-    font-size: 20px;
 }
 
 /* Center the Buy Me a Coffee button */

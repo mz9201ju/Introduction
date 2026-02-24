@@ -5,7 +5,6 @@
   <!-- ============================= -->
   <!-- 🌌 Basic Meta + Styling Setup -->
   <!-- ============================= -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
@@ -75,11 +74,9 @@
   <!-- ⚡ Performance Prefetch/Preload -->
   <!-- ============================= -->
   <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.buymeacoffee.com" crossorigin>
   <link rel="dns-prefetch" href="//www.googletagmanager.com">
-  <link rel="dns-prefetch" href="//fonts.googleapis.com">
-  <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  <link rel="dns-prefetch" href="//cdn.buymeacoffee.com">
   <link rel="preload" as="image" href="/OMER_ZAHID.jpeg">
 
   <!-- ============================= -->
@@ -105,12 +102,29 @@
   <!-- ============================= -->
   <!-- 📊 Google Analytics -->
   <!-- ============================= -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YJRLD3DJ1E"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-YJRLD3DJ1E', { 'anonymize_ip': false });
+
+    const loadAnalytics = () => {
+      if (window.__analyticsLoaded) return;
+      window.__analyticsLoaded = true;
+
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-YJRLD3DJ1E';
+      gaScript.onload = () => {
+        gtag('js', new Date());
+        gtag('config', 'G-YJRLD3DJ1E', { 'anonymize_ip': false });
+      };
+      document.head.appendChild(gaScript);
+    };
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadAnalytics, { timeout: 3500 });
+    } else {
+      window.addEventListener('load', () => setTimeout(loadAnalytics, 1500), { once: true });
+    }
   </script>
 
   <!-- ============================= -->

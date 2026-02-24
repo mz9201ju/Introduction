@@ -7,7 +7,7 @@ import { COLORS, SHADOWS } from "../../theme";
 /*
   NavBar.jsx
   - Adds a globe button that toggles a custom language dropdown.
-  - Keeps a hidden #google_translate_element so Google widget can initialize.
+    - Keeps a hidden #google_translate_element so Google widget can initialize.
   - Language buttons try the Google combo first (no reload), fall back to a cookie+reload.
   - Accessibility: keyboard handlers + pointer events; avoids passive touch errors.
   - Lots of comments so you (or other devs) can follow the logic easily.
@@ -113,8 +113,9 @@ export default function NavBar() {
     }, [isMobile, isOpen]);
 
     // ----------------------------
-    // Google Translate script init (run once)
-    // - Keeps guards to avoid duplicate injection in SPA/HMR.
+    // Google Translate bootstrap (run once)
+    // - Keeps guards/callbacks ready, but defers script network load
+    //   until user opens the language panel.
     // - Restricts languages to ar,en,zh-CN,fr,hi
     // ----------------------------
     useEffect(() => {
@@ -202,7 +203,23 @@ export default function NavBar() {
             document.head.appendChild(s);
         }
 
-        // Add the Google script (only if it isn't already present)
+        // deliberately no teardown: leaving callback/style is fine for SPA navigation
+    }, []);
+
+    const loadTranslateScriptIfNeeded = () => {
+        if (typeof window === "undefined") return;
+
+        if (window.google && window.google.translate) {
+            if (!window.__google_translate_initialized) {
+                try {
+                    window.googleTranslateElementInit && window.googleTranslateElementInit();
+                } catch (err) {
+                    console.error('Google Translate initialization failed:', err);
+                }
+            }
+            return;
+        }
+
         if (!document.querySelector('script[src*="translate_a/element.js"]')) {
             const script = document.createElement("script");
             script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
@@ -210,19 +227,8 @@ export default function NavBar() {
             script.defer = true;
             script.onerror = () => console.warn("Google Translate script failed to load.");
             document.body.appendChild(script);
-        } else {
-            // if script already there, try to init after a short delay
-            setTimeout(() => {
-                try {
-                    window.googleTranslateElementInit && window.googleTranslateElementInit();
-                } catch (err) {
-                    console.error('Google Translate initialization failed:', err);
-                }
-            }, 120);
         }
-
-        // deliberately no teardown: leaving the script/style is fine for SPA navigation
-    }, []);
+    };
 
     // ----------------------------
     // Robust setLanguage implementation
@@ -364,7 +370,8 @@ export default function NavBar() {
             <div
                 id="google_translate_element"
                 ref={gRef}
-                aria-hidden="true"
+                inert=""
+                tabIndex={-1}
                 style={{
                     position: "absolute",
                     left: "-9999px",
@@ -414,6 +421,7 @@ export default function NavBar() {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
+                            loadTranslateScriptIfNeeded();
                             // init widget if script already loaded but init hasn't run
                             if (window.google && window.google.translate && !window.__google_translate_initialized) {
                                 try {
