@@ -11,7 +11,7 @@ const PAGE_STYLE = { textAlign: "center", padding: "4rem" };
 const SECTION_STYLE = { marginTop: "3rem" };
 const CARD_STYLE = {
     position: "relative",
-    overflow: "hidden",
+    overflow: "clip",
     marginTop: "1rem",
     padding: "1rem",
     background: "rgba(0,0,0,0.6)",
