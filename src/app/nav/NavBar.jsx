@@ -370,7 +370,7 @@ export default function NavBar() {
             <div
                 id="google_translate_element"
                 ref={gRef}
-                inert=""
+                inert={true}
                 tabIndex={-1}
                 style={{
                     position: "absolute",
