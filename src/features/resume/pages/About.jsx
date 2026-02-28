@@ -65,9 +65,9 @@ export default function About() {
                 <h2>About Me</h2>
                 <div style={CARD_STYLE}>
                     <p>
-                        I attribute all my knowledge, creativity, and success to God! (Allah) — the Creator of this vast universe 🌌.
-                        Through His guidance and mercy, I’ve been able to innovate and build digital solutions that simplify lives, optimize time, and reduce costs — all while maintaining clarity, efficiency, and purpose.
-                        Every line of code I write is a reflection of gratitude to Allah, my greatest teacher and source of inspiration. 🤍
+                        I credit Allah for the knowledge, creativity, and progress in my journey 🌌.
+                        With His guidance and mercy, I build digital solutions that make everyday work simpler, faster, and more cost-effective.
+                        My work is an expression of gratitude to Allah, who continues to inspire and guide me. 🤍
                     </p>
                 </div>
                 <h2>🚀 Featured Project For Local Businesses</h2>
