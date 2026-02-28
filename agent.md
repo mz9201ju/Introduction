@@ -57,3 +57,41 @@
 - Avoid duplicate logic; reuse existing modules/helpers.
 - Preserve current architecture boundaries and file responsibilities.
 - Keep behavior stable unless behavior change is explicitly requested.
+
+---
+
+## Implementation Log
+
+### 2026-02-28 — About Page ProjectCard Hover Animations
+
+**Date:** 2026-02-28
+
+**Files changed:**
+- `src/features/resume/data/projects.js` — added `animKey` field to each project entry
+- `src/features/resume/utils/animationProfiles.js` — new file; animation profile registry mapping `animKey` to Canvas particle config (symbols, velocity ranges, size, opacity, count)
+- `src/features/resume/hooks/useCardHover.js` — new file; minimal `useCardHover` hook exposing `isHovered` + mouse/focus event handlers
+- `src/features/resume/components/CardHoverBackground.jsx` — new file; Canvas component that runs a `requestAnimationFrame` particle loop when `isActive`, cleans up on deactivation/unmount
+- `src/features/resume/pages/About.jsx` — `ProjectCard` now accepts `animKey`, wires `useCardHover`, renders `<CardHoverBackground>`; `CARD_STYLE` gains `position:relative` and `overflow:hidden`
+- `src/features/resume/pages/About.css` — added `.card-hover-bg-canvas` (absolute fill, `pointer-events:none`, `z-index:0`) and `~ *` sibling rule (`z-index:1`) to keep content above the canvas
+- `README.md` — new section documenting the feature, profile table, how to add profiles, a11y/reduced-motion
+- `agent.md` — this implementation log
+
+**Design decisions and trade-offs:**
+- **Canvas + RAF** chosen over CSS-only keyframes because it allows per-particle randomization (speed, position, size, opacity) for a natural, non-repeating feel — CSS alone would require many fixed keyframes.
+- **Emoji glyphs** (`ctx.fillText`) used for themed symbols: zero extra assets, vectorized appearance, easy to change per project.
+- **`animKey` in `projects.js`** is the single source of truth linking a project to its profile. New projects only need `animKey` added; the profile registry handles the rest.
+- **`useCardHover` hook** is kept minimal (mouse + focus/blur only) to avoid unnecessary re-renders. No throttle needed — state toggles are infrequent.
+- **`position:relative` + `overflow:hidden`** on the card ensures particles are visually clipped to the card boundary without JS measurement.
+- Canvas dimensions are read from `container.clientWidth/Height` at activation time; no ResizeObserver needed since card layout is stable.
+- **`prefers-reduced-motion`** is checked inside the effect: when active, canvas is cleared and RAF never starts — clean static fallback with no extra component complexity.
+
+**Validation results:**
+- `npm run lint` — ✅ no warnings or errors
+- `npm run build` — ✅ clean build, About chunk size increased by ~3 KB (expected for new Canvas component)
+- Manual Playwright verification — animation confirmed visible on hover (cars visible in NYC LUX RIDE card screenshot)
+
+**Known limitations / future improvements:**
+- Canvas is sized once at hover activation. If the card resizes (e.g., window resize while hovering), particles may run outside the logical canvas area until next activation. A ResizeObserver could fix this if needed.
+- Emoji rendering on Canvas is font-dependent; on some Linux headless environments emoji may render as boxes. This is a platform/font limitation, not a code issue.
+- Particle count and speed are fixed per profile. Future work could make them responsive to card size.
+

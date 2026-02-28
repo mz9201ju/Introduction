@@ -57,6 +57,48 @@ This project combines a **React + Vite** frontend hosted on **GitHub Pages** wit
 - Generates matching cover letters
 - Uses the same AI proxy infrastructure
 
+### About Page — ProjectCard Hover Animations
+
+Each project card on the About page displays a unique animated background when hovered (or focused via keyboard).
+
+**How it works:**
+- Hovering (or keyboard-focusing) a card activates a Canvas-based particle animation scoped only to that card.
+- Animated emoji particles move across the card background based on the project's identity (e.g., 🚗🚙🏎️ cars for NYC LUX RIDE, ✈️🛩️ planes for Bell Aviation).
+- Particles are clipped to the card bounds and rendered below all card content via `z-index`, so title/description/button/tech stack remain fully legible.
+- Only the hovered card animates — no other cards are affected.
+- Animation loop is managed with `requestAnimationFrame` and is fully cleaned up on mouse-leave or unmount.
+
+**Animation profile mapping (project `animKey` → theme):**
+
+| animKey | Project | Symbols |
+|---------|---------|---------|
+| `nyc-lux-ride` | NYC LUX RIDE | 🚗 🚙 🏎️ 🚕 |
+| `bell-aviation` | Bell Aviation / ROMISOFT | ✈️ 🛩️ 🛫 |
+| `tikka-masala` | Tikka Masala | 🌶️ 🍛 🫙 🌿 |
+| `skylight-ksa` | SkyLight \| KSA | ⚡ ✨ 💡 🌟 |
+| `deebas-daycare` | Deeba's Day Care | 🎈 ⭐ 🌈 🎀 |
+| `oz-studios` | OZ Studios | 💻 🚀 ⚡ 🌐 |
+| `elia-barber` | ELIA Barber Shop | ✂️ 💈 🪒 💇 |
+| `rashida-daycare` | Rashida Little Champs | 🌟 🎠 🎨 🎪 |
+
+**Adding a new project animation profile:**
+1. Add an `animKey` field to the project entry in `src/features/resume/data/projects.js`.
+2. Add a matching entry in `src/features/resume/utils/animationProfiles.js` with `symbols`, speed ranges (`vxRange`, `vyRange`), `sizeRange`, `opacityRange`, and `count`.
+3. If no profile exists for the key, the default sparkle profile (`✨ ⭐ 🌟`) is used automatically.
+
+**Accessibility & reduced-motion:**
+- Keyboard users trigger the same animation via `focus`/`blur` events on the card.
+- When the OS/browser `prefers-reduced-motion: reduce` media query is active, the canvas stays cleared and no animation runs — a clean static fallback.
+- The canvas layer has `pointer-events: none` and `aria-hidden="true"` so it never blocks links or assistive technology.
+
+**Relevant source files:**
+- `src/features/resume/data/projects.js` — `animKey` field per project
+- `src/features/resume/utils/animationProfiles.js` — profile registry
+- `src/features/resume/hooks/useCardHover.js` — hover/focus state hook
+- `src/features/resume/components/CardHoverBackground.jsx` — Canvas animation component
+- `src/features/resume/pages/About.jsx` — ProjectCard integration
+- `src/features/resume/pages/About.css` — canvas positioning styles
+
 ---
 
 ## ⚙️ Local Development

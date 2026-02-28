@@ -8,6 +8,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/khuram-limo-service/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "NYC LUX preview",
         tech: "React • Vite • Tailwind • Cloudflare",
+        animKey: "nyc-lux-ride",
     },
     {
         title: "✈️ Bell Aviation / ROMISOFT LLC",
@@ -18,6 +19,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/bell-aviation-romisoft/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Bell Aviation / ROMISOFT LLC preview",
         tech: "React • Vite • Tailwind",
+        animKey: "bell-aviation",
     },
     {
         title: "Tikka Masala (Bellevue, WA)",
@@ -27,6 +29,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/tikka-masala-v2/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Tikka Masala preview",
         tech: "React • Vite • Cloudflare",
+        animKey: "tikka-masala",
     },
     {
         title: "⚡ SkyLight | KSA",
@@ -37,6 +40,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/skylight-ksa/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "SkyLight KSA preview",
         tech: "React • Vite • Cloudflare",
+        animKey: "skylight-ksa",
     },
     {
         title: "👶 Deeba's Day Care",
@@ -47,6 +51,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/deebasDayCare/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Deeba's Day Care preview",
         tech: "React • Vite • Tailwind • Cloudflare",
+        animKey: "deebas-daycare",
     },
     {
         title: "OZ Studios (Premium and Enterprise Websites with full SEO)",
@@ -57,6 +62,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/oz-it-studios/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "OZ Studios preview",
         tech: "React • Vite • Cloudflare",
+        animKey: "oz-studios",
     },
     {
         title: "💈 ELIA Barber Shop",
@@ -67,6 +73,7 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/ELIA_BarberShop_WebSite/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "ELIA Barber Shop preview",
         tech: "React • Vite • Tailwind",
+        animKey: "elia-barber",
     },
     {
         title: "👶 Rashida Little Champs DayCare",
@@ -77,5 +84,6 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/RashidaLittleChampsDayCare/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Deeba's Day Care preview",
         tech: "React • Vite • Tailwind • Cloudflare",
+        animKey: "rashida-daycare",
     },
 ];

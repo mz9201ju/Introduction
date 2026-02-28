@@ -3,11 +3,15 @@ import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 import { profile } from "@resume/data/profile";
 import { PROJECTS } from "@resume/data/projects";
 import Footer from "@app/nav/Footer";
+import CardHoverBackground from "@resume/components/CardHoverBackground";
+import { useCardHover } from "@resume/hooks/useCardHover";
 import "./About.css";
 
 const PAGE_STYLE = { textAlign: "center", padding: "4rem" };
 const SECTION_STYLE = { marginTop: "3rem" };
 const CARD_STYLE = {
+    position: "relative",
+    overflow: "hidden",
     marginTop: "1rem",
     padding: "1rem",
     background: "rgba(0,0,0,0.6)",
@@ -23,11 +27,19 @@ const PREVIEW_CTA_STYLE = {
     textDecoration: "none",
 };
 
-function ProjectCard({ title, description, href, imgSrc, imgAlt, tech }) {
+function ProjectCard({ title, description, href, imgSrc, imgAlt, tech, animKey }) {
     const [hasError, setHasError] = useState(false);
+    const { isHovered, handleMouseEnter, handleMouseLeave, handleFocus, handleBlur } = useCardHover();
 
     return (
-        <div style={CARD_STYLE}>
+        <div
+            style={CARD_STYLE}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+        >
+            <CardHoverBackground animKey={animKey} isActive={isHovered} />
             <h3>{title}</h3>
             <p>{description}</p>
             <a
