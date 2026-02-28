@@ -1,5 +1,5 @@
-import { useRef, useEffect, useCallback } from 'react';
-import { getAnimationProfile } from '@resume/utils/animationProfiles';
+import { useRef, useEffect, useCallback } from "react";
+import { getAnimationProfile } from "@resume/utils/animationProfiles";
 
 function randomBetween(min, max) {
     return min + Math.random() * (max - min);
@@ -40,7 +40,7 @@ export default function CardHoverBackground({ animKey, isActive }) {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         if (!isActive || prefersReduced) {
             stopAnimation();
@@ -59,12 +59,10 @@ export default function CardHoverBackground({ animKey, isActive }) {
 
         const profile = getAnimationProfile(animKey);
 
-        // Scatter particles on first activation; reuse on subsequent ones
-        if (!particlesRef.current) {
-            particlesRef.current = Array.from({ length: profile.count }, () =>
-                createParticle(profile, width, height, true)
-            );
-        }
+        // Create fresh particles for this activation (also picks up any animKey change)
+        particlesRef.current = Array.from({ length: profile.count }, () =>
+            createParticle(profile, width, height, true)
+        );
 
         const ctx = canvas.getContext('2d');
 
