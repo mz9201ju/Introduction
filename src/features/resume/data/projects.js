@@ -1,6 +1,6 @@
 export const PROJECTS = [
     {
-        title: "🚘 NYC LUX (Premium Ride Service)",
+        title: "🚘 NYC LUX RIDE (Premium Ride Service)",
         description:
             "Experience New York in Motion — Redefined.” White-glove chauffeurs. An immaculate fleet. Tailored hospitality. From Wall Street to Fifth Avenue, your journey begins the moment we open the door — and continues with every mile of effortless luxury.",
         href: "https://mz9201ju.github.io/khuram-limo-service/",
@@ -10,22 +10,22 @@ export const PROJECTS = [
         tech: "React • Vite • Tailwind • Cloudflare",
     },
     {
+        title: "✈️ Bell Aviation / ROMISOFT LLC",
+        description:
+            "Bell Aviation Services has a rich history in Aircraft Maintenance, Repair, Operations, Worldwide Recovery, Avionics, Fleet Maintenance & Logistics. Building on foundational services, the software arm of this business is ROMISOFT supporting both commercial and military aircraft mixed fleet operations. We also offer individualized FAA part 61 training for High Performance, Complex, and Tail Wheel endorsements using our own classic airplanes. We are a small business and veteran owned.",
+        href: "https://mz9201ju.github.io/bell-aviation-romisoft/",
+        imgSrc:
+            "https://api.microlink.io/?url=https://mz9201ju.github.io/bell-aviation-romisoft/&screenshot=true&type=png&meta=false&embed=screenshot.url",
+        imgAlt: "Bell Aviation / ROMISOFT LLC preview",
+        tech: "React • Vite • Tailwind",
+    },
+    {
         title: "Tikka Masala (Bellevue, WA)",
         description: "Authentic Halal Indian & Pakistani cuisine Conveniently located in Bellevue WA",
         href: "https://mz9201ju.github.io/tikka-masala-v2/",
         imgSrc:
             "https://api.microlink.io/?url=https://mz9201ju.github.io/tikka-masala-v2/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Tikka Masala preview",
-        tech: "React • Vite • Cloudflare",
-    },
-    {
-        title: "OZ Studios (Premium and Enterprise Websites with full SEO)",
-        description:
-            "From greenfield builds to complex refactors — architected, implemented, and shipped end-to-end.",
-        href: "https://mz9201ju.github.io/oz-it-studios/",
-        imgSrc:
-            "https://api.microlink.io/?url=https://mz9201ju.github.io/oz-it-studios/&screenshot=true&type=png&meta=false&embed=screenshot.url",
-        imgAlt: "OZ Studios preview",
         tech: "React • Vite • Cloudflare",
     },
     {
@@ -39,26 +39,6 @@ export const PROJECTS = [
         tech: "React • Vite • Cloudflare",
     },
     {
-        title: "💈 ELIA Barber Shop",
-        description:
-            "A local Bellevue barber shop website I built to help the business grow its online visibility. Designed with React + Vite + Tailwind and deployed on GitHub Pages. Features online booking and a modern responsive design.",
-        href: "https://mz9201ju.github.io/ELIA_BarberShop_WebSite",
-        imgSrc:
-            "https://api.microlink.io/?url=https://mz9201ju.github.io/ELIA_BarberShop_WebSite/&screenshot=true&type=png&meta=false&embed=screenshot.url",
-        imgAlt: "ELIA Barber Shop preview",
-        tech: "React • Vite • Tailwind",
-    },
-    {
-        title: "✈️ Bell Aviation / ROMISOFT LLC",
-        description:
-            "Bell Aviation Services has a rich history in Aircraft Maintenance, Repair, Operations, Worldwide Recovery, Avionics, Fleet Maintenance & Logistics. Building on foundational services, the software arm of this business is ROMISOFT supporting both commercial and military aircraft mixed fleet operations. We also offer individualized FAA part 61 training for High Performance, Complex, and Tail Wheel endorsements using our own classic airplanes. We are a small business and veteran owned.",
-        href: "https://mz9201ju.github.io/bell-aviation-romisoft/",
-        imgSrc:
-            "https://api.microlink.io/?url=https://mz9201ju.github.io/bell-aviation-romisoft/&screenshot=true&type=png&meta=false&embed=screenshot.url",
-        imgAlt: "Bell Aviation / ROMISOFT LLC preview",
-        tech: "React • Vite • Tailwind",
-    },
-    {
         title: "👶 Deeba's Day Care",
         description:
             "At our childcare center, we believe in creating a nurturing and enriching environment where every child is valued, respected, and supported in their journey of growth and development. Our philosophy is rooted in the understanding that each child is unique, with their own set of strengths, interests, and learning styles.",
@@ -67,6 +47,26 @@ export const PROJECTS = [
             "https://api.microlink.io/?url=https://mz9201ju.github.io/deebasDayCare/&screenshot=true&type=png&meta=false&embed=screenshot.url",
         imgAlt: "Deeba's Day Care preview",
         tech: "React • Vite • Tailwind • Cloudflare",
+    },
+    {
+        title: "OZ Studios (Premium and Enterprise Websites with full SEO)",
+        description:
+            "From greenfield builds to complex refactors — architected, implemented, and shipped end-to-end.",
+        href: "https://mz9201ju.github.io/oz-it-studios/",
+        imgSrc:
+            "https://api.microlink.io/?url=https://mz9201ju.github.io/oz-it-studios/&screenshot=true&type=png&meta=false&embed=screenshot.url",
+        imgAlt: "OZ Studios preview",
+        tech: "React • Vite • Cloudflare",
+    },
+    {
+        title: "💈 ELIA Barber Shop",
+        description:
+            "A local Bellevue barber shop website I built to help the business grow its online visibility. Designed with React + Vite + Tailwind and deployed on GitHub Pages. Features online booking and a modern responsive design.",
+        href: "https://mz9201ju.github.io/ELIA_BarberShop_WebSite",
+        imgSrc:
+            "https://api.microlink.io/?url=https://mz9201ju.github.io/ELIA_BarberShop_WebSite/&screenshot=true&type=png&meta=false&embed=screenshot.url",
+        imgAlt: "ELIA Barber Shop preview",
+        tech: "React • Vite • Tailwind",
     },
     {
         title: "👶 Rashida Little Champs DayCare",
