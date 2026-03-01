@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.omerzahid.com/sitemap.xml
+Host: www.omerzahid.com

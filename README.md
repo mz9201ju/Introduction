@@ -171,6 +171,37 @@ The site is automatically deployed to GitHub Pages when changes are pushed to th
 
 ---
 
+## 🔎 SEO Automation (No Manual Work)
+
+If `public/sitemap.xml` declares a weekly cadence, it should be validated automatically every week.
+
+### Recommended setup (hands-off)
+
+Use a scheduled GitHub Actions workflow (`cron`) that runs once per week and does this:
+
+1. Fetches and parses `public/sitemap.xml`
+2. Verifies required routes are present:
+	- `/`
+	- `/about`
+	- `/ask-me`
+	- `/resume-generator`
+	- `/darthVader`
+3. Fails the workflow if any route is missing
+4. Opens an issue automatically (or sends notification) when sitemap drift is detected
+
+### Optional stronger automation
+
+To avoid any manual updates, generate `public/sitemap.xml` during CI from a single route source (for example from the app route config) and commit the updated file automatically using a bot token.
+
+### Suggested schedule
+
+- Weekly check: every Monday (UTC)
+- Extra trigger: on every push to `main`
+
+This ensures sitemap freshness stays aligned with the declared weekly cadence without your manual involvement.
+
+---
+
 ## ⚡ Performance Optimizations
 
 This project has been optimized for performance:

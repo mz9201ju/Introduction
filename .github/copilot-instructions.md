@@ -81,6 +81,10 @@ When changing code, run the smallest relevant checks first:
 1. `npm run lint`
 2. `npm run build` for production-impacting changes
 
+## SEO Automation Policy
+- If `public/sitemap.xml` is maintained with weekly cadence, keep it automatically verified in CI on a weekly schedule (and on `main` pushes).
+- Prefer no-touch maintenance by validating required URLs and optionally auto-generating sitemap entries from route sources to avoid manual sitemap upkeep.
+
 If failures are unrelated, report them without broad unrelated fixes.
 
 ## Testing Principles

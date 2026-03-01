@@ -52,6 +52,8 @@
 
 ## SEO + Identity Consistency
 - Keep personal/site identity consistent as **Omer Zahid** across metadata and profile references unless explicitly asked otherwise.
+- Enforce sitemap freshness automatically: if `public/sitemap.xml` uses weekly cadence, CI must run a scheduled weekly validation and fail on missing or stale critical routes.
+- Prefer no-touch maintenance: use GitHub Actions to validate (and optionally regenerate) sitemap entries so manual sitemap edits are not required.
 
 ## Change Quality
 - Avoid duplicate logic; reuse existing modules/helpers.
