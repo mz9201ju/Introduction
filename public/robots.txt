@@ -1,5 +1,131 @@
+# =========================================================
+# 🤖 OMER ZAHID — Robots.txt
+# Controls how crawlers access and index this website
+# =========================================================
+
+# =========================================================
+# 🚫 AI / DATA SCRAPERS BLOCKLIST
+# =========================================================
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: ClaudeWeb
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: SeekportBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: ZoominfoBot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+User-agent: crawler4j
+Disallow: /
+
+User-agent: MauiBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: Yandex
+Disallow: /
+
+# =========================================================
+# 🌐 GENERAL CRAWL RULES
+# =========================================================
 User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /cgi-bin/
+Disallow: /config/
+Disallow: /private/
+Disallow: /server/
+Disallow: /tmp/
+Disallow: /wordpress/
+Disallow: /wp-*
+Disallow: /xmlrpc.php
+Disallow: /*.php$
+Disallow: /*.bak$
+Disallow: /*.sql$
+Disallow: /*.env$
+Disallow: /*.git$
+Disallow: /*.log$
 Allow: /
+
+# =========================================================
+# ✅ APPROVED SEARCH ENGINES — FULL ACCESS
+# =========================================================
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# =========================================================
+# ⚙️ CRAWL CONTROL & INDEXING METADATA
+# =========================================================
+User-agent: *
+Crawl-delay: 5
 
 Sitemap: https://www.omerzahid.com/sitemap.xml
 Host: www.omerzahid.com
+
+# =========================================================
+# 💼 CONTACT / BRAND INFO
+# =========================================================
+# Omer Zahid - Portfolio
+# Website: https://www.omerzahid.com
