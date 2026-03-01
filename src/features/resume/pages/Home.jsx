@@ -5,6 +5,7 @@ import Skills from "@resume/components/Skills";
 import { profile } from "@resume/data/profile";
 import SimpleSpaceshipCursor from "@features/SimpleSpaceshipCursor";
 import Footer from "@app/nav/Footer";
+import { usePageSeo } from "@app/hooks/usePageSeo";
 
 const GRID_STYLE = { marginTop: "4rem" };
 const SPACER_STYLE = { height: 16 };
@@ -16,6 +17,12 @@ const NERD_STATS = [
 ];
 
 function Home() {
+  usePageSeo({
+    title: "Omer Zahid – Senior Software Engineer",
+    description:
+      "Explore Omer Zahid’s software engineering portfolio with React and Spring Boot projects, DevOps automation wins, core skills, and hands-on product experience.",
+  });
+
   return (
     <>
       <SimpleSpaceshipCursor />

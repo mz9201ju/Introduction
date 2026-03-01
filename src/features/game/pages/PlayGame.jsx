@@ -2,8 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import Starfield from "@game/components/Starfield";
 import Scoreboard from "@game/components/Scoreboard";
 import SpaceshipCursor from "@game/pages/SpaceshipCursor";
+import { usePageSeo } from "@app/hooks/usePageSeo";
 
 export default function PlayGame() {
+  usePageSeo({
+    title: "Play Game | Omer Zahid",
+    description:
+      "Play Omer Zahid’s browser-based space shooter with starfield combat, progressive enemy waves, boss battles, and live scoring tuned for smooth canvas action.",
+  });
+
   const [showInstructions, setShowInstructions] = useState(true);
   const [stats, setStats] = useState({
     kills: 0,

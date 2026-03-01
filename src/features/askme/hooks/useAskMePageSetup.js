@@ -1,29 +1,19 @@
 import { useEffect } from "react";
+import { usePageSeo } from "@app/hooks/usePageSeo";
 
 export function useAskMePageSetup() {
+  usePageSeo({
+    title: "Ask Me | Omer Zahid",
+    description:
+      "Chat with Omer AI to learn about Omer Zahid’s experience, projects, and technical stack through a fast, interactive terminal-style portfolio assistant.",
+  });
+
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, []);
-
-  useEffect(() => {
-    document.title = "Ask Me | Omer Zahid";
-
-    const descriptionContent = "Chat directly with Omer AI — learn about Omer Zahid, his projects, and website.";
-    const metaDesc = document.querySelector('meta[name="description"]');
-
-    if (metaDesc) {
-      metaDesc.setAttribute("content", descriptionContent);
-      return;
-    }
-
-    const meta = document.createElement("meta");
-    meta.name = "description";
-    meta.content = descriptionContent;
-    document.head.appendChild(meta);
   }, []);
 
   useEffect(() => {

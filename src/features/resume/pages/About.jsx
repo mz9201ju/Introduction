@@ -5,6 +5,7 @@ import { PROJECTS } from "@resume/data/projects";
 import Footer from "@app/nav/Footer";
 import CardHoverBackground from "@resume/components/CardHoverBackground";
 import { useCardHover } from "@resume/hooks/useCardHover";
+import { usePageSeo } from "@app/hooks/usePageSeo";
 import "./About.css";
 
 const PAGE_STYLE = { textAlign: "center", padding: "4rem" };
@@ -70,6 +71,12 @@ function ProjectCard({ title, description, href, imgSrc, imgAlt, tech, animKey }
 }
 
 export default function About() {
+    usePageSeo({
+        title: "About | Omer Zahid",
+        description:
+            "Discover Omer Zahid’s background, engineering mindset, and featured projects for local businesses, including practical solutions built with modern web technologies.",
+    });
+
     return (
         <div style={PAGE_STYLE}>
             <SimpleSpaceshipCursor />

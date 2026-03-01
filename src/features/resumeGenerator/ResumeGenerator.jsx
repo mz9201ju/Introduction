@@ -6,6 +6,7 @@ import mammoth from "mammoth/mammoth.browser";
 import { jsPDF } from "jspdf";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import { generateResumeAndCoverLetter } from "../../services/aiApi";
+import { usePageSeo } from "@app/hooks/usePageSeo";
 import "./ResumeGenerator.css";
 
 GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
@@ -93,6 +94,12 @@ function downloadAsPdf(content, title) {
 }
 
 export default function ResumeGenerator() {
+    usePageSeo({
+        title: "Resume Generator | Omer Zahid",
+        description:
+            "Use the AI Resume Generator to tailor your resume and cover letter to a job description, then download polished results in PDF or DOC format in minutes.",
+    });
+
     const [resume, setResume] = useState("");
     const [jobDesc, setJobDesc] = useState("");
     const [loading, setLoading] = useState(false);
