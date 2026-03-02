@@ -57,7 +57,6 @@ export const GAME = {
     // Power-up unified drop system
     POWERUP_DROP_CHANCE: 0.45,
     POWERUP_WEIGHTS: { health: 3, shield: 2, firepower: 4 },
-    POWERUP_LIFE: 8,
 
     // Boss power-up drops
     BOSS_POWERUP_WEIGHTS: { health: 2, shield: 3, firepower: 4 },
