@@ -1,13 +1,14 @@
 export const PROJECTS = [
     {
-        title: "🚘 NYC LUX RIDE (Premium Ride Service)",
+        title: "🚘 NYC LUX RIDE — MALIK NYC LLC",
         description:
-            "Experience New York in Motion — Redefined.” White-glove chauffeurs. An immaculate fleet. Tailored hospitality. From Wall Street to Fifth Avenue, your journey begins the moment we open the door — and continues with every mile of effortless luxury.",
+            "Experience New York in Motion — Redefined. White-glove chauffeurs. An immaculate fleet. Tailored hospitality. From Wall Street to Fifth Avenue, your journey begins the moment we open the door. " +
+            "As Chief Solution Architect & Technology Officer, architected an AI-powered full-stack platform featuring a cross-platform Android app (Capacitor), Google Maps real-time routing, automated AI-driven SEO pipelines, and GitHub Actions CI/CD for 24/7 zero-touch deployments.",
         href: "https://mz9201ju.github.io/khuram-limo-service/",
         imgSrc:
             "https://api.microlink.io/?url=https://mz9201ju.github.io/khuram-limo-service/&screenshot=true&type=png&meta=false&embed=screenshot.url",
-        imgAlt: "NYC LUX preview",
-        tech: "React • Vite • Tailwind • Cloudflare",
+        imgAlt: "NYC LUX RIDE preview",
+        tech: "React • Vite • Tailwind • Capacitor (Android) • Google Maps API • GitHub Actions • AI SEO",
         animKey: "nyc-lux-ride",
     },
     {

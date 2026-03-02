@@ -21,6 +21,27 @@ export const profile = {
     ],
     experience: [
         {
+            company: "NYC LUX RIDE — MALIK NYC LLC",
+            role: "Chief Solution Architect & Technology Officer",
+            time: "2025 – Present | New York, NY",
+            highlights: [
+                "🚘 CSA & CTO — NYC LUX RIDE (MALIK NYC LLC): end-to-end platform ownership",
+                "🤖 AI-driven SEO pipelines keep all client sites consistently ranked around the clock",
+                "📱 Cross-platform Android app built on top of the React/Vite web platform (Capacitor)",
+                "🗺️ Google Maps API integration for real-time routing & live location tracking",
+                "⚙️ GitHub Actions CI/CD: automated build → test → deploy with zero-touch releases",
+                "🔄 Automated mobile release versioning (npm run mobile:prepare-release)",
+            ],
+            bullets: [
+                "Serving as Chief Solution Architect and Technology Officer for NYC LUX RIDE, a premium luxury ride service under MALIK NYC LLC — owning the full technology vision, infrastructure, and delivery.",
+                "Deployed a cross-platform Android app built on top of the React/Vite web platform using Capacitor, with automated mobile release versioning (npm run mobile:prepare-release) for zero-friction app store releases.",
+                "Integrated Google Maps API for real-time routing and live location tracking, dramatically improving the rider booking experience and on-road navigation accuracy.",
+                "Leveraged AI (GPT-4o, Claude) to power continuous SEO optimization — automating structured data markup, sitemap generation, and meta-content refresh to keep properties consistently ranked around the clock.",
+                "Implemented GitHub Actions CI/CD pipelines for automated build, test, and deploy cycles, ensuring 24/7 system availability with fully automated zero-touch deployments.",
+                "Embedded AI-driven content pipelines into the site maintenance workflow, continuously refreshing service pages, FAQs, and schema data to maximize search relevance and user engagement.",
+            ]
+        },
+        {
             company: "Costco Wholesale",
             role: "Senior Software Engineer",
             time: "Oct 2019 – Present | Issaquah, WA",
