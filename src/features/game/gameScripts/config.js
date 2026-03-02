@@ -63,12 +63,12 @@ export const GAME = {
     BOSS_POWERUP_WEIGHTS: { health: 2, shield: 3, firepower: 4 },
     BOSS_POWERUP_DROP_CHANCE: 0.22,
 
-    // Mini-boss (boss split)
-    MINI_BOSS_HP: 30,
-    MINI_BOSS_FIRE_EVERY: 650,
+    // Mini-boss (boss split) — harder than the main boss
+    MINI_BOSS_HP: 60,
+    MINI_BOSS_FIRE_EVERY: 350,
     MINI_BOSS_SIZE: 64,
-    MINI_BOSS_POWERUP_DROP_CHANCE: 0.12,
-    MINI_BOSS_POWERUP_WEIGHTS: { health: 2, shield: 2, firepower: 1 },
+    MINI_BOSS_POWERUP_DROP_CHANCE: 0.15,
+    MINI_BOSS_POWERUP_WEIGHTS: { health: 9, shield: 1 },
 
     // Mine system
     MINE_FUSE_TIME: 1.8,
