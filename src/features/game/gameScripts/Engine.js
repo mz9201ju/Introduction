@@ -362,19 +362,8 @@ export default class Engine {
         const life = GAME.MY_BULLET_LIFE;
         const cx = this.cursorX, cy = this.cursorY;
 
-        if (fp >= 5) {
-            // Level 5: 5-shot wide fan
-            for (let i = -2; i <= 2; i++) {
-                const angle = -Math.PI / 2 + i * 0.22;
-                this.myBullets.push(makePlayerBullet({
-                    x: cx, y: cy,
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life, color, fp,
-                }));
-            }
-        } else if (fp >= 4) {
-            // Level 4: Triple wide spread
+        if (fp >= 4) {
+            // Level 4-5: Triple spread shot
             for (let i = -1; i <= 1; i++) {
                 const angle = -Math.PI / 2 + i * 0.28;
                 this.myBullets.push(makePlayerBullet({
@@ -385,19 +374,8 @@ export default class Engine {
                 }));
             }
         } else if (fp >= 3) {
-            // Level 3: Triple tight spread
-            for (let i = -1; i <= 1; i++) {
-                const angle = -Math.PI / 2 + i * 0.14;
-                this.myBullets.push(makePlayerBullet({
-                    x: cx, y: cy,
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life, color, fp,
-                }));
-            }
-        } else if (fp >= 2) {
-            // Level 2: Twin parallel shot
-            for (const offset of [-10, 10]) {
+            // Level 3: Twin shot (two parallel beams)
+            for (const offset of [-14, 14]) {
                 this.myBullets.push(makePlayerBullet({
                     x: cx + offset, y: cy,
                     vx: 0, vy: -spd,
@@ -405,7 +383,7 @@ export default class Engine {
                 }));
             }
         } else {
-            // Level 1: Single shot
+            // Level 1-2: Single shot
             this.myBullets.push(makePlayerBullet({
                 x: cx, y: cy,
                 vx: 0, vy: -spd,
