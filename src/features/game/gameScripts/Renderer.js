@@ -7,7 +7,6 @@ import enemyShip6 from "../assets/enemyFigterShip.png";
 import enemyShip7 from "../assets/ufo.png";
 
 import { GAME } from "./config";
-import { POWERUP_TYPE, FP_COLORS } from "./entities";
 
 // Handles drawing of enemies, bullets, explosions, and ship sprite.
 export default class Renderer {
@@ -93,42 +92,14 @@ export default class Renderer {
 
     drawPlayerBullet(ctx, pb, dt) {
         pb.x += pb.vx * dt; pb.y += pb.vy * dt; pb.life -= dt;
-        const fp = pb.fp || 1;
 
         ctx.save();
-        if (fp >= 5) {
-            ctx.strokeStyle = "rgba(60, 240, 255, 0.97)";
-            ctx.lineWidth = 8;
-            ctx.shadowColor = "rgba(40,220,255,1)";
-            ctx.shadowBlur = 22;
-        } else if (fp >= 4) {
-            ctx.strokeStyle = "rgba(255, 60, 200, 0.97)";
-            ctx.lineWidth = 5.5;
-            ctx.shadowColor = "rgba(255,40,200,0.9)";
-            ctx.shadowBlur = 14;
-        } else if (fp >= 3) {
-            ctx.strokeStyle = "rgba(200, 80, 255, 0.97)";
-            ctx.lineWidth = 4;
-            ctx.shadowColor = "rgba(180,60,255,0.8)";
-            ctx.shadowBlur = 10;
-        } else if (fp >= 2) {
-            ctx.strokeStyle = "rgba(255, 200, 40, 0.97)";
-            ctx.lineWidth = 4.5;
-            ctx.shadowColor = "rgba(255,180,0,0.7)";
-            ctx.shadowBlur = 8;
-        } else {
-            if (pb.color === "red") ctx.strokeStyle = "rgba(255, 60, 60, 0.95)";
-            else if (pb.color === "blue") ctx.strokeStyle = "rgba(40, 160, 255, 0.95)";
-            else ctx.strokeStyle = "rgba(120, 255, 140, 0.95)";
-            ctx.lineWidth = 3;
-        }
-
-        const trail = fp >= 5 ? 32 : fp >= 3 ? 24 : 18;
-        const spd = Math.hypot(pb.vx, pb.vy) || 1;
-        const tx = (pb.vx / spd) * trail;
-        const ty = (pb.vy / spd) * trail;
+        if (pb.color === "red") ctx.strokeStyle = "rgba(255, 60, 60, 0.95)";
+        else if (pb.color === "blue") ctx.strokeStyle = "rgba(40, 160, 255, 0.95)";
+        else ctx.strokeStyle = "rgba(120, 255, 140, 0.95)";
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(pb.x - tx, pb.y - ty);
+        ctx.moveTo(pb.x, pb.y + 18);
         ctx.lineTo(pb.x, pb.y);
         ctx.stroke();
         ctx.restore();
@@ -151,149 +122,27 @@ export default class Renderer {
         ctx.restore();
     }
 
-    /**
-     * Draws a unified power-up pickup (health, shield, or firepower star).
-     */
-    drawPowerup(ctx, p) {
+    drawHealthPickup(ctx, p) {
         const pulse = 1 + 0.18 * Math.sin(p.t * 4.5);
         const fade = Math.min(1, p.life / 1.5);
         const radius = GAME.HEALTH_PICKUP_RADIUS * pulse;
-
         ctx.save();
         ctx.globalAlpha = fade * 0.92;
-
-        if (p.type === POWERUP_TYPE.HEALTH) {
-            // Green cross / health pack
-            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-            grad.addColorStop(0, "rgba(180,255,220,1)");
-            grad.addColorStop(0.5, "rgba(0,220,120,0.85)");
-            grad.addColorStop(1, "rgba(0,180,80,0)");
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "rgba(255,255,255,0.9)";
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = "round";
-            const arm = radius * 0.45;
-            ctx.beginPath(); ctx.moveTo(p.x, p.y - arm); ctx.lineTo(p.x, p.y + arm); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(p.x - arm, p.y); ctx.lineTo(p.x + arm, p.y); ctx.stroke();
-
-        } else if (p.type === POWERUP_TYPE.SHIELD) {
-            // Blue/cyan shield star
-            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-            grad.addColorStop(0, "rgba(180,240,255,1)");
-            grad.addColorStop(0.5, "rgba(40,180,255,0.85)");
-            grad.addColorStop(1, "rgba(0,100,255,0)");
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            // Shield icon: two concentric arcs forming a target ring (no emoji)
-            ctx.strokeStyle = "rgba(120,220,255,0.95)";
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius * 0.55, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius * 0.28, 0, Math.PI * 2);
-            ctx.stroke();
-            // Horizontal bar through center
-            ctx.beginPath();
-            ctx.moveTo(p.x - radius * 0.38, p.y);
-            ctx.lineTo(p.x + radius * 0.38, p.y);
-            ctx.stroke();
-
-        } else if (p.type === POWERUP_TYPE.FIREPOWER) {
-            // Firepower star — color from FP_COLORS palette
-            const color = p.color || FP_COLORS[0];
-            const r2 = color.replace("#", "");
-            const ri = parseInt(r2.substring(0, 2), 16);
-            const gi = parseInt(r2.substring(2, 4), 16);
-            const bi = parseInt(r2.substring(4, 6), 16);
-            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
-            grad.addColorStop(0, `rgba(255,255,255,1)`);
-            grad.addColorStop(0.35, `rgba(${ri},${gi},${bi},0.95)`);
-            grad.addColorStop(1, `rgba(${ri},${gi},${bi},0)`);
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            // Lightning bolt — 4-point geometric shape (no emoji)
-            ctx.fillStyle = `rgba(255,255,255,0.95)`;
-            ctx.strokeStyle = `rgba(${ri},${gi},${bi},1)`;
-            ctx.lineWidth = 1;
-            const bw = radius * 0.28, bh = radius * 0.5;
-            ctx.beginPath();
-            ctx.moveTo(p.x + bw * 0.4, p.y - bh);
-            ctx.lineTo(p.x - bw * 0.6, p.y - bh * 0.05);
-            ctx.lineTo(p.x + bw * 0.1, p.y - bh * 0.05);
-            ctx.lineTo(p.x - bw * 0.4, p.y + bh);
-            ctx.lineTo(p.x + bw * 0.6, p.y + bh * 0.05);
-            ctx.lineTo(p.x - bw * 0.1, p.y + bh * 0.05);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-        }
-
-        ctx.restore();
-    }
-
-    /**
-     * Draws a mine with a pulsing countdown visual.
-     * @param {CanvasRenderingContext2D} ctx
-     * @param {{ x: number, y: number, fuse: number }} mine
-     */
-    drawMine(ctx, mine) {
-        const progress = Math.min(1, mine.fuse / GAME.MINE_FUSE_TIME);
-        // Blink frequency increases as fuse nears zero
-        const blinkRate = 3 + progress * 12;
-        const blink = Math.sin(mine.fuse * blinkRate * Math.PI) > 0 ? 1 : 0.35;
-
-        // Color shifts: yellow → orange → red
-        const r = 255;
-        const g = Math.round(200 * (1 - progress));
-        const b = 0;
-
-        const baseRadius = 12;
-        const pulse = 1 + 0.15 * Math.sin(mine.fuse * 8);
-
-        ctx.save();
-        ctx.globalAlpha = blink * 0.92;
-
-        // Outer glow
-        const grad = ctx.createRadialGradient(mine.x, mine.y, 0, mine.x, mine.y, baseRadius * pulse * 2.5);
-        grad.addColorStop(0, `rgba(${r},${g},${b},0.9)`);
-        grad.addColorStop(0.5, `rgba(${r},${g},0,0.4)`);
-        grad.addColorStop(1, `rgba(${r},0,0,0)`);
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
+        grad.addColorStop(0, "rgba(180,255,220,1)");
+        grad.addColorStop(0.5, "rgba(0,220,120,0.85)");
+        grad.addColorStop(1, "rgba(0,180,80,0)");
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(mine.x, mine.y, baseRadius * pulse * 2.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
         ctx.fill();
-
-        // Core circle
-        ctx.fillStyle = `rgba(${r},${g},${b},1)`;
-        ctx.shadowColor = `rgba(${r},${g},${b},1)`;
-        ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.arc(mine.x, mine.y, baseRadius * pulse, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Warning X symbol
-        ctx.globalAlpha = blink * 0.95;
-        ctx.strokeStyle = "rgba(255,255,255,0.95)";
-        ctx.lineWidth = 2;
+        // Cross symbol
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 2.5;
         ctx.lineCap = "round";
-        const arm = baseRadius * 0.55;
-        ctx.beginPath();
-        ctx.moveTo(mine.x - arm, mine.y - arm);
-        ctx.lineTo(mine.x + arm, mine.y + arm);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(mine.x + arm, mine.y - arm);
-        ctx.lineTo(mine.x - arm, mine.y + arm);
-        ctx.stroke();
-
+        const arm = radius * 0.45;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y - arm); ctx.lineTo(p.x, p.y + arm); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(p.x - arm, p.y); ctx.lineTo(p.x + arm, p.y); ctx.stroke();
         ctx.restore();
     }
 

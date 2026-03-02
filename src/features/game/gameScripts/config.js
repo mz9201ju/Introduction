@@ -50,20 +50,4 @@ export const GAME = {
 
     // Force field
     FORCE_FIELD_DURATION: 6,
-
-    // Firepower system
-    FIREPOWER_MAX: 5,
-
-    // Power-up unified drop system
-    POWERUP_DROP_CHANCE: 0.45,
-    POWERUP_WEIGHTS: { health: 3, shield: 1, firepower: 4 },
-    POWERUP_LIFE: 8,
-
-    // Mine system
-    MINE_FUSE_TIME: 1.8,
-    MINE_EXPLOSION_RADIUS: 80,
-    MINE_DAMAGE: 20,
-    ELITE_MINE_INTERVAL_MIN: 6.0,
-    ELITE_MINE_INTERVAL_MAX: 12.0,
-    ELITE_DEATH_MINE_CHANCE: 0.15,
 };
