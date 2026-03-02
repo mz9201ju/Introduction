@@ -576,13 +576,14 @@ export default class Engine {
 
         const bx = this.boss?.x ?? this.bg.CX;
         const by = this.boss?.y ?? this.bg.CY * 0.45;
-        const H = this.bg.H;
+        const { W, H } = this.bg;
 
         this.miniBosses = [
             {
-                x: bx - 90, y: by,
-                vx: -(this.bg.W * 0.22),
-                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.18),
+                x: bx,
+                y: by,
+                vx: (Math.random() < 0.5 ? 1 : -1) * (W * 0.25),
+                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.20),
                 angle: 0,
                 hp: GAME.MINI_BOSS_HP,
                 alive: true,
@@ -593,9 +594,10 @@ export default class Engine {
                 img: pool[idx1],
             },
             {
-                x: bx + 90, y: by,
-                vx: (this.bg.W * 0.22),
-                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.18),
+                x: bx,
+                y: by,
+                vx: (Math.random() < 0.5 ? 1 : -1) * (W * 0.25),
+                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.20),
                 angle: 0,
                 hp: GAME.MINI_BOSS_HP,
                 alive: true,
