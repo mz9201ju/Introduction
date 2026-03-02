@@ -1,8 +1,8 @@
 import StarfieldBackground from "./StarfieldBackground";
 import Renderer from "./Renderer";
 import { GAME } from "./config";
-import { randBetween, weightedRandom } from "./utils";
-import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion, makePowerup, makeMine, POWERUP_TYPE, FP_COLORS } from "./entities";
+import { randBetween } from "./utils";
+import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion, makeHealthPickup } from "./entities";
 import bossImage1 from "../assets/alien-head.png";
 import bossImage2 from "../assets/angry.png";
 import bossImage3 from "../assets/star.png";
@@ -28,7 +28,6 @@ export default class Engine {
         this.playerHitFlash = 0;
         this.forceFieldTimer = 0;
         this.bossAttackCycle = 0;
-        this.firepowerLevel = 1;
 
         // Level Transition Overlay
         this.showLevelText = true;
@@ -74,8 +73,7 @@ export default class Engine {
         this.enemyBullets = [];
         this.myBullets = [];
         this.explosions = [];
-        this.powerups = [];
-        this.mines = [];
+        this.healthPickups = [];
 
         // --- Cursor (player pos) ---
         this.cursorX = 0;
@@ -157,7 +155,6 @@ export default class Engine {
         this.level = 1;             // ✅ Reset level back to 1
         this.showLevelText = true;  // ✅ Show "LEVEL 1" banner again
         this.levelTextTimer = 0;
-        this.firepowerLevel = 1;    // ✅ Reset firepower
 
         this.clearWorld();
         this.spawnTimer = 0;
@@ -176,7 +173,6 @@ export default class Engine {
             reset: this.justReset,
             level: this.level,
             killsThisLevel: this.killsThisLevel,
-            firepowerLevel: this.firepowerLevel,
         });
 
         cancelAnimationFrame(this.raf); // 🧹 stop old loop if any
@@ -238,8 +234,7 @@ export default class Engine {
         this.enemyBullets.length = 0;
         this.myBullets.length = 0;
         this.explosions.length = 0;
-        this.powerups.length = 0;
-        this.mines.length = 0;
+        this.healthPickups.length = 0;
         this.nextEnemyAt = Infinity;
     }
 
@@ -337,39 +332,10 @@ export default class Engine {
     }
 
     playerFire(color = "green") {
-        const fp = this.firepowerLevel;
-        const spd = GAME.MY_BULLET_SPEED;
-        const life = GAME.MY_BULLET_LIFE;
-        const cx = this.cursorX, cy = this.cursorY;
-
-        if (fp >= 4) {
-            // Level 4-5: Triple spread shot
-            for (let i = -1; i <= 1; i++) {
-                const angle = -Math.PI / 2 + i * 0.28;
-                this.myBullets.push(makePlayerBullet({
-                    x: cx, y: cy,
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life, color, fp,
-                }));
-            }
-        } else if (fp >= 3) {
-            // Level 3: Twin shot (two parallel beams)
-            for (const offset of [-14, 14]) {
-                this.myBullets.push(makePlayerBullet({
-                    x: cx + offset, y: cy,
-                    vx: 0, vy: -spd,
-                    life, color, fp,
-                }));
-            }
-        } else {
-            // Level 1-2: Single shot
-            this.myBullets.push(makePlayerBullet({
-                x: cx, y: cy,
-                vx: 0, vy: -spd,
-                life, color, fp,
-            }));
-        }
+        this.myBullets.push(makePlayerBullet({
+            x: this.cursorX, y: this.cursorY, vx: 0, vy: -GAME.MY_BULLET_SPEED,
+            life: GAME.MY_BULLET_LIFE, color
+        }));
     }
 
     triggerExplosion(x, y) {
@@ -562,13 +528,11 @@ export default class Engine {
             if (this._isHit(this.cursorX, this.cursorY, b.x, b.y, R)) {
                 b.life = 0;
                 this.triggerExplosion(this.cursorX, this.cursorY);
-                // Force field blocks all damage and preserves firepower
+                // Force field blocks all damage
                 if (this.forceFieldTimer > 0) continue;
                 this.playerHitFlash = GAME.HIT_FLASH_DURATION;
                 const dmg = b.damage || 1;
                 this.playerHitCount = Math.max(0, this.playerHitCount - dmg);
-                // Reset firepower on hit when no shield
-                this.firepowerLevel = 1;
                 if (this.playerHitCount <= 0) { this.gameOver = true; break; }
                 this.onKill?.({
                     kills: this.killCount,
@@ -577,33 +541,25 @@ export default class Engine {
                     loss: this.gameOver,
                     level: this.level,
                     killsThisLevel: this.killsThisLevel,
-                    firepowerLevel: this.firepowerLevel,
                 });
             }
         }
     }
 
     // ============================================================
-    // 💊 Power-up Collection
+    // 💊 Health Pickup Collection
     // ============================================================
 
-    checkPowerups(dt) {
-        for (let i = this.powerups.length - 1; i >= 0; i--) {
-            const p = this.powerups[i];
+    checkPickups(dt) {
+        for (let i = this.healthPickups.length - 1; i >= 0; i--) {
+            const p = this.healthPickups[i];
             p.life -= dt;
             p.t += dt;
-            if (p.life <= 0) { this.powerups.splice(i, 1); continue; }
+            if (p.life <= 0) { this.healthPickups.splice(i, 1); continue; }
             if (this._isHit(this.cursorX, this.cursorY, p.x, p.y, GAME.HEALTH_PICKUP_RADIUS + 15)) {
-                this.powerups.splice(i, 1);
-
-                if (p.type === POWERUP_TYPE.HEALTH) {
-                    this.playerHitCount = Math.min(GAME.MAX_PLAYER_HP, this.playerHitCount + GAME.HEALTH_PICKUP_HP);
-                } else if (p.type === POWERUP_TYPE.SHIELD) {
-                    this.forceFieldTimer = GAME.FORCE_FIELD_DURATION;
-                } else if (p.type === POWERUP_TYPE.FIREPOWER) {
-                    this.firepowerLevel = Math.min(GAME.FIREPOWER_MAX, this.firepowerLevel + 1);
-                }
-
+                this.healthPickups.splice(i, 1);
+                this.playerHitCount = Math.min(GAME.MAX_PLAYER_HP, this.playerHitCount + GAME.HEALTH_PICKUP_HP);
+                this.forceFieldTimer = GAME.FORCE_FIELD_DURATION;
                 this.onKill?.({
                     kills: this.killCount,
                     playerHP: this.playerHitCount,
@@ -611,8 +567,7 @@ export default class Engine {
                     loss: this.gameOver,
                     level: this.level,
                     killsThisLevel: this.killsThisLevel,
-                    forceField: this.forceFieldTimer > 0,
-                    firepowerLevel: this.firepowerLevel,
+                    forceField: true,
                 });
             }
         }
@@ -710,23 +665,13 @@ export default class Engine {
                         reset: this.justReset,
                         level: this.level,
                         killsThisLevel: this.killsThisLevel,
-                        firepowerLevel: this.firepowerLevel,
                     });
 
-                    // Weighted power-up drop
-                    if (Math.random() < GAME.POWERUP_DROP_CHANCE) {
-                        const type = weightedRandom(GAME.POWERUP_WEIGHTS);
-                        const pickup = makePowerup({ x: enemy.x, y: enemy.y, type });
-                        if (type === POWERUP_TYPE.FIREPOWER) {
-                            const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
-                            pickup.color = FP_COLORS[colorIdx];
-                        }
-                        this.powerups.push(pickup);
-                    }
-
-                    // Elite death mine (rare)
-                    if (enemy.isElite && Math.random() < GAME.ELITE_DEATH_MINE_CHANCE) {
-                        this.mines.push(makeMine({ x: enemy.x, y: enemy.y }));
+                    // Drop health pickup
+                    if (Math.random() < GAME.HEALTH_DROP_CHANCE) {
+                        const pickup = makeHealthPickup({ x: enemy.x, y: enemy.y });
+                        pickup.life = GAME.HEALTH_PICKUP_LIFE;
+                        this.healthPickups.push(pickup);
                     }
 
                     // Level Progression
@@ -779,9 +724,9 @@ export default class Engine {
             for (const e of this.enemies) if (e && e.alive) this.renderer.drawEnemy(ctx, e, this.killCount);
         }
 
-        // Power-ups + force field
-        this.checkPowerups(dt);
-        for (const p of this.powerups) this.renderer.drawPowerup(ctx, p);
+        // Health pickups + force field
+        this.checkPickups(dt);
+        for (const p of this.healthPickups) this.renderer.drawHealthPickup(ctx, p);
         if (this.forceFieldTimer > 0) {
             this.forceFieldTimer -= dt;
             this.renderer.drawForceField(ctx, this.cursorX, this.cursorY, this.forceFieldTimer, GAME.FORCE_FIELD_DURATION);
@@ -795,14 +740,9 @@ export default class Engine {
                     level: this.level,
                     killsThisLevel: this.killsThisLevel,
                     forceField: false,
-                    firepowerLevel: this.firepowerLevel,
                 });
             }
         }
-
-        // Mines
-        this.updateMines(dt);
-        for (const mine of this.mines) if (mine.alive) this.renderer.drawMine(ctx, mine);
 
         this.drawLevelText(ctx, dt);
         // Player-hit screen flash
@@ -895,59 +835,6 @@ export default class Engine {
                 this.enemyFire(e);
                 e.nextFire = now + e.fireEvery;
                 if (Math.random() < 0.25) e.nextFire = now + e.fireEvery * 0.45;
-            }
-
-            // Elite: occasionally deploy a mine while alive
-            if (e.isElite) {
-                if (e.nextMineAt === undefined) {
-                    e.nextMineAt = now + randBetween(
-                        GAME.ELITE_MINE_INTERVAL_MIN * 1000,
-                        GAME.ELITE_MINE_INTERVAL_MAX * 1000
-                    );
-                }
-                if (now >= e.nextMineAt) {
-                    this.mines.push(makeMine({ x: e.x, y: e.y }));
-                    e.nextMineAt = now + randBetween(
-                        GAME.ELITE_MINE_INTERVAL_MIN * 1000,
-                        GAME.ELITE_MINE_INTERVAL_MAX * 1000
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates active mines: advances fuse timer, checks player hit, detonates on expiry.
-     */
-    updateMines(dt) {
-        if (this.victory || this.gameOver) return;
-        for (let i = this.mines.length - 1; i >= 0; i--) {
-            const mine = this.mines[i];
-            if (!mine.alive) { this.mines.splice(i, 1); continue; }
-
-            mine.fuse += dt;
-
-            if (mine.fuse >= GAME.MINE_FUSE_TIME) {
-                // Detonate
-                mine.alive = false;
-                this.triggerExplosion(mine.x, mine.y);
-                if (this.forceFieldTimer <= 0 &&
-                    this._isHit(this.cursorX, this.cursorY, mine.x, mine.y, GAME.MINE_EXPLOSION_RADIUS)) {
-                    this.playerHitCount = Math.max(0, this.playerHitCount - GAME.MINE_DAMAGE);
-                    this.playerHitFlash = GAME.HIT_FLASH_DURATION;
-                    this.firepowerLevel = 1;
-                    if (this.playerHitCount <= 0) this.gameOver = true;
-                    this.onKill?.({
-                        kills: this.killCount,
-                        playerHP: this.playerHitCount,
-                        victory: this.victory,
-                        loss: this.gameOver,
-                        level: this.level,
-                        killsThisLevel: this.killsThisLevel,
-                        firepowerLevel: this.firepowerLevel,
-                    });
-                }
-                this.mines.splice(i, 1);
             }
         }
     }
