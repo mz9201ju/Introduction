@@ -734,6 +734,16 @@ export default class Engine {
                     if (this.miniBosses.every(m => !m.alive)) {
                         this.victory = true;
                         this.victoryT = 0;
+                        this.onKill?.({
+                            kills: this.killCount,
+                            playerHP: this.playerHitCount,
+                            victory: this.victory,
+                            loss: this.gameOver,
+                            level: this.level,
+                            killsThisLevel: this.killsThisLevel,
+                            bossHP: 0,
+                            bossMaxHp: 0,
+                        });
                         this.clearWorld();
                     }
                 } else if (Math.random() < GAME.MINI_BOSS_POWERUP_DROP_CHANCE) {
