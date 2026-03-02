@@ -61,7 +61,7 @@ export const GAME = {
 
     // Boss power-up drops
     BOSS_POWERUP_WEIGHTS: { health: 2, shield: 3, firepower: 4 },
-    BOSS_POWERUP_DROP_CHANCE: 0.55,
+    BOSS_POWERUP_DROP_CHANCE: 0.22,
 
     // Mini-boss (boss split)
     MINI_BOSS_HP: 30,
