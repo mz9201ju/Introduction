@@ -6,10 +6,6 @@ import { makeEnemy, makeEnemyBullet, makePlayerBullet, makeExplosion, makePoweru
 import bossImage1 from "../assets/alien-head.png";
 import bossImage2 from "../assets/angry.png";
 import bossImage3 from "../assets/star.png";
-import miniBossImg1 from "../assets/alien.png";
-import miniBossImg2 from "../assets/alien-ship.png";
-import miniBossImg3 from "../assets/ufo.png";
-import miniBossImg4 from "../assets/evilShip.png";
 
 /**
  * Engine
@@ -51,11 +47,6 @@ export default class Engine {
         this.boss = null;
         this.nextEnemyAt = 0;
 
-        // Mini-boss state (post-boss split)
-        this.miniBosses = [];
-        this.miniBossPhase = false;
-        this.miniBossMaxHp = 0;
-
         // Level System
         this.killsThisLevel = 0;
         this.level = 1;
@@ -67,14 +58,6 @@ export default class Engine {
         this.bossImgReady = false;
         this.bossImg.onload = () => (this.bossImgReady = true);
         this.bossImg.src = bossImages[Math.floor(Math.random() * bossImages.length)];
-
-        // Preload mini-boss image pool (picked at spawn time)
-        this.miniBossImgPool = [miniBossImg1, miniBossImg2, miniBossImg3, miniBossImg4].map(src => {
-            const img = new Image();
-            img.onload = () => { img._ready = true; };
-            img.src = src;
-            return img;
-        });
 
         // --- Background + Renderer ---
         this.bg = new StarfieldBackground();
@@ -169,9 +152,6 @@ export default class Engine {
         this.bossAttackCycle = 0;
         this.inBossPhase = false;
         this.boss = null;
-        this.miniBosses = [];
-        this.miniBossPhase = false;
-        this.miniBossMaxHp = 0;
         this.killCount = 0;
         this.killsThisLevel = 0;    // ✅ Reset kills this level
         this.level = 1;             // ✅ Reset level back to 1
@@ -546,8 +526,9 @@ export default class Engine {
                 });
                 if (b.hp <= 0) {
                     b.alive = false;
+                    this.victory = true;
+                    this.victoryT = 0;
                     this.clearWorld();
-                    this.spawnMiniBosses();
                 } else if (Math.random() < GAME.BOSS_POWERUP_DROP_CHANCE) {
                     // Boss drops a power-up near its position on each hit
                     const type = weightedRandom(GAME.BOSS_POWERUP_WEIGHTS);
@@ -565,174 +546,6 @@ export default class Engine {
                 }
             }
         }
-    }
-
-    /** 🔀 Spawn two mini-bosses when the main boss dies */
-    spawnMiniBosses() {
-        const pool = this.miniBossImgPool;
-        const idx1 = Math.floor(Math.random() * pool.length);
-        let idx2;
-        do { idx2 = Math.floor(Math.random() * pool.length); } while (idx2 === idx1);
-
-        const bx = this.boss?.x ?? this.bg.CX;
-        const by = this.boss?.y ?? this.bg.CY * 0.45;
-        const H = this.bg.H;
-
-        this.miniBosses = [
-            {
-                x: bx - 90, y: by,
-                vx: -(this.bg.W * 0.22),
-                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.18),
-                angle: 0,
-                hp: GAME.MINI_BOSS_HP,
-                alive: true,
-                radius: 32,
-                fireEvery: GAME.MINI_BOSS_FIRE_EVERY,
-                fireT: 0,
-                attackCycle: 0,
-                img: pool[idx1],
-            },
-            {
-                x: bx + 90, y: by,
-                vx: (this.bg.W * 0.22),
-                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.18),
-                angle: 0,
-                hp: GAME.MINI_BOSS_HP,
-                alive: true,
-                radius: 32,
-                fireEvery: GAME.MINI_BOSS_FIRE_EVERY,
-                fireT: Math.round(GAME.MINI_BOSS_FIRE_EVERY / 2),
-                attackCycle: 1,
-                img: pool[idx2],
-            },
-        ];
-        this.miniBossPhase = true;
-        this.miniBossMaxHp = GAME.MINI_BOSS_HP * 2;
-
-        this.onKill?.({
-            kills: this.killCount,
-            playerHP: this.playerHitCount,
-            victory: this.victory,
-            loss: this.gameOver,
-            level: this.level,
-            killsThisLevel: this.killsThisLevel,
-            bossHP: this.miniBossMaxHp,
-            bossMaxHp: this.miniBossMaxHp,
-        });
-    }
-
-    /** 👾 Mini-boss movement + reduced firepower (2 modes, no laser) */
-    updateMiniBoss(dt, mb) {
-        if (!mb || !mb.alive) return;
-
-        mb.x += mb.vx * dt;
-        mb.y += mb.vy * dt;
-        const pad = 40;
-        if (mb.x < pad || mb.x > this.bg.W - pad) mb.vx *= -1;
-        if (mb.y < pad || mb.y > this.bg.H - pad) mb.vy *= -1;
-        mb.angle += 2.0 * dt;
-
-        mb.fireT += dt * 1000;
-        if (mb.fireT >= mb.fireEvery) {
-            mb.fireT = 0;
-            const dx = this.cursorX - mb.x;
-            const dy = this.cursorY - mb.y;
-            const d = Math.hypot(dx, dy) || 1;
-            const speed = (GAME.BOSS_BULLET_SPEED || GAME.BULLET_SPEED * 2.2) * 0.75;
-            const mode = mb.attackCycle % 2;
-            mb.attackCycle++;
-
-            if (mode === 0) {
-                for (let i = 0; i < 2; i++) {
-                    const spread = (Math.random() - 0.5) * 0.3;
-                    this.enemyBullets.push({
-                        x: mb.x, y: mb.y,
-                        vx: (dx / d) * speed + spread,
-                        vy: (dy / d) * speed + spread,
-                        life: GAME.BULLET_LIFE,
-                        color: i === 0 ? "red" : "blue",
-                        heavy: false,
-                        damage: 1,
-                    });
-                }
-            } else {
-                const baseAngle = Math.atan2(dy, dx);
-                for (let i = 0; i < 3; i++) {
-                    const angle = baseAngle + (i - 1) * 0.28;
-                    this.enemyBullets.push({
-                        x: mb.x, y: mb.y,
-                        vx: Math.cos(angle) * speed * 0.9,
-                        vy: Math.sin(angle) * speed * 0.9,
-                        life: GAME.BULLET_LIFE * 1.2,
-                        color: i % 2 === 0 ? "orange" : "yellow",
-                        heavy: false,
-                        damage: 1,
-                    });
-                }
-            }
-        }
-
-        for (const pb of this.myBullets) {
-            if (pb.life <= 0) continue;
-            if (this._isHit(mb.x, mb.y, pb.x, pb.y, mb.radius)) {
-                pb.life = 0;
-                mb.hp -= 1;
-                this.triggerExplosion(mb.x, mb.y);
-                const totalMbHp = this.miniBosses.reduce((sum, m) => sum + Math.max(0, m.hp), 0);
-                this.onKill?.({
-                    kills: this.killCount,
-                    playerHP: this.playerHitCount,
-                    victory: this.victory,
-                    loss: this.gameOver,
-                    level: this.level,
-                    killsThisLevel: this.killsThisLevel,
-                    bossHP: totalMbHp,
-                    bossMaxHp: this.miniBossMaxHp,
-                });
-                if (mb.hp <= 0) {
-                    mb.alive = false;
-                    this.triggerExplosion(mb.x, mb.y);
-                    if (this.miniBosses.every(m => !m.alive)) {
-                        this.victory = true;
-                        this.victoryT = 0;
-                        this.clearWorld();
-                    }
-                } else if (Math.random() < GAME.MINI_BOSS_POWERUP_DROP_CHANCE) {
-                    const type = weightedRandom(GAME.MINI_BOSS_POWERUP_WEIGHTS);
-                    const pickup = makePowerup({
-                        x: mb.x + (Math.random() - 0.5) * 60,
-                        y: mb.y + (Math.random() - 0.5) * 60,
-                        type,
-                    });
-                    if (type === POWERUP_TYPE.FIREPOWER) {
-                        const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
-                        pickup.color = FP_COLORS[colorIdx];
-                    }
-                    this.powerups.push(pickup);
-                }
-            }
-        }
-    }
-
-    /** 🎨 Draw a mini-boss */
-    drawMiniBoss(ctx, mb) {
-        if (!mb || !mb.alive) return;
-        ctx.save();
-        ctx.translate(mb.x, mb.y);
-        ctx.rotate(mb.angle);
-        const SIZE = GAME.MINI_BOSS_SIZE;
-        if (mb.img?._ready) {
-            ctx.imageSmoothingEnabled = true;
-            ctx.shadowColor = "rgba(255,180,0,0.7)";
-            ctx.shadowBlur = 12;
-            ctx.drawImage(mb.img, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
-        } else {
-            ctx.fillStyle = "darkorange";
-            ctx.beginPath();
-            ctx.arc(0, 0, SIZE / 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
     }
 
     // ============================================================
@@ -973,12 +786,6 @@ export default class Engine {
         if (this.inBossPhase) {
             this.updateBoss(dt);
             this.drawBoss(ctx);
-            if (this.miniBossPhase) {
-                for (const mb of this.miniBosses) {
-                    this.updateMiniBoss(dt, mb);
-                    if (mb.alive) this.drawMiniBoss(ctx, mb);
-                }
-            }
         } else {
             this.doSpawning(dt);
             const now = performance.now();
