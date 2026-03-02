@@ -529,20 +529,6 @@ export default class Engine {
                     this.victory = true;
                     this.victoryT = 0;
                     this.clearWorld();
-                } else if (Math.random() < GAME.BOSS_POWERUP_DROP_CHANCE) {
-                    // Boss drops a power-up near its position on each hit
-                    const type = weightedRandom(GAME.BOSS_POWERUP_WEIGHTS);
-                    const spread = 80;
-                    const pickup = makePowerup({
-                        x: b.x + (Math.random() - 0.5) * spread,
-                        y: b.y + (Math.random() - 0.5) * spread,
-                        type,
-                    });
-                    if (type === POWERUP_TYPE.FIREPOWER) {
-                        const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
-                        pickup.color = FP_COLORS[colorIdx];
-                    }
-                    this.powerups.push(pickup);
                 }
             }
         }
