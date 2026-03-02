@@ -604,8 +604,8 @@ export default class Engine {
             {
                 x: bx,
                 y: by,
-                vx: (Math.random() < 0.5 ? 1 : -1) * (W * 0.35),
-                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.28),
+                vx: (Math.random() < 0.5 ? 1 : -1) * (W * 0.25),
+                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.20),
                 angle: 0,
                 hp: GAME.MINI_BOSS_HP,
                 alive: true,
@@ -618,8 +618,8 @@ export default class Engine {
             {
                 x: bx,
                 y: by,
-                vx: (Math.random() < 0.5 ? 1 : -1) * (W * 0.35),
-                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.28),
+                vx: (Math.random() < 0.5 ? 1 : -1) * (W * 0.25),
+                vy: (Math.random() < 0.5 ? 1 : -1) * (H * 0.20),
                 angle: 0,
                 hp: GAME.MINI_BOSS_HP,
                 alive: true,
@@ -662,8 +662,8 @@ export default class Engine {
             const dx = this.cursorX - mb.x;
             const dy = this.cursorY - mb.y;
             const d = Math.hypot(dx, dy) || 1;
-            const speed = GAME.BOSS_BULLET_SPEED || GAME.BULLET_SPEED * 2.2;
-            const mode = mb.attackCycle % 3;
+            const speed = (GAME.BOSS_BULLET_SPEED || GAME.BULLET_SPEED * 2.2) * 0.75;
+            const mode = mb.attackCycle % 2;
             mb.attackCycle++;
 
             if (mode === 0) {
@@ -679,7 +679,7 @@ export default class Engine {
                         damage: 1,
                     });
                 }
-            } else if (mode === 1) {
+            } else {
                 const baseAngle = Math.atan2(dy, dx);
                 for (let i = 0; i < 3; i++) {
                     const angle = baseAngle + (i - 1) * 0.28;
@@ -690,21 +690,6 @@ export default class Engine {
                         life: GAME.BULLET_LIFE * 1.2,
                         color: i % 2 === 0 ? "orange" : "yellow",
                         heavy: false,
-                        damage: 1,
-                    });
-                }
-            } else {
-                // Mode 2: 5-shot wide burst aimed at player
-                const baseAngle = Math.atan2(dy, dx);
-                for (let i = -2; i <= 2; i++) {
-                    const angle = baseAngle + i * 0.22;
-                    this.enemyBullets.push({
-                        x: mb.x, y: mb.y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        life: GAME.BULLET_LIFE * 1.4,
-                        color: "magenta",
-                        heavy: true,
                         damage: 1,
                     });
                 }
@@ -743,6 +728,10 @@ export default class Engine {
                         y: mb.y + (Math.random() - 0.5) * 60,
                         type,
                     });
+                    if (type === POWERUP_TYPE.FIREPOWER) {
+                        const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
+                        pickup.color = FP_COLORS[colorIdx];
+                    }
                     this.powerups.push(pickup);
                 }
             }
