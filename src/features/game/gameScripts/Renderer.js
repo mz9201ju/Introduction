@@ -123,7 +123,7 @@ export default class Renderer {
             ctx.lineWidth = 3;
         }
 
-        const trail = fp >= 5 ? 32 : fp >= 3 ? 24 : fp >= 2 ? 20 : 16;
+        const trail = fp >= 5 ? 32 : fp >= 3 ? 24 : 18;
         const spd = Math.hypot(pb.vx, pb.vy) || 1;
         const tx = (pb.vx / spd) * trail;
         const ty = (pb.vy / spd) * trail;
