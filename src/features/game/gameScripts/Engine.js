@@ -580,7 +580,7 @@ export default class Engine {
                         type,
                     });
                     if (type === POWERUP_TYPE.FIREPOWER) {
-                        const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
+                        const colorIdx = Math.min(Math.max(this.firepowerLevel - 1, 0), FP_COLORS.length - 1);
                         pickup.color = FP_COLORS[colorIdx];
                     }
                     this.powerups.push(pickup);
@@ -964,7 +964,7 @@ export default class Engine {
                         const type = weightedRandom(GAME.POWERUP_WEIGHTS);
                         const pickup = makePowerup({ x: enemy.x, y: enemy.y, type });
                         if (type === POWERUP_TYPE.FIREPOWER) {
-                            const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
+                            const colorIdx = Math.min(Math.max(this.firepowerLevel - 1, 0), FP_COLORS.length - 1);
                             pickup.color = FP_COLORS[colorIdx];
                         }
                         this.powerups.push(pickup);
