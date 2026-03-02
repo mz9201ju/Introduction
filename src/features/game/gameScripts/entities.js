@@ -10,8 +10,8 @@ export const POWERUP_TYPE = Object.freeze({
 /** Firepower star colors (one per fp level, index 0 = level 1 star look) */
 export const FP_COLORS = ["#ffa020", "#ffe020", "#bf40ff", "#ff40c0", "#40f0ff"];
 
-export function makePowerup({ x, y, type }) {
-    return { x, y, type, life: 8, t: 0 };
+export function makePowerup({ x, y, type, life = 8 }) {
+    return { x, y, type, life, t: 0 };
 }
 
 export function makeMine({ x, y }) {
