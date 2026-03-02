@@ -36,8 +36,8 @@ export function makeEnemyBullet({ x, y, vx, vy, life, color }) {
     return { x, y, vx, vy, life, color };
 }
 
-export function makePlayerBullet({ x, y, vx, vy, life, color }) {
-    return { x, y, vx, vy, life, color };
+export function makePlayerBullet({ x, y, vx, vy, life, color, fp = 1 }) {
+    return { x, y, vx, vy, life, color, fp };
 }
 
 export function makeExplosion({ x, y }) {
