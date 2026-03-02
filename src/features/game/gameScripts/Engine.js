@@ -580,7 +580,10 @@ export default class Engine {
                         type,
                     });
                     if (type === POWERUP_TYPE.FIREPOWER) {
-                        const colorIdx = Math.min(this.firepowerLevel, FP_COLORS.length - 1);
+                        const colorIdx = Math.max(
+                            0,
+                            Math.min(this.firepowerLevel - 1, FP_COLORS.length - 1),
+                        );
                         pickup.color = FP_COLORS[colorIdx];
                     }
                     this.powerups.push(pickup);
