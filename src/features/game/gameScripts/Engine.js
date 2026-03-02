@@ -645,7 +645,7 @@ export default class Engine {
         });
     }
 
-    /** 👾 Mini-boss movement + reduced firepower (2 modes, no laser) */
+    /** 👾 Mini-boss movement + reduced firepower (3 modes, no laser) */
     updateMiniBoss(dt, mb) {
         if (!mb || !mb.alive) return;
 
