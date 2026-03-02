@@ -8,11 +8,21 @@ export function randBetween(a, b) {
  * @returns {string}
  */
 export function weightedRandom(weights) {
-    const total = Object.values(weights).reduce((s, w) => s + w, 0);
+    const entries = Object.entries(weights);
+    if (entries.length === 0) {
+        throw new Error('weightedRandom: weights object must not be empty');
+    }
+
+    const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
+
+    if (total <= 0) {
+        throw new Error('weightedRandom: total weight must be greater than 0');
+    }
+
     let rand = Math.random() * total;
-    for (const [key, weight] of Object.entries(weights)) {
+    for (const [key, weight] of entries) {
         rand -= weight;
         if (rand <= 0) return key;
     }
-    return Object.keys(weights)[Object.keys(weights).length - 1];
+    return entries[entries.length - 1][0];
 }
