@@ -117,31 +117,45 @@ cd Introduction
 
 #### 2️⃣ Install Dependencies
 ```bash
-npm install
+npm.cmd install
 ```
 
 #### 3️⃣ Run Development Server
 ```bash
-npm run dev
+npm.cmd run dev
 ```
 
 The site will be available at `http://localhost:5173`
 
 #### 4️⃣ Build for Production
 ```bash
-npm run build
-npm run preview
+npm.cmd run build
+npm.cmd run preview
 ```
 
 ### Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build optimized production bundle
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint code quality checks
-- `npm run test:e2e` - Run Playwright browser smoke tests
-- `npm run test:e2e:headed` - Run Playwright tests in headed mode
-- `npm run test:e2e:report` - Open Playwright HTML report
+- `npm.cmd run dev` - Start development server
+- `npm.cmd run build` - Build optimized production bundle
+- `npm.cmd run preview` - Preview production build locally
+- `npm.cmd run lint` - Run ESLint code quality checks
+- `npm.cmd run test:e2e` - Run Playwright browser smoke tests
+- `npm.cmd run test:e2e:headed` - Run Playwright tests in headed mode
+- `npm.cmd run test:e2e:report` - Open Playwright HTML report
+
+### Windows-safe Verification (Recommended)
+
+Run lint and build in one command:
+
+```bash
+npm.cmd run lint; npm.cmd run build
+```
+
+If PowerShell execution policy blocks scripts, use:
+
+```bash
+powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint; npm.cmd run build"
+```
 
 ### Playwright E2E
 

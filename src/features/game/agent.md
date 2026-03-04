@@ -45,8 +45,8 @@
 - Business logic remains separated from rendering/UI files.
 - Desktop and mobile interactions both verified.
 - Cleanup of listeners/frames/timers confirmed.
-- `npm.cmd run lint` passes.
-- `npm.cmd run build` passes for production safety.
+- `npm.cmd run lint; npm.cmd run build` passes for production safety.
+- If execution policy blocks scripts, use: `powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint; npm.cmd run build"`.
 
 ## Recurring Feature Delivery (Operational Rule)
 - Maintain a rolling feature cadence aligned with the current automation schedule.
@@ -77,8 +77,8 @@
 - No duplicate logic introduced.
 - Desktop and mobile behavior verified.
 - No leaked listeners/frames/timers.
-- `npm.cmd run lint` passes.
-- `npm.cmd run build` passes.
+- `npm.cmd run lint; npm.cmd run build` passes.
+- If execution policy blocks scripts, use: `powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint; npm.cmd run build"`.
 - Release summary added using the required template below.
 
 ## Change Budget (Anti-Overreach)

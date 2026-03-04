@@ -78,8 +78,12 @@ Prefer alias imports over deep relative imports when possible.
 
 ## Validation Before Finalizing
 When changing code, run the smallest relevant checks first:
-1. `npm run lint`
-2. `npm run build` for production-impacting changes
+1. Run lint + build in one Windows-safe command:
+  - `npm.cmd run lint; npm.cmd run build`
+2. If execution policy blocks scripts, run via PowerShell Bypass:
+  - `powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint; npm.cmd run build"`
+3. For non-production-impacting changes, lint-only is acceptable:
+  - `npm.cmd run lint`
 
 ## SEO Automation Policy
 - If `public/sitemap.xml` is maintained with weekly cadence, keep it automatically verified in CI on a weekly schedule (and on `main` pushes).
