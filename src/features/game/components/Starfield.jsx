@@ -2,15 +2,19 @@ import { useEffect, useRef } from "react";
 import Engine from "@game/gameScripts/Engine";
 
 // Thin React wrapper that mounts the canvas + engine and cleans up.
-export default function Starfield({ onKill }) {
+export default function Starfield({ onKill, onVictory, onLoss, startPaused = false, onEngineReady }) {
   const ref = useRef(null);
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const engine = new Engine(canvas, { onKill });
-    return () => engine.destroy();
-  }, [onKill]); // now safe because PlayGame memoizes onKill
+    const engine = new Engine(canvas, { onKill, onVictory, onLoss, startPaused });
+    onEngineReady?.(engine);
+    return () => {
+      onEngineReady?.(null);
+      engine.destroy();
+    };
+  }, [onKill, onVictory, onLoss, onEngineReady, startPaused]);
 
   return (
     <canvas

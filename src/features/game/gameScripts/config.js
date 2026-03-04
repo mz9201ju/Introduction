@@ -76,4 +76,36 @@ export const GAME = {
     ELITE_MINE_INTERVAL_MIN: 6.0,
     ELITE_MINE_INTERVAL_MAX: 12.0,
     ELITE_DEATH_MINE_CHANCE: 0.15,
+
+    // ------------------------------------------------------------
+    // ADMIN LOCAL TEST MODE (manual config only)
+    // ------------------------------------------------------------
+    // Purpose: Quickly reach end-game locally and verify all flows.
+    // How to use:
+    // 1) Set ENABLED to true.
+    // 2) Tune values below manually.
+    // 3) Run local dev server and test.
+    // 4) Set ENABLED back to false after local validation.
+    ADMIN: {
+        ENABLED: true,
+
+        // If true, player takes no bullet/mine damage.
+        INVINCIBLE: true,
+
+        // Starting firepower level when game starts/resets.
+        // Valid range: 1..FIREPOWER_MAX
+        START_FIREPOWER_LEVEL: 5,
+
+        // Multiplies player bullet speed.
+        // Example: 3 means 3x faster lasers.
+        BULLET_SPEED_MULTIPLIER: 3,
+
+        // Damage applied per player bullet hit (enemies + bosses + mini-bosses).
+        // Example: 25 will melt boss HP quickly.
+        SHOT_DAMAGE: 25,
+
+        // Number of shot volleys created per trigger/click.
+        // Keep this low (1-3) to avoid noisy visuals.
+        SHOTS_PER_TRIGGER: 2,
+    },
 };

@@ -17,10 +17,12 @@ import miniBossImg4 from "../assets/evilShip.png";
  * Refactored for DRY + clarity. All original behavior preserved.
  */
 export default class Engine {
-    constructor(canvas, { onKill } = {}) {
+    constructor(canvas, { onKill, onVictory, onLoss, startPaused = false } = {}) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
+        this.onVictory = onVictory;
+        this.onLoss = onLoss;
 
         // --- Game State ---
         this.killCount = 0;
@@ -32,7 +34,9 @@ export default class Engine {
         this.playerHitFlash = 0;
         this.forceFieldTimer = 0;
         this.bossAttackCycle = 0;
-        this.firepowerLevel = 1;
+        this.firepowerLevel = this._getInitialFirepowerLevel();
+        this.victoryNotified = false;
+        this.lossNotified = false;
 
         // Level Transition Overlay
         this.showLevelText = true;
@@ -106,6 +110,8 @@ export default class Engine {
         // --- Timing ---
         this.lastT = performance.now();
         this.raf = 0;
+        this.isPaused = Boolean(startPaused);
+        this.isLoopRunning = false;
 
         // --- Bind Methods ---
         this.frame = this.frame.bind(this);
@@ -134,7 +140,7 @@ export default class Engine {
         this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
         window.addEventListener("touchstart", this.onMultiTouch, { passive: false });
 
-        this.raf = requestAnimationFrame(this.frame);
+        if (!this.isPaused) this.startLoop();
     }
 
     // ============================================================
@@ -144,6 +150,41 @@ export default class Engine {
     _setCursor(x, y) { this.cursorX = x; this.cursorY = y; }
     _dist2(ax, ay, bx, by) { const dx = ax - bx, dy = ay - by; return dx * dx + dy * dy; }
     _isHit(ax, ay, bx, by, radius) { return this._dist2(ax, ay, bx, by) <= radius * radius; }
+    _isEditableTarget(target) {
+        if (!target || typeof target !== "object") return false;
+        const tag = String(target.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea" || tag === "select") return true;
+        return Boolean(target.isContentEditable);
+    }
+    _notifyVictory() {
+        if (this.victoryNotified) return;
+        this.victoryNotified = true;
+        this.onVictory?.();
+    }
+    _notifyLoss() {
+        if (this.lossNotified) return;
+        this.lossNotified = true;
+        this.onLoss?.();
+    }
+    _isAdminEnabled() { return Boolean(GAME.ADMIN?.ENABLED); }
+    _isAdminInvincible() { return this._isAdminEnabled() && Boolean(GAME.ADMIN?.INVINCIBLE); }
+    _playerShotDamage() {
+        if (!this._isAdminEnabled()) return 1;
+        return Math.max(1, Number(GAME.ADMIN?.SHOT_DAMAGE) || 1);
+    }
+    _playerBulletSpeed() {
+        const mult = this._isAdminEnabled() ? Math.max(1, Number(GAME.ADMIN?.BULLET_SPEED_MULTIPLIER) || 1) : 1;
+        return GAME.MY_BULLET_SPEED * mult;
+    }
+    _shotsPerTrigger() {
+        if (!this._isAdminEnabled()) return 1;
+        return Math.max(1, Math.floor(Number(GAME.ADMIN?.SHOTS_PER_TRIGGER) || 1));
+    }
+    _getInitialFirepowerLevel() {
+        if (!this._isAdminEnabled()) return 1;
+        const target = Number(GAME.ADMIN?.START_FIREPOWER_LEVEL) || 1;
+        return Math.max(1, Math.min(GAME.FIREPOWER_MAX, Math.floor(target)));
+    }
 
     /**
      * Scales values based on current level (linear growth)
@@ -177,7 +218,7 @@ export default class Engine {
         this.level = 1;             // ✅ Reset level back to 1
         this.showLevelText = true;  // ✅ Show "LEVEL 1" banner again
         this.levelTextTimer = 0;
-        this.firepowerLevel = 1;    // ✅ Reset firepower
+        this.firepowerLevel = this._getInitialFirepowerLevel();
 
         this.clearWorld();
         this.spawnTimer = 0;
@@ -186,6 +227,8 @@ export default class Engine {
         this.justReset = true;
         this.playerHitFlash = 0;
         this._nextEliteAt = GAME.ELITE_SPAWN_EVERY;
+        this.victoryNotified = false;
+        this.lossNotified = false;
 
         // ✅ Emit all key stats on each update
         this.onKill?.({
@@ -199,8 +242,8 @@ export default class Engine {
             firepowerLevel: this.firepowerLevel,
         });
 
-        cancelAnimationFrame(this.raf); // 🧹 stop old loop if any
-        this.raf = requestAnimationFrame(this.frame); // 🔄 start fresh
+        this.stopLoop();
+        if (!this.isPaused) this.startLoop();
     }
 
     // ============================================================
@@ -208,6 +251,7 @@ export default class Engine {
     // ============================================================
 
     onMultiTouch(e) {
+        if (this.isPaused) return;
         const touches = e.touches?.length || 0;
         if (touches === 2) { e.preventDefault(); console.log("✌️ Two-finger restart"); this.resetGame(); }
         else if (touches === 3) {
@@ -219,28 +263,33 @@ export default class Engine {
     }
 
     onTouchMove(e) {
+        if (this.isPaused) return;
         e.preventDefault();
         const t = e.touches[0] || e.changedTouches[0];
         if (!t) return;
         const rect = this.canvas.getBoundingClientRect();
         this._setCursor(t.clientX - rect.left, t.clientY - rect.top);
     }
-    onTouchEnd(e) { e.preventDefault(); }
-    onMove(e) { this._setCursor(e.clientX, e.clientY); }
-    onMouseDown(e) { e.button === 0 ? this.playerFire() : this.playerFire(Math.random() < 0.5 ? "red" : "blue"); }
+    onTouchEnd(e) { if (!this.isPaused) e.preventDefault(); }
+    onMove(e) { if (!this.isPaused) this._setCursor(e.clientX, e.clientY); }
+    onMouseDown(e) { if (!this.isPaused) e.button === 0 ? this.playerFire() : this.playerFire(Math.random() < 0.5 ? "red" : "blue"); }
     blockContextMenu(e) { e.preventDefault(); }
 
     onExternalFire(e) {
+        if (this.isPaused) return;
         const { x, y, color } = e.detail || {};
         if (typeof x === "number" && typeof y === "number") this._setCursor(x, y);
         this.playerFire(color);
     }
     onExternalMove(e) {
+        if (this.isPaused) return;
         const { x, y } = e.detail || {};
         if (typeof x === "number" && typeof y === "number") this._setCursor(x, y);
     }
 
     onKeyDown(e) {
+        if (this.isPaused) return;
+        if (this._isEditableTarget(e.target)) return;
         if ((e.key || "").toLowerCase() === "r") {
             e.preventDefault();
             this.resetGame();
@@ -250,6 +299,31 @@ export default class Engine {
     // ============================================================
     // 🔁 Game State Control
     // ============================================================
+
+    startLoop() {
+        if (this.isLoopRunning || this.isPaused) return;
+        this.lastT = performance.now();
+        this.isLoopRunning = true;
+        this.raf = requestAnimationFrame(this.frame);
+    }
+
+    stopLoop() {
+        if (this.raf) cancelAnimationFrame(this.raf);
+        this.raf = 0;
+        this.isLoopRunning = false;
+    }
+
+    start() {
+        if (!this.isPaused && this.isLoopRunning) return;
+        this.isPaused = false;
+        this.startLoop();
+    }
+
+    pause() {
+        if (this.isPaused) return;
+        this.isPaused = true;
+        this.stopLoop();
+    }
 
     resetGame() { this._resetCore(); }
 
@@ -271,7 +345,7 @@ export default class Engine {
     }
 
     destroy() {
-        cancelAnimationFrame(this.raf);
+        this.stopLoop();
         window.removeEventListener("resize", this.onResize);
         window.removeEventListener("mousemove", this.onMove);
         window.removeEventListener("mousedown", this.onMouseDown);
@@ -358,59 +432,70 @@ export default class Engine {
 
     playerFire(color = "green") {
         const fp = this.firepowerLevel;
-        const spd = GAME.MY_BULLET_SPEED;
+        const spd = this._playerBulletSpeed();
         const life = GAME.MY_BULLET_LIFE;
         const cx = this.cursorX, cy = this.cursorY;
+        const shotDamage = this._playerShotDamage();
+        const shotsPerTrigger = this._shotsPerTrigger();
 
-        if (fp >= 5) {
-            // Level 5: 5-shot wide fan
-            for (let i = -2; i <= 2; i++) {
-                const angle = -Math.PI / 2 + i * 0.22;
-                this.myBullets.push(makePlayerBullet({
-                    x: cx, y: cy,
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life, color, fp,
-                }));
-            }
-        } else if (fp >= 4) {
-            // Level 4: Triple wide spread
-            for (let i = -1; i <= 1; i++) {
-                const angle = -Math.PI / 2 + i * 0.28;
-                this.myBullets.push(makePlayerBullet({
-                    x: cx, y: cy,
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life, color, fp,
-                }));
-            }
-        } else if (fp >= 3) {
-            // Level 3: Triple tight spread
-            for (let i = -1; i <= 1; i++) {
-                const angle = -Math.PI / 2 + i * 0.14;
-                this.myBullets.push(makePlayerBullet({
-                    x: cx, y: cy,
-                    vx: Math.cos(angle) * spd,
-                    vy: Math.sin(angle) * spd,
-                    life, color, fp,
-                }));
-            }
-        } else if (fp >= 2) {
-            // Level 2: Twin parallel shot
-            for (const offset of [-10, 10]) {
-                this.myBullets.push(makePlayerBullet({
-                    x: cx + offset, y: cy,
+        const pushBullet = (bullet) => {
+            bullet.damage = shotDamage;
+            this.myBullets.push(bullet);
+        };
+
+        for (let volley = 0; volley < shotsPerTrigger; volley++) {
+            const volleyOffset = volley * 4;
+
+            if (fp >= 5) {
+                // Level 5: 5-shot wide fan
+                for (let i = -2; i <= 2; i++) {
+                    const angle = -Math.PI / 2 + i * 0.22;
+                    pushBullet(makePlayerBullet({
+                        x: cx, y: cy - volleyOffset,
+                        vx: Math.cos(angle) * spd,
+                        vy: Math.sin(angle) * spd,
+                        life, color, fp,
+                    }));
+                }
+            } else if (fp >= 4) {
+                // Level 4: Triple wide spread
+                for (let i = -1; i <= 1; i++) {
+                    const angle = -Math.PI / 2 + i * 0.28;
+                    pushBullet(makePlayerBullet({
+                        x: cx, y: cy - volleyOffset,
+                        vx: Math.cos(angle) * spd,
+                        vy: Math.sin(angle) * spd,
+                        life, color, fp,
+                    }));
+                }
+            } else if (fp >= 3) {
+                // Level 3: Triple tight spread
+                for (let i = -1; i <= 1; i++) {
+                    const angle = -Math.PI / 2 + i * 0.14;
+                    pushBullet(makePlayerBullet({
+                        x: cx, y: cy - volleyOffset,
+                        vx: Math.cos(angle) * spd,
+                        vy: Math.sin(angle) * spd,
+                        life, color, fp,
+                    }));
+                }
+            } else if (fp >= 2) {
+                // Level 2: Twin parallel shot
+                for (const offset of [-10, 10]) {
+                    pushBullet(makePlayerBullet({
+                        x: cx + offset, y: cy - volleyOffset,
+                        vx: 0, vy: -spd,
+                        life, color, fp,
+                    }));
+                }
+            } else {
+                // Level 1: Single shot
+                pushBullet(makePlayerBullet({
+                    x: cx, y: cy - volleyOffset,
                     vx: 0, vy: -spd,
                     life, color, fp,
                 }));
             }
-        } else {
-            // Level 1: Single shot
-            this.myBullets.push(makePlayerBullet({
-                x: cx, y: cy,
-                vx: 0, vy: -spd,
-                life, color, fp,
-            }));
         }
     }
 
@@ -554,7 +639,7 @@ export default class Engine {
             if (pb.life <= 0) continue;
             if (this._isHit(b.x, b.y, pb.x, pb.y, b.radius)) {
                 pb.life = 0;
-                b.hp -= 1;
+                b.hp -= pb.damage || 1;
                 this.triggerExplosion(b.x, b.y);
                 this.onKill?.({
                     kills: this.killCount,
@@ -718,7 +803,7 @@ export default class Engine {
             if (pb.life <= 0) continue;
             if (this._isHit(mb.x, mb.y, pb.x, pb.y, mb.radius)) {
                 pb.life = 0;
-                mb.hp -= 1;
+                mb.hp -= pb.damage || 1;
                 this.triggerExplosion(mb.x, mb.y);
                 const totalMbHp = this.miniBosses.reduce((sum, m) => sum + Math.max(0, m.hp), 0);
                 this.onKill?.({
@@ -737,6 +822,7 @@ export default class Engine {
                     if (this.miniBosses.every(m => !m.alive)) {
                         this.victory = true;
                         this.victoryT = 0;
+                        this._notifyVictory();
                         this.onKill?.({
                             kills: this.killCount,
                             playerHP: this.playerHitCount,
@@ -794,7 +880,7 @@ export default class Engine {
                 if (!e || !e.alive) continue;
                 if (this._isHit(e.x, e.y, pb.x, pb.y, GAME.HIT_RADIUS)) {
                     pb.life = 0;
-                    e.hp -= 1;
+                    e.hp -= pb.damage || 1;
                     this.triggerExplosion(e.x, e.y);
                     if (e.hp <= 0) e.alive = false;
                     break;
@@ -811,6 +897,7 @@ export default class Engine {
             if (this._isHit(this.cursorX, this.cursorY, b.x, b.y, R)) {
                 b.life = 0;
                 this.triggerExplosion(this.cursorX, this.cursorY);
+                if (this._isAdminInvincible()) continue;
                 // Force field blocks all damage and preserves firepower
                 if (this.forceFieldTimer > 0) continue;
                 this.playerHitFlash = GAME.HIT_FLASH_DURATION;
@@ -818,7 +905,11 @@ export default class Engine {
                 this.playerHitCount = Math.max(0, this.playerHitCount - dmg);
                 // Reset firepower on hit when no shield
                 this.firepowerLevel = 1;
-                if (this.playerHitCount <= 0) { this.gameOver = true; break; }
+                if (this.playerHitCount <= 0) {
+                    this.gameOver = true;
+                    this._notifyLoss();
+                    break;
+                }
                 this.onKill?.({
                     kills: this.killCount,
                     playerHP: this.playerHitCount,
@@ -1007,6 +1098,11 @@ export default class Engine {
     // ============================================================
 
     frame(tNow) {
+        if (this.isPaused) {
+            this.stopLoop();
+            return;
+        }
+
         const dt = Math.min(0.033, (tNow - this.lastT) / 1000);
         this.lastT = tNow;
         const ctx = this.ctx;
@@ -1071,7 +1167,13 @@ export default class Engine {
             ctx.restore();
         }
         // Overlays + rendering
-        if (this.victory) this.drawVictory(ctx, dt);
+        if (this.victory) {
+            this.drawVictory(ctx, dt);
+            this.justReset = true;
+            this.isLoopRunning = false;
+            this.raf = 0;
+            return; // 🧊 stop loop on victory screen
+        }
         for (const b of this.enemyBullets) this.renderer.drawEnemyBullet(ctx, b, dt);
         for (const pb of this.myBullets) this.renderer.drawPlayerBullet(ctx, pb, dt);
         this.handleCollisions();
@@ -1081,12 +1183,14 @@ export default class Engine {
         if (this.gameOver) {
             this.drawGameOver(ctx);
             this.justReset = true;
+            this.isLoopRunning = false;
+            this.raf = 0;
             return; // 🧊 stop loop — no new frame requested
         }
 
         this.cull();
         this.justReset = false;
-        this.raf = requestAnimationFrame(this.frame);
+        if (!this.isPaused) this.raf = requestAnimationFrame(this.frame);
     }
 
     drawBoss(ctx) {
@@ -1186,12 +1290,19 @@ export default class Engine {
                 // Detonate
                 mine.alive = false;
                 this.triggerExplosion(mine.x, mine.y);
+                if (this._isAdminInvincible()) {
+                    this.mines.splice(i, 1);
+                    continue;
+                }
                 if (this.forceFieldTimer <= 0 &&
                     this._isHit(this.cursorX, this.cursorY, mine.x, mine.y, GAME.MINE_EXPLOSION_RADIUS)) {
                     this.playerHitCount = Math.max(0, this.playerHitCount - GAME.MINE_DAMAGE);
                     this.playerHitFlash = GAME.HIT_FLASH_DURATION;
                     this.firepowerLevel = 1;
-                    if (this.playerHitCount <= 0) this.gameOver = true;
+                    if (this.playerHitCount <= 0) {
+                        this.gameOver = true;
+                        this._notifyLoss();
+                    }
                     this.onKill?.({
                         kills: this.killCount,
                         playerHP: this.playerHitCount,
