@@ -1,5 +1,5 @@
 export const profile = {
-    image: "./OMER_ZAHID.jpeg",
+    image: "/OMER_ZAHID.jpeg",
     name: "Omer Zahid",
     title: "Senior Software Engineer — AI-enabled Systems",
     blurb:

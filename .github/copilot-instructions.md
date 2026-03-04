@@ -78,8 +78,12 @@ Prefer alias imports over deep relative imports when possible.
 
 ## Validation Before Finalizing
 When changing code, run the smallest relevant checks first:
-1. `npm run lint`
-2. `npm run build` for production-impacting changes
+1. `npm.cmd run lint ; npm.cmd run build` (single command on Windows)
+2. If PowerShell policy blocks scripts: `powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint ; npm.cmd run build"`
+
+## Identity + Domain Consistency
+- Canonical person name is **Omer Zahid** (with a space).
+- Domain strings without spaces (for example `omerzahid`) represent the same identity and should not replace spaced name usage in profile/SEO text unless explicitly requested.
 
 ## SEO Automation Policy
 - If `public/sitemap.xml` is maintained with weekly cadence, keep it automatically verified in CI on a weekly schedule (and on `main` pushes).

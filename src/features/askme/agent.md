@@ -141,8 +141,8 @@ For every AskMe change, verify both desktop and cellphone layouts before PR:
 
 ## Validation Commands
 Run these before finalizing:
-1. `npm run lint`
-2. `npm run build` (when behavior or production output is impacted)
+1. `npm.cmd run lint ; npm.cmd run build` (single command on Windows)
+2. If PowerShell policy blocks scripts: `powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint ; npm.cmd run build"`
 
 If failures are unrelated, report them and avoid broad unrelated fixes.
 

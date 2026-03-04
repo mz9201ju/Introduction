@@ -2,6 +2,8 @@
 
 Welcome to the **Introduction Project**, a personal portfolio site and interactive AI experience built by **Omer Zahid**.
 
+Identity note: **Omer Zahid** (with a space) is the canonical person name; domain strings like `omerzahid` represent the same identity and should not replace spaced-name profile/SEO text.
+
 ## 🔗 Quick Links
 
 - **Home/Resume:** [https://www.omerzahid.com](https://www.omerzahid.com)
@@ -142,6 +144,20 @@ npm run preview
 - `npm run test:e2e` - Run Playwright browser smoke tests
 - `npm run test:e2e:headed` - Run Playwright tests in headed mode
 - `npm run test:e2e:report` - Open Playwright HTML report
+
+### Windows Validation (Agent/CI Friendly)
+
+Use a single command for lint + build on Windows:
+
+```bash
+npm.cmd run lint ; npm.cmd run build
+```
+
+If PowerShell execution policy blocks scripts, use:
+
+```bash
+powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint ; npm.cmd run build"
+```
 
 ### Playwright E2E
 

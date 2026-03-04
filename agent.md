@@ -32,9 +32,10 @@
 - Do not refactor unrelated areas.
 
 ## Validation Requirements
-- Run:
-  1. `npm.cmd run lint`
-  2. `npm.cmd run build` (for production-impacting changes)
+- On Windows, run lint + build in one command:
+  1. `npm.cmd run lint ; npm.cmd run build`
+- If PowerShell execution policy blocks scripts, use:
+  2. `powershell -ExecutionPolicy Bypass -Command "npm.cmd run lint ; npm.cmd run build"`
 - For browser end-to-end coverage when requested, run:
   3. `npm.cmd run test:e2e`
 - If unrelated failures exist, report them without broad unrelated fixes.
@@ -52,6 +53,7 @@
 
 ## SEO + Identity Consistency
 - Keep personal/site identity consistent as **Omer Zahid** across metadata and profile references unless explicitly asked otherwise.
+- Treat domain strings without spaces (for example `omerzahid`) as the same identity as **Omer Zahid**; never rewrite the person name without the space in profile/SEO text unless explicitly requested.
 - Enforce sitemap freshness automatically: if `public/sitemap.xml` uses weekly cadence, CI must run a scheduled weekly validation and fail on missing or stale critical routes.
 - Prefer no-touch maintenance: use GitHub Actions to validate (and optionally regenerate) sitemap entries so manual sitemap edits are not required.
 
@@ -88,8 +90,8 @@
 - **`prefers-reduced-motion`** is checked inside the effect: when active, canvas is cleared and RAF never starts — clean static fallback with no extra component complexity.
 
 **Validation results:**
-- `npm run lint` — ✅ no warnings or errors
-- `npm run build` — ✅ clean build, About chunk size increased by ~3 KB (expected for new Canvas component)
+- `npm.cmd run lint` — ✅ no warnings or errors
+- `npm.cmd run build` — ✅ clean build, About chunk size increased by ~3 KB (expected for new Canvas component)
 - Manual Playwright verification — animation confirmed visible on hover (cars visible in NYC LUX RIDE card screenshot)
 
 **Known limitations / future improvements:**
