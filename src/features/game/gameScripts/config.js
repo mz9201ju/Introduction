@@ -87,7 +87,7 @@ export const GAME = {
     // 3) Run local dev server and test.
     // 4) Set ENABLED back to false after local validation.
     ADMIN: {
-        ENABLED: false,
+        ENABLED: true,
 
         // If true, player takes no bullet/mine damage.
         INVINCIBLE: true,
