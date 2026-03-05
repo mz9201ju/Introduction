@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import Engine from "@game/gameScripts/Engine";
 
 // Thin React wrapper that mounts the canvas + engine and cleans up.
-export default function Starfield({ onKill, onVictory, onLoss, startPaused = false, onEngineReady }) {
+export default function Starfield({ onKill, onVictory, onLoss, startPaused = false, onEngineReady, hidden = false }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function Starfield({ onKill, onVictory, onLoss, startPaused = fal
     <canvas
       ref={ref}
       role="presentation"
-      style={{ position: "fixed", inset: 0, zIndex: -1, pointerEvents: "none" }}
+      style={{ position: "fixed", inset: 0, zIndex: -1, pointerEvents: "none", opacity: hidden ? 0 : 1 }}
     />
   );
 }

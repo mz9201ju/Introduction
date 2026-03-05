@@ -359,6 +359,7 @@ export default function PlayGame() {
   }, [winnerName, winnerPicture]);
 
   const shouldForceWinnerForm = stats.victory && !winnerSubmittedForVictory;
+  const shouldHideGameCanvas = showWinnerForm || shouldForceWinnerForm;
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -372,6 +373,7 @@ export default function PlayGame() {
         onLoss={handleLossReached}
         startPaused
         onEngineReady={handleEngineReady}
+        hidden={shouldHideGameCanvas}
       />
 
       {(stats.victory || stats.loss) && !showLeaderboardGate && !showWinnerForm && !shouldForceWinnerForm && (

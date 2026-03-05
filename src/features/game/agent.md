@@ -112,7 +112,7 @@
 ### Leaderboard Flow (Before Gameplay)
 1. `PlayGame` mounts `Starfield` with `startPaused` enabled.
 2. Engine initializes fully (canvas, entities, listeners) but loop/input are paused.
-3. Leaderboard modal opens immediately and starts a 10s timeout.
+3. Leaderboard modal opens immediately and starts a 60s timeout.
 4. Modal closes either on manual close (`Start Now`) or timeout.
 5. `startGameOnce` unpauses game exactly once using a ref guard to avoid race conditions/double-start.
 
@@ -136,18 +136,20 @@
 ### Modal Lifecycle Behavior
 - Pregame leaderboard modal:
   - shown immediately on load,
-  - auto-closes at 10s,
+  - auto-closes at 60s,
   - or closes manually,
   - then starts game once.
-- Victory modal:
-  - shown once per victory state using a ref gate,
-  - asks user if they want leaderboard submission.
 - Winner form modal:
+  - opens automatically on victory,
   - captures name + image,
   - supports upload/camera,
   - displays loading + errors.
+  - hides the game canvas while open so `VICTORY!/restart` text is not visible behind the form.
 - Success confirmation:
   - transient confirmation banner shown after successful submit.
+
+### Leaderboard Image UX
+- Each leaderboard row is clickable (not just the avatar image) to open the enlarged profile picture preview.
 
 ### Camera Handling Approach
 - Supports three paths:
