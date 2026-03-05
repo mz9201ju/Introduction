@@ -5,7 +5,7 @@ import SpaceshipCursor from "@game/pages/SpaceshipCursor";
 import { usePageSeo } from "@app/hooks/usePageSeo";
 import { addWinnerToLeaderboard, fetchLeaderboard } from "@game/services/leaderboardApi";
 
-const LEADERBOARD_DISPLAY_MS = 30000;
+const LEADERBOARD_DISPLAY_MS = 60000;
 
 const FALLBACK_AVATAR =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'%3E%3Crect width='88' height='88' fill='%2322293a'/%3E%3Ccircle cx='44' cy='32' r='16' fill='%23364259'/%3E%3Crect x='20' y='54' width='48' height='22' rx='11' fill='%23364259'/%3E%3C/svg%3E";
@@ -14,8 +14,8 @@ const modalBackdropStyle = {
   position: "fixed",
   inset: 0,
   zIndex: 60,
-  background: "rgba(0,0,0,0.82)",
-  backdropFilter: "blur(6px)",
+  background: "rgba(0,0,0,0.9)",
+  backdropFilter: "blur(8px)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -26,10 +26,10 @@ const modalCardStyle = {
   width: "min(720px, 96vw)",
   maxHeight: "90vh",
   overflowY: "auto",
-  background: "rgba(5,8,16,0.98)",
+  background: "rgba(5,8,16,1)",
   color: "#e8f0ff",
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,0.22)",
+  border: "1px solid rgba(255,255,255,0.3)",
   boxShadow: "0 18px 40px rgba(0,0,0,0.62)",
   padding: 18,
   fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto",
@@ -66,7 +66,6 @@ export default function PlayGame() {
   const [leaderboardEntries, setLeaderboardEntries] = useState([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
   const [leaderboardError, setLeaderboardError] = useState("");
-  const [showWinPrompt, setShowWinPrompt] = useState(false);
   const [showWinnerForm, setShowWinnerForm] = useState(false);
   const [winnerName, setWinnerName] = useState("");
   const [winnerPicture, setWinnerPicture] = useState("");
@@ -149,10 +148,15 @@ export default function PlayGame() {
     engine.pause();
   }, []);
 
+  const openEntryImage = useCallback((entry) => {
+    if (!entry?.picture) return;
+    setZoomedImage(entry.picture);
+    setZoomedName(entry.firstName);
+  }, []);
+
   const handleVictoryReached = useCallback(() => {
     winnerPromptShownRef.current = true;
     setShowLeaderboardGate(false);
-    setShowWinPrompt(false);
     setShowWinnerForm(true);
     setWinnerSubmitError("");
     setCameraError("");
@@ -180,7 +184,6 @@ export default function PlayGame() {
 
     if (reset) {
       winnerPromptShownRef.current = false;
-      setShowWinPrompt(false);
       setShowWinnerForm(false);
       setWinnerSubmittedForVictory(false);
       setWinnerConfirmation("");
@@ -240,7 +243,6 @@ export default function PlayGame() {
   useEffect(() => {
     if (!stats.victory || winnerPromptShownRef.current) return;
     winnerPromptShownRef.current = true;
-    setShowWinPrompt(false);
     setShowWinnerForm(true);
     setWinnerSubmitError("");
     setCameraError("");
@@ -346,7 +348,6 @@ export default function PlayGame() {
       if (!mountedRef.current) return;
       setWinnerConfirmation("Added to leaderboard successfully!");
       setShowWinnerForm(false);
-      setShowWinPrompt(false);
       setWinnerSubmittedForVictory(true);
       setWinnerName("");
       setWinnerPicture("");
@@ -373,7 +374,7 @@ export default function PlayGame() {
         onEngineReady={handleEngineReady}
       />
 
-      {(stats.victory || stats.loss) && !showLeaderboardGate && !showWinPrompt && !showWinnerForm && !shouldForceWinnerForm && (
+      {(stats.victory || stats.loss) && !showLeaderboardGate && !showWinnerForm && !shouldForceWinnerForm && (
         <div
           style={{
             position: "fixed",
@@ -384,19 +385,6 @@ export default function PlayGame() {
             gap: 8,
           }}
         >
-          {stats.victory && (
-            <button
-              type="button"
-              style={buttonStyle}
-              onClick={() => {
-                setShowWinPrompt(false);
-                setShowWinnerForm(true);
-              }}
-            >
-              Add Myself to Leaderboard
-            </button>
-          )}
-
           <button
             type="button"
             style={buttonStyle}
@@ -417,7 +405,7 @@ export default function PlayGame() {
               <div>
                 <div style={{ fontSize: 22, fontWeight: 800 }}>🏁 Leaderboard</div>
                 <div style={{ opacity: 0.85, fontSize: 14 }}>
-                  {gameStartedRef.current ? "Current leaderboard" : "Game starts automatically in 30 seconds."}
+                  {gameStartedRef.current ? "Current leaderboard" : "Game starts automatically in 60 seconds."}
                 </div>
               </div>
               <button type="button" style={buttonStyle} onClick={closeLeaderboardModal}>
@@ -451,19 +439,16 @@ export default function PlayGame() {
                       gap: 12,
                       padding: 10,
                       borderRadius: 10,
-                      border: "1px solid rgba(255,255,255,0.15)",
-                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(8,14,30,0.92)",
+                      cursor: entry.picture ? "pointer" : "default",
                     }}
+                    onClick={() => openEntryImage(entry)}
                   >
                     <img
                       src={entry.picture || FALLBACK_AVATAR}
                       alt={`${entry.firstName} profile`}
                       style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", background: "rgba(255,255,255,0.1)", cursor: entry.picture ? "zoom-in" : "default", border: "1px solid rgba(255,255,255,0.18)" }}
-                      onClick={() => {
-                        if (!entry.picture) return;
-                        setZoomedImage(entry.picture);
-                        setZoomedName(entry.firstName);
-                      }}
                       onError={(event) => {
                         event.currentTarget.onerror = null;
                         event.currentTarget.src = FALLBACK_AVATAR;
@@ -474,35 +459,6 @@ export default function PlayGame() {
                 ))}
               </div>
             )}
-
-            {stats.victory && (
-              <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end" }}>
-                <button
-                  type="button"
-                  style={buttonStyle}
-                  onClick={() => {
-                    setShowLeaderboardGate(false);
-                    setShowWinPrompt(false);
-                    setShowWinnerForm(true);
-                  }}
-                >
-                  Add Myself to Leaderboard
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showWinPrompt && !showWinnerForm && (
-        <div style={modalBackdropStyle}>
-          <div style={modalCardStyle}>
-            <div style={{ fontWeight: 800, fontSize: 22, marginBottom: 10 }}>🏆 You won!</div>
-            <div style={{ marginBottom: 18 }}>Would you like to add yourself to the leaderboard?</div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button type="button" style={buttonStyle} onClick={() => setShowWinnerForm(true)}>Yes, add me</button>
-              <button type="button" style={buttonStyle} onClick={() => setShowWinPrompt(false)}>No thanks</button>
-            </div>
           </div>
         </div>
       )}

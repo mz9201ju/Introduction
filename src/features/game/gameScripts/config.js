@@ -96,6 +96,13 @@ export const GAME = {
         // Valid range: 1..FIREPOWER_MAX
         START_FIREPOWER_LEVEL: 5,
 
+        // Starting gameplay level when game starts/resets.
+        // Set to max level to jump directly to boss-tier gameplay.
+        START_LEVEL: 5,
+
+        // If true and start level is max level, begin directly in boss phase.
+        START_IN_BOSS_PHASE: true,
+
         // Multiplies player bullet speed.
         // Example: 3 means 3x faster lasers.
         BULLET_SPEED_MULTIPLIER: 3,

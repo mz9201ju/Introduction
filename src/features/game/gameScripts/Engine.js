@@ -61,9 +61,9 @@ export default class Engine {
         this.miniBossMaxHp = 0;
 
         // Level System
-        this.killsThisLevel = 0;
-        this.level = 1;
         this.maxLevels = 5;
+        this.level = this._getInitialLevel();
+        this.killsThisLevel = 0;
 
         // Randomize boss image
         const bossImages = [bossImage1, bossImage2, bossImage3];
@@ -140,6 +140,8 @@ export default class Engine {
         this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
         window.addEventListener("touchstart", this.onMultiTouch, { passive: false });
 
+        if (this._shouldStartInBossPhase()) this.enterBossPhase();
+
         if (!this.isPaused) this.startLoop();
     }
 
@@ -185,6 +187,16 @@ export default class Engine {
         const target = Number(GAME.ADMIN?.START_FIREPOWER_LEVEL) || 1;
         return Math.max(1, Math.min(GAME.FIREPOWER_MAX, Math.floor(target)));
     }
+    _getInitialLevel() {
+        if (!this._isAdminEnabled()) return 1;
+        const target = Number(GAME.ADMIN?.START_LEVEL) || 1;
+        return Math.max(1, Math.min(this.maxLevels, Math.floor(target)));
+    }
+    _shouldStartInBossPhase() {
+        return this._isAdminEnabled()
+            && Boolean(GAME.ADMIN?.START_IN_BOSS_PHASE)
+            && this.level >= this.maxLevels;
+    }
 
     /**
      * Scales values based on current level (linear growth)
@@ -214,9 +226,9 @@ export default class Engine {
         this.miniBossPhase = false;
         this.miniBossMaxHp = 0;
         this.killCount = 0;
-        this.killsThisLevel = 0;    // ✅ Reset kills this level
-        this.level = 1;             // ✅ Reset level back to 1
-        this.showLevelText = true;  // ✅ Show "LEVEL 1" banner again
+        this.level = this._getInitialLevel();
+        this.killsThisLevel = 0;
+        this.showLevelText = true;
         this.levelTextTimer = 0;
         this.firepowerLevel = this._getInitialFirepowerLevel();
 
@@ -230,6 +242,8 @@ export default class Engine {
         this.victoryNotified = false;
         this.lossNotified = false;
 
+        if (this._shouldStartInBossPhase()) this.enterBossPhase();
+
         // ✅ Emit all key stats on each update
         this.onKill?.({
             kills: this.killCount,
@@ -239,6 +253,8 @@ export default class Engine {
             reset: this.justReset,
             level: this.level,
             killsThisLevel: this.killsThisLevel,
+            bossHP: this.inBossPhase && this.boss ? this.boss.hp : null,
+            bossMaxHp: this.inBossPhase ? this.bossMaxHp : null,
             firepowerLevel: this.firepowerLevel,
         });
 
