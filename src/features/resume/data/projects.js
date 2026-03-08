@@ -31,17 +31,17 @@ export const PROJECTS = [
         tech: "React • Vite • Cloudflare",
         animKey: "tikka-masala",
     },
-    {
-        title: "⚡ SkyLight | KSA",
-        description:
-            "Founded in 2016 in Jeddah, Skylight began as a visionary enterprise with a simple goal: to revolutionize the industry through cutting-edge solutions and customer-centric services.",
-        href: "https://mz9201ju.github.io/skylight-ksa/",
-        imgSrc:
-            "https://api.microlink.io/?url=https://mz9201ju.github.io/skylight-ksa/&screenshot=true&type=png&meta=false&embed=screenshot.url",
-        imgAlt: "SkyLight KSA preview",
-        tech: "React • Vite • Cloudflare",
-        animKey: "skylight-ksa",
-    },
+    // {
+    //     title: "⚡ SkyLight | KSA",
+    //     description:
+    //         "Founded in 2016 in Jeddah, Skylight began as a visionary enterprise with a simple goal: to revolutionize the industry through cutting-edge solutions and customer-centric services.",
+    //     href: "https://mz9201ju.github.io/skylight-ksa/",
+    //     imgSrc:
+    //         "https://api.microlink.io/?url=https://mz9201ju.github.io/skylight-ksa/&screenshot=true&type=png&meta=false&embed=screenshot.url",
+    //     imgAlt: "SkyLight KSA preview",
+    //     tech: "React • Vite • Cloudflare",
+    //     animKey: "skylight-ksa",
+    // },
     {
         title: "👶 Deeba's Day Care",
         description:
@@ -64,17 +64,17 @@ export const PROJECTS = [
         tech: "React • Vite • Cloudflare",
         animKey: "oz-studios",
     },
-    {
-        title: "💈 ELIA Barber Shop",
-        description:
-            "A local Bellevue barber shop website I built to help the business grow its online visibility. Designed with React + Vite + Tailwind and deployed on GitHub Pages. Features online booking and a modern responsive design.",
-        href: "https://mz9201ju.github.io/ELIA_BarberShop_WebSite",
-        imgSrc:
-            "https://api.microlink.io/?url=https://mz9201ju.github.io/ELIA_BarberShop_WebSite/&screenshot=true&type=png&meta=false&embed=screenshot.url",
-        imgAlt: "ELIA Barber Shop preview",
-        tech: "React • Vite • Tailwind",
-        animKey: "elia-barber",
-    },
+    // {
+    //     title: "💈 ELIA Barber Shop",
+    //     description:
+    //         "A local Bellevue barber shop website I built to help the business grow its online visibility. Designed with React + Vite + Tailwind and deployed on GitHub Pages. Features online booking and a modern responsive design.",
+    //     href: "https://mz9201ju.github.io/ELIA_BarberShop_WebSite",
+    //     imgSrc:
+    //         "https://api.microlink.io/?url=https://mz9201ju.github.io/ELIA_BarberShop_WebSite/&screenshot=true&type=png&meta=false&embed=screenshot.url",
+    //     imgAlt: "ELIA Barber Shop preview",
+    //     tech: "React • Vite • Tailwind",
+    //     animKey: "elia-barber",
+    // },
     {
         title: "👶 Rashida Little Champs DayCare",
         description:
