@@ -27,7 +27,7 @@ export async function fetchLeaderboard({ signal } = {}) {
   }));
 }
 
-export async function addWinnerToLeaderboard({ firstName, picture, signal } = {}) {
+export async function addWinnerToLeaderboard({ firstName, picture, difficulty = "medium", signal } = {}) {
   const trimmedName = String(firstName || "").trim();
   if (!trimmedName) throw new Error("First name is required");
   if (!picture) throw new Error("Profile picture is required");
@@ -40,6 +40,7 @@ export async function addWinnerToLeaderboard({ firstName, picture, signal } = {}
     body: JSON.stringify({
       firstName: trimmedName,
       picture,
+      difficulty,
     }),
     signal,
   });

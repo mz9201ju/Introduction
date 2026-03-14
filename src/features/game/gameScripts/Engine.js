@@ -17,7 +17,7 @@ import miniBossImg4 from "../assets/evilShip.png";
  * Refactored for DRY + clarity. All original behavior preserved.
  */
 export default class Engine {
-    constructor(canvas, { onKill, onVictory, onLoss, startPaused = false } = {}) {
+    constructor(canvas, { onKill, onVictory, onLoss, startPaused = false, difficulty = "medium" } = {}) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.onKill = onKill;
@@ -25,6 +25,9 @@ export default class Engine {
         this.onLoss = onLoss;
 
         // --- Game State ---
+        this.difficulty = difficulty;
+        this.difficultyConfig = this._getDifficultyConfig(difficulty);
+
         this.killCount = 0;
         this.gameOver = false;
         this.victory = false;
@@ -42,7 +45,6 @@ export default class Engine {
         this.showLevelText = true;
         this.levelTextTimer = 0;
         this.levelTextDuration = 2.0;
-
 
         // iOS Safari fix for touch drag
         this.canvas.style.touchAction = "none";
@@ -145,6 +147,46 @@ export default class Engine {
         if (!this.isPaused) this.startLoop();
     }
 
+    /**
+     * Returns config multipliers for the given difficulty
+     */
+    _getDifficultyConfig(difficulty) {
+        if (difficulty === "easy") {
+            return {
+                enemySpeed: 0.6,
+                enemyHp: 0.5,
+                bossHp: 0.5,
+                bossDamage: 0.5,
+                enemyFireRate: 1.5,
+                playerDamage: 2.5,
+                playerFireRate: 1.5,
+                playerFirepower: 2,
+            };
+        } else if (difficulty === "hard") {
+            return {
+                enemySpeed: 1.3,
+                enemyHp: 1.4,
+                bossHp: 1.5,
+                bossDamage: 1.3,
+                enemyFireRate: 0.8,
+                playerDamage: 0.8,
+                playerFireRate: 1,
+                playerFirepower: 1,
+            };
+        }
+        // medium/default
+        return {
+            enemySpeed: 1,
+            enemyHp: 1,
+            bossHp: 1,
+            bossDamage: 1,
+            enemyFireRate: 1,
+            playerDamage: 1,
+            playerFireRate: 1,
+            playerFirepower: 1,
+        };
+    }
+
     // ============================================================
     // Reusable Helpers
     // ============================================================
@@ -171,6 +213,9 @@ export default class Engine {
     _isAdminEnabled() { return Boolean(GAME.ADMIN?.ENABLED); }
     _isAdminInvincible() { return this._isAdminEnabled() && Boolean(GAME.ADMIN?.INVINCIBLE); }
     _playerShotDamage() {
+        if (this.difficultyConfig && !this._isAdminEnabled()) {
+            return 1 * this.difficultyConfig.playerDamage;
+        }
         if (!this._isAdminEnabled()) return 1;
         return Math.max(1, Number(GAME.ADMIN?.SHOT_DAMAGE) || 1);
     }
@@ -183,6 +228,9 @@ export default class Engine {
         return Math.max(1, Math.floor(Number(GAME.ADMIN?.SHOTS_PER_TRIGGER) || 1));
     }
     _getInitialFirepowerLevel() {
+        if (this.difficultyConfig && !this._isAdminEnabled()) {
+            return Math.max(1, Math.round(this.difficultyConfig.playerFirepower));
+        }
         if (!this._isAdminEnabled()) return 1;
         const target = Number(GAME.ADMIN?.START_FIREPOWER_LEVEL) || 1;
         return Math.max(1, Math.min(GAME.FIREPOWER_MAX, Math.floor(target)));
@@ -403,13 +451,13 @@ export default class Engine {
         const isElite = forceElite || (this.killCount > 0 && this.killCount >= this._nextEliteAt);
         if (isElite) this._nextEliteAt = this.killCount + GAME.ELITE_SPAWN_EVERY;
 
-        const spd = this._scaleByLevel(GAME.ENEMY_SPEED) * (isElite ? GAME.ELITE_SPEED_MULT : 1);
+        const spd = this._scaleByLevel(GAME.ENEMY_SPEED) * (isElite ? GAME.ELITE_SPEED_MULT : 1) * this.difficultyConfig.enemySpeed;
         const vx = (toCX / len) * spd;
         const vy = (toCY / len) * spd;
 
         // 🔥 Faster fire at higher levels
-        const fireMin = this._scaleByLevel(GAME.ENEMY_FIRE_MIN, -0.2) * (isElite ? 0.65 : 1);
-        const fireMax = this._scaleByLevel(GAME.ENEMY_FIRE_MAX, -0.2) * (isElite ? 0.65 : 1);
+        const fireMin = this._scaleByLevel(GAME.ENEMY_FIRE_MIN, -0.2) * (isElite ? 0.65 : 1) * this.difficultyConfig.enemyFireRate;
+        const fireMax = this._scaleByLevel(GAME.ENEMY_FIRE_MAX, -0.2) * (isElite ? 0.65 : 1) * this.difficultyConfig.enemyFireRate;
 
         const now = performance.now();
 
@@ -425,7 +473,7 @@ export default class Engine {
             fireEvery: randBetween(fireMin, fireMax),
             nextFire: now + randBetween(200, 900),
             isElite,
-            hp: isElite ? GAME.ELITE_HP : 1,
+            hp: (isElite ? GAME.ELITE_HP : 1) * this.difficultyConfig.enemyHp,
         });
 
         // 👇 Entry boost to avoid idle spawn delay
@@ -559,7 +607,7 @@ export default class Engine {
      * Spawn Boss with faster movement and smarter firing
      */
     spawnBoss() {
-        const totalHp = GAME.BOSS_HP;
+        const totalHp = Math.round(GAME.BOSS_HP * this.difficultyConfig.bossHp);
         this.bossMaxHp = totalHp;
         this.bossAttackCycle = 0;
         this.boss = {
@@ -571,7 +619,7 @@ export default class Engine {
             hp: totalHp,
             alive: true,
             radius: 45,
-            fireEvery: 400,
+            fireEvery: 400 * this.difficultyConfig.enemyFireRate,
             fireT: 0
         };
     }
@@ -819,7 +867,7 @@ export default class Engine {
             if (pb.life <= 0) continue;
             if (this._isHit(mb.x, mb.y, pb.x, pb.y, mb.radius)) {
                 pb.life = 0;
-                mb.hp -= pb.damage || 1;
+                mb.hp -= (pb.damage || 1) * (this.difficultyConfig ? this.difficultyConfig.playerDamage : 1);
                 this.triggerExplosion(mb.x, mb.y);
                 const totalMbHp = this.miniBosses.reduce((sum, m) => sum + Math.max(0, m.hp), 0);
                 this.onKill?.({
@@ -1333,5 +1381,4 @@ export default class Engine {
             }
         }
     }
-
 }

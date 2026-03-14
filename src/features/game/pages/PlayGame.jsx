@@ -54,6 +54,12 @@ function fileToDataUrl(file) {
   });
 }
 
+const DIFFICULTY_LEVELS = [
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
+];
+
 export default function PlayGame() {
   usePageSeo({
     title: "Play Game | Omer Zahid",
@@ -62,6 +68,8 @@ export default function PlayGame() {
   });
 
   const [showInstructions, setShowInstructions] = useState(false);
+  const [difficulty, setDifficulty] = useState("medium");
+  const [difficultyLocked, setDifficultyLocked] = useState(false);
   const [showLeaderboardGate, setShowLeaderboardGate] = useState(true);
   const [leaderboardEntries, setLeaderboardEntries] = useState([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
@@ -105,6 +113,7 @@ export default function PlayGame() {
     gameStartedRef.current = true;
     setShowLeaderboardGate(false);
     setShowInstructions(true);
+    setDifficultyLocked(true);
     clearTimeout(leaderboardTimeoutRef.current);
     if (gameEngineRef.current) gameEngineRef.current.start();
     console.log(`▶️ Game start triggered (${reason})`);
@@ -177,6 +186,7 @@ export default function PlayGame() {
     bossMaxHp: null,
     forceField: false,
     firepowerLevel: 1,
+    difficulty: "medium",
   });
 
   const handleKill = useCallback((payload = {}) => {
@@ -191,7 +201,7 @@ export default function PlayGame() {
       setWinnerName("");
       setWinnerPicture("");
       stopCamera();
-      setStats({ kills: 0, playerHP: 100, victory: false, loss: false, level: 1, killsThisLevel: 0, bossHP: null, bossMaxHp: null, forceField: false, firepowerLevel: 1 });
+      setStats({ kills: 0, playerHP: 100, victory: false, loss: false, level: 1, killsThisLevel: 0, bossHP: null, bossMaxHp: null, forceField: false, firepowerLevel: 1, difficulty });
       return;
     }
 
@@ -206,8 +216,9 @@ export default function PlayGame() {
       bossMaxHp: typeof bossMaxHp === "number" ? bossMaxHp : prev.bossMaxHp,
       forceField: payload.forceField ?? prev.forceField,
       firepowerLevel: typeof payload.firepowerLevel === "number" ? payload.firepowerLevel : prev.firepowerLevel,
+      difficulty,
     }));
-  }, [stopCamera]);
+  }, [stopCamera, difficulty]);
 
   /* ==========================================================
      ⏱️ Show instructions for 10 seconds, then fade out
@@ -343,6 +354,7 @@ export default function PlayGame() {
       await addWinnerToLeaderboard({
         firstName: cleanedName,
         picture: winnerPicture,
+        difficulty,
       });
 
       if (!mountedRef.current) return;
@@ -356,7 +368,7 @@ export default function PlayGame() {
     } finally {
       if (mountedRef.current) setWinnerSubmitLoading(false);
     }
-  }, [winnerName, winnerPicture]);
+  }, [winnerName, winnerPicture, difficulty]);
 
   const shouldForceWinnerForm = stats.victory && !winnerSubmittedForVictory;
   const shouldHideGameCanvas = showWinnerForm || shouldForceWinnerForm;
@@ -366,6 +378,45 @@ export default function PlayGame() {
       {/* Global effects across all pages */}
       <SpaceshipCursor />
 
+      {/* Difficulty selection UI */}
+      {!difficultyLocked && (
+        <div style={{
+          position: "fixed",
+          top: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 100,
+          color: "#e8f0ff",
+          borderRadius: 12,
+          padding: "18px 24px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+          fontWeight: 700,
+          fontSize: 18,
+        }}>
+          
+          <div style={{ display: "flex", gap: 16, margin: 26 }}>
+            {DIFFICULTY_LEVELS.map(opt => (
+              <button
+                key={opt.value}
+                style={{
+                  ...buttonStyle,
+                  background: difficulty === opt.value ? "#2563eb" : buttonStyle.background,
+                  color: difficulty === opt.value ? "#fff" : buttonStyle.color,
+                  borderWidth: difficulty === opt.value ? 2 : 1,
+                  borderColor: difficulty === opt.value ? "#60a5fa" : buttonStyle.border,
+                  fontSize: 18,
+                  minWidth: 90,
+                }}
+                onClick={() => setDifficulty(opt.value)}
+                disabled={difficultyLocked}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Scoreboard stats={stats} />
       <Starfield
         onKill={handleKill}
@@ -374,6 +425,7 @@ export default function PlayGame() {
         startPaused
         onEngineReady={handleEngineReady}
         hidden={shouldHideGameCanvas}
+        difficulty={difficulty}
       />
 
       {(stats.victory || stats.loss) && !showLeaderboardGate && !showWinnerForm && !shouldForceWinnerForm && (
@@ -456,7 +508,22 @@ export default function PlayGame() {
                         event.currentTarget.src = FALLBACK_AVATAR;
                       }}
                     />
-                    <div style={{ fontWeight: 700 }}>{entry.firstName}</div>
+                    <div style={{ fontWeight: 700 }}>
+                      {entry.firstName}
+                      {entry.difficulty && (
+                        <span style={{
+                          marginLeft: 10,
+                          fontWeight: 500,
+                          fontSize: 13,
+                          color: entry.difficulty === "hard" ? "#f87171" : entry.difficulty === "easy" ? "#60a5fa" : "#facc15",
+                          background: "rgba(255,255,255,0.08)",
+                          borderRadius: 6,
+                          padding: "2px 8px",
+                        }}>
+                          {entry.difficulty.charAt(0).toUpperCase() + entry.difficulty.slice(1)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
